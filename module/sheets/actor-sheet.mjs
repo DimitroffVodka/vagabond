@@ -946,7 +946,8 @@ export class VagabondActorSheet extends api.HandlebarsApplicationMixin(
     const { img } =
       this.document.constructor.getDefaultArtwork?.(this.document.toObject()) ??
       {};
-    const fp = new FilePicker({
+    const FilePickerClass = foundry.applications.apps.FilePicker.implementation ?? foundry.applications.apps.FilePicker;
+    const fp = new FilePickerClass({
       current,
       type: 'image',
       redirectToRoot: img ? [img] : [],

@@ -339,7 +339,10 @@ export class VagabondCharBuilder extends HandlebarsApplicationMixin(ApplicationV
 
     const ancestryComplete = !!state.selectedAncestry;
     const classComplete = !!state.selectedClass;
-    const statsComplete = state.assignedStats && Object.keys(state.assignedStats).length === 6;
+    const statCount = Object.keys(CONFIG.VAGABOND.stats ?? {}).length || 6;
+    const statsComplete = state.assignedStats &&
+      Object.keys(state.assignedStats).length === statCount &&
+      Object.values(state.assignedStats).every(v => v !== null && v !== undefined);
 
     return ancestryComplete && classComplete && statsComplete;
   }

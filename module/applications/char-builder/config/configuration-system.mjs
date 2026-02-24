@@ -382,7 +382,7 @@ export class ConfigurationSystem {
         11: [7, 5, 5, 2, 2, 2],
         12: [7, 6, 4, 2, 2, 2]
       },
-      statNames: ['might', 'dexterity', 'awareness', 'reason', 'presence', 'luck'],
+      statNames: (CONFIG.VAGABOND.homebrew?.stats ?? []).map(s => s.key),
       defaultBudget: 27,
       calculations: {
         pointBuy: {

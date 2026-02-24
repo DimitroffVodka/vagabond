@@ -42,6 +42,8 @@ export class HomebrewSettingsApp extends api.HandlebarsApplicationMixin(api.Appl
       updateHomebrew:    HomebrewSettingsApp.#onUpdateHomebrew,
       deleteHomebrew:    HomebrewSettingsApp.#onDeleteHomebrew,
       toggleSaveForm:    HomebrewSettingsApp.#onToggleSaveForm,
+      addStatArray:      HomebrewSettingsApp.#onAddStatArray,
+      removeStatArray:   HomebrewSettingsApp.#onRemoveStatArray,
       resetAll:          HomebrewSettingsApp.#onResetAll,
       saveAndClose:      HomebrewSettingsApp.#onSaveAndClose,
       close: function() { this.close(); },
@@ -172,6 +174,14 @@ export class HomebrewSettingsApp extends api.HandlebarsApplicationMixin(api.Appl
       showDerivations: this.#activeTab === 'derivations',
       showDamageTypes: this.#activeTab === 'damageTypes',
       showStatCap:     this.#activeTab === 'statCap',
+      statArrayRows:   (() => {
+        const statCount = this.#config.stats?.length ?? 6;
+        return (this.#config.statArrays ?? []).map((arr, i) => ({
+          index: i,
+          roll:  i + 1,
+          values: arr.slice(0, statCount).concat(Array(Math.max(0, statCount - arr.length)).fill(1)),
+        }));
+      })(),
       showAdvanced:    this.#activeTab === 'advanced',
       showTerms:       this.#activeTab === 'terms',
       showLibrary:     this.#activeTab === 'library',
@@ -367,6 +377,14 @@ export class HomebrewSettingsApp extends api.HandlebarsApplicationMixin(api.Appl
     const el = this.element;
     el.querySelector('[data-field="statCap"]')?.addEventListener('change', (e) => {
       this.#config.statCap = parseInt(e.target.value) || 7;
+    });
+    el.querySelectorAll('.hb-sa-value').forEach(input => {
+      input.addEventListener('change', (e) => {
+        const ai = parseInt(input.dataset.arrayIndex);
+        const vi = parseInt(input.dataset.valueIndex);
+        if (!this.#config.statArrays[ai]) return;
+        this.#config.statArrays[ai][vi] = parseInt(e.target.value) || 0;
+      });
     });
   }
 
@@ -781,6 +799,24 @@ export class HomebrewSettingsApp extends api.HandlebarsApplicationMixin(api.Appl
     this.render();
   }
 
+  /** Add a new stat array row (clones the last row as a starting point). */
+  static #onAddStatArray() {
+    if (!this.#config.statArrays) this.#config.statArrays = [];
+    const last = this.#config.statArrays.at(-1);
+    const statCount = this.#config.stats?.length ?? 6;
+    const newRow = last ? [...last] : Array(statCount).fill(1);
+    this.#config.statArrays = [...this.#config.statArrays, newRow];
+    this.render();
+  }
+
+  /** Remove a stat array row by index. */
+  static #onRemoveStatArray(event, target) {
+    const index = parseInt(target.dataset.index);
+    if (isNaN(index) || !this.#config.statArrays) return;
+    this.#config.statArrays = this.#config.statArrays.filter((_, i) => i !== index);
+    this.render();
+  }
+
   /** Reset the entire config to factory defaults after a confirmation dialog. */
   static async #onResetAll() {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
@@ -878,10 +914,11 @@ export class HomebrewSettingsApp extends api.HandlebarsApplicationMixin(api.Appl
 
   /** Read all individual entry files from the shared assets folder. Returns [] if not found. */
   static async #loadLibrary() {
+    const FP = foundry.applications.apps.FilePicker.implementation ?? foundry.applications.apps.FilePicker;
     try {
-      await foundry.applications.apps.FilePicker.createDirectory('data', 'assets/vagabond').catch(() => {});
-      await foundry.applications.apps.FilePicker.createDirectory('data', HomebrewSettingsApp.#LIBRARY_DIR).catch(() => {});
-      const result = await foundry.applications.apps.FilePicker.browse('data', HomebrewSettingsApp.#LIBRARY_DIR);
+      await FP.createDirectory('data', 'assets/vagabond').catch(() => {});
+      await FP.createDirectory('data', HomebrewSettingsApp.#LIBRARY_DIR).catch(() => {});
+      const result = await FP.browse('data', HomebrewSettingsApp.#LIBRARY_DIR);
       const jsonFiles = (result.files ?? []).filter(f => f.endsWith('.json'));
       const entries = await Promise.all(jsonFiles.map(async (filePath) => {
         try {
@@ -902,12 +939,13 @@ export class HomebrewSettingsApp extends api.HandlebarsApplicationMixin(api.Appl
 
   /** Write a single entry as its own JSON file in the library folder. */
   static async #saveLibraryEntry(entry) {
+    const FP = foundry.applications.apps.FilePicker.implementation ?? foundry.applications.apps.FilePicker;
     try {
-      await foundry.applications.apps.FilePicker.createDirectory('data', 'assets/vagabond').catch(() => {});
-      await foundry.applications.apps.FilePicker.createDirectory('data', HomebrewSettingsApp.#LIBRARY_DIR).catch(() => {});
+      await FP.createDirectory('data', 'assets/vagabond').catch(() => {});
+      await FP.createDirectory('data', HomebrewSettingsApp.#LIBRARY_DIR).catch(() => {});
       const json = JSON.stringify(entry, null, 2);
       const file = new File([json], `${entry.id}.json`, { type: 'application/json' });
-      await foundry.applications.apps.FilePicker.upload('data', HomebrewSettingsApp.#LIBRARY_DIR, file, {}, { notify: false });
+      await FP.upload('data', HomebrewSettingsApp.#LIBRARY_DIR, file, {}, { notify: false });
     } catch (err) {
       ui.notifications.error(`Failed to save homebrew library entry: ${err.message}`);
     }
@@ -915,10 +953,11 @@ export class HomebrewSettingsApp extends api.HandlebarsApplicationMixin(api.Appl
 
   /** Mark an entry as deleted by overwriting its file (Foundry has no client-side file delete). */
   static async #deleteLibraryEntry(id) {
+    const FP = foundry.applications.apps.FilePicker.implementation ?? foundry.applications.apps.FilePicker;
     try {
       const json = JSON.stringify({ deleted: true });
       const file = new File([json], `${id}.json`, { type: 'application/json' });
-      await foundry.applications.apps.FilePicker.upload('data', HomebrewSettingsApp.#LIBRARY_DIR, file, {}, { notify: false });
+      await FP.upload('data', HomebrewSettingsApp.#LIBRARY_DIR, file, {}, { notify: false });
     } catch (err) {
       ui.notifications.error(`Failed to delete homebrew library entry: ${err.message}`);
     }

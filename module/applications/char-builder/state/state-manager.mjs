@@ -31,17 +31,14 @@ export class CharacterBuilderStateManager {
       
       // Stats
       selectedArrayId: null,
-      assignedStats: {
-        might: null,
-        dexterity: null,
-        awareness: null,
-        reason: null,
-        presence: null,
-        luck: null
-      },
+      assignedStats: Object.fromEntries(
+        (CONFIG.VAGABOND.homebrew?.stats ?? [
+          {key:'might'},{key:'dexterity'},{key:'awareness'},{key:'reason'},{key:'presence'},{key:'luck'}
+        ]).map(s => [s.key, null])
+      ),
       unassignedValues: [],
       selectedValue: null,
-      
+
       // Skills
       skills: [],
       
@@ -221,10 +218,11 @@ export class CharacterBuilderStateManager {
       stats: () => {
         this.updateMultiple({
           'selectedArrayId': null,
-          'assignedStats': {
-            might: null, dexterity: null, awareness: null,
-            reason: null, presence: null, luck: null
-          },
+          'assignedStats': Object.fromEntries(
+            (CONFIG.VAGABOND.homebrew?.stats ?? [
+              {key:'might'},{key:'dexterity'},{key:'awareness'},{key:'reason'},{key:'presence'},{key:'luck'}
+            ]).map(s => [s.key, null])
+          ),
           'unassignedValues': [],
           'selectedValue': null,
           'appliedBonuses': {}
@@ -456,11 +454,16 @@ export class CharacterBuilderStateManager {
       return false;
     }
     
-    // Check stats object structure
-    const requiredStats = ['might', 'dexterity', 'awareness', 'reason', 'presence', 'luck'];
-    for (const stat of requiredStats) {
-      if (!(stat in this.builderData.assignedStats)) {
-        return false;
+    // Check stats object structure only once the user has started the stats step
+    // (assignedStats is {} until _onActivate initialises it — skip the check until then)
+    const assignedStats = this.builderData.assignedStats;
+    if (assignedStats && Object.keys(assignedStats).length > 0) {
+      const requiredStats = (CONFIG.VAGABOND.homebrew?.stats ?? []).map(s => s.key);
+      const fallback = ['might', 'dexterity', 'awareness', 'reason', 'presence', 'luck'];
+      for (const stat of (requiredStats.length ? requiredStats : fallback)) {
+        if (!(stat in assignedStats)) {
+          return false;
+        }
       }
     }
     

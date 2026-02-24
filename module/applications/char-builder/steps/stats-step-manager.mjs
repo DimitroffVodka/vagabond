@@ -32,6 +32,16 @@ export class StatsStepManager extends BaseStepManager {
     return 'stats';
   }
 
+  /** Returns the ordered list of stat keys from the active homebrew config. */
+  _getStatKeys() {
+    return (CONFIG.VAGABOND.homebrew?.stats ?? []).map(s => s.key);
+  }
+
+  /** Returns a fresh assignedStats object (all keys null) for the current stat set. */
+  _makeEmptyAssignedStats() {
+    return Object.fromEntries(this._getStatKeys().map(k => [k, null]));
+  }
+
   /**
    * Get state paths managed by this step
    * @protected
@@ -83,7 +93,7 @@ export class StatsStepManager extends BaseStepManager {
     }));
 
     // Prepare individual stats for display with localized labels
-    const statOrder = ['might', 'dexterity', 'awareness', 'reason', 'presence', 'luck'];
+    const statOrder = this._getStatKeys();
 
     // Stat hints mapping (describing what each stat does)
     const statHints = {
@@ -240,12 +250,19 @@ export class StatsStepManager extends BaseStepManager {
    * @private
    */
   _getStatArrays() {
+    // Homebrew config takes priority
+    const homebrewArrays = CONFIG.VAGABOND.homebrew?.statArrays;
+    if (homebrewArrays?.length) {
+      return Object.fromEntries(homebrewArrays.map((arr, i) => [i + 1, arr]));
+    }
+
+    // Fall back to the char-builder config JSON
     const statsConfig = this.configSystem.getStatsConfig();
-    if (statsConfig && statsConfig.arrays) {
+    if (statsConfig?.arrays) {
       return statsConfig.arrays;
     }
 
-    // Fallback to hardcoded arrays
+    // Last resort hardcoded fallback
     return {
       1: [5, 5, 5, 4, 4, 3], 2: [5, 5, 5, 5, 3, 2], 3: [6, 5, 4, 4, 4, 3],
       4: [6, 5, 5, 4, 3, 2], 5: [6, 6, 4, 3, 3, 3], 6: [6, 6, 4, 4, 3, 2],
@@ -282,12 +299,10 @@ export class StatsStepManager extends BaseStepManager {
       }
     }
 
-    // Get saves from the preview actor
-    const savesAffectedBy = {
-      endure: ['might'],
-      reflex: ['dexterity', 'awareness'],
-      will: ['reason', 'presence']
-    };
+    // Get saves from the preview actor (read from homebrew config)
+    const savesAffectedBy = Object.fromEntries(
+      (CONFIG.VAGABOND.homebrew?.saves ?? []).map(s => [s.key, [s.stat1, s.stat2].filter(Boolean)])
+    );
 
     const saves = Object.entries(previewActor.system.saves).map(([key, save]) => {
       return {
@@ -402,24 +417,9 @@ export class StatsStepManager extends BaseStepManager {
       // Get trained skills from builder state
       const trainedSkills = state.skills || [];
 
-      // Build skills object with trained status matching schema (includes weapon skills)
-      // Each skill needs: trained (bool), stat (string), bonus (number)
-      const skillsDefinition = {
-        arcana: { stat: 'reason' },
-        craft: { stat: 'reason' },
-        medicine: { stat: 'reason' },
-        brawl: { stat: 'might' },
-        finesse: { stat: 'dexterity' },
-        melee: { stat: 'might' },
-        ranged: { stat: 'awareness' },
-        sneak: { stat: 'dexterity' },
-        detect: { stat: 'awareness' },
-        mysticism: { stat: 'awareness' },
-        survival: { stat: 'awareness' },
-        influence: { stat: 'presence' },
-        leadership: { stat: 'presence' },
-        performance: { stat: 'presence' }
-      };
+      const skillsDefinition = Object.fromEntries(
+        (CONFIG.VAGABOND.homebrew?.skills ?? []).map(s => [s.key, { stat: s.stat }])
+      );
 
       const skills = {};
       for (const [key, def] of Object.entries(skillsDefinition)) {
@@ -489,18 +489,12 @@ export class StatsStepManager extends BaseStepManager {
       return;
     }
 
-    // Update state with selected array
+    // Update state with selected array (trim to current stat count)
+    const statCount = this._getStatKeys().length;
     const updates = {
       'selectedArrayId': arrayId,
-      'unassignedValues': [...selectedArray],
-      'assignedStats': {
-        might: null,
-        dexterity: null,
-        awareness: null,
-        reason: null,
-        presence: null,
-        luck: null
-      },
+      'unassignedValues': [...selectedArray].slice(0, statCount),
+      'assignedStats': this._makeEmptyAssignedStats(),
       'selectedValue': null
     };
 
@@ -659,17 +653,11 @@ export class StatsStepManager extends BaseStepManager {
       return;
     }
 
-    // Reset to original unassigned values
+    // Reset to original unassigned values (trim to current stat count)
+    const statCount = this._getStatKeys().length;
     const updates = {
-      'unassignedValues': [...originalValues],
-      'assignedStats': {
-        might: null,
-        dexterity: null,
-        awareness: null,
-        reason: null,
-        presence: null,
-        luck: null
-      },
+      'unassignedValues': [...originalValues].slice(0, statCount),
+      'assignedStats': this._makeEmptyAssignedStats(),
       'selectedValue': null
     };
 
@@ -735,9 +723,7 @@ export class StatsStepManager extends BaseStepManager {
     // Sort values descending (highest first)
     const values = [...selectedArray].sort((a, b) => b - a);
 
-    // Stat order: might, dexterity, awareness, reason, presence, luck
-    const statOrder = ['might', 'dexterity', 'awareness', 'reason', 'presence', 'luck'];
-
+    const statOrder = this._getStatKeys();
     const assignedStats = {};
 
     if (keyStat && statOrder.includes(keyStat)) {
@@ -835,14 +821,7 @@ export class StatsStepManager extends BaseStepManager {
   _onReset() {
     const updates = {
       'selectedArrayId': null,
-      'assignedStats': {
-        might: null,
-        dexterity: null,
-        awareness: null,
-        reason: null,
-        presence: null,
-        luck: null
-      },
+      'assignedStats': this._makeEmptyAssignedStats(),
       'unassignedValues': [],
       'selectedValue': null
     };
@@ -858,14 +837,7 @@ export class StatsStepManager extends BaseStepManager {
     // Initialize stats if not already done
     const state = this.getCurrentState();
     if (!state.assignedStats) {
-      this.updateState('assignedStats', {
-        might: null,
-        dexterity: null,
-        awareness: null,
-        reason: null,
-        presence: null,
-        luck: null
-      }, { skipValidation: true });
+      this.updateState('assignedStats', this._makeEmptyAssignedStats(), { skipValidation: true });
     }
 
     // Collect available bonuses and update state
@@ -1130,8 +1102,8 @@ export class StatsStepManager extends BaseStepManager {
     finalValue += unappliedBonus.amount;
 
     // Check if this would exceed maximum
-    if (finalValue > 7) {
-      ui.notifications.warn(`Cannot apply bonus: ${selectedStat.toUpperCase()} would exceed maximum (7)`);
+    if (finalValue > (CONFIG.VAGABOND.homebrew?.statCap ?? 7)) {
+      ui.notifications.warn(`Cannot apply bonus: ${selectedStat.toUpperCase()} would exceed maximum (${CONFIG.VAGABOND.homebrew?.statCap ?? 7})`);
       return;
     }
 

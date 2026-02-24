@@ -638,6 +638,43 @@
           </div>
         </fieldset>
 
+        <fieldset class="hb-fieldset">
+          <legend>Character Builder Stat Arrays</legend>
+          <p class="hb-hint" style="margin-bottom: 0.75rem;">
+            <i class="fa-solid fa-circle-info fa-xs"></i>
+            Each row is one array offered in the character builder. Values are assigned to stats left-to-right in the order defined in the Stats tab. The row number is what a random roll selects (row 1 = roll 1, etc.).
+          </p>
+          <table class="hb-sa-table">
+            <thead>
+              <tr>
+                <th class="hb-sa-roll-col">#</th>
+                {{#each config.stats}}
+                <th>{{abbreviation}}</th>
+                {{/each}}
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each statArrayRows}}
+              <tr>
+                <td class="hb-sa-roll-col">{{roll}}</td>
+                {{#each values}}
+                <td><input type="number" class="hb-sa-value" data-array-index="{{@../index}}" data-value-index="{{@index}}" value="{{this}}" min="1" max="20" step="1"></td>
+                {{/each}}
+                <td>
+                  <button type="button" class="hb-sa-remove-btn" data-action="removeStatArray" data-index="{{index}}" title="Remove this array">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+          <button type="button" class="hb-add-btn" data-action="addStatArray" style="margin-top: 0.4rem;">
+            <i class="fa-solid fa-plus"></i> Add Array
+          </button>
+        </fieldset>
+
       </div>
       {{/if}}
 

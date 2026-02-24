@@ -389,7 +389,7 @@ export class CharacterBuilderUIComponents {
       class: state.selectedClass?.name || 'Not selected',
       level: 1, // Character builder is always level 1
       statsAssigned: Object.keys(state.assignedStats || {}).length,
-      totalStats: 6,
+      totalStats: Object.keys(CONFIG.VAGABOND.stats ?? {}).length || 6,
       skillsSelected: (state.skills || []).length,
       perksSelected: (state.perks || []).length + (state.classPerks || []).length,
       spellsSelected: (state.spells || []).length,
@@ -642,12 +642,7 @@ export class CharacterBuilderUIComponents {
         const currentSkills = state.skills || [];
         const guaranteed = skillGrant.guaranteed || [];
 
-        // Get all skills including weapon skills (melee, ranged)
-        const allSkillsWithWeaponSkills = [
-          ...Object.keys(CONFIG.VAGABOND?.skills || {}),
-          'melee',
-          'ranged'
-        ];
+        const allSkillsWithWeaponSkills = Object.keys(CONFIG.VAGABOND?.skills || {});
 
         // Validate each choice pool
         let totalNeeded = 0;
@@ -685,20 +680,15 @@ export class CharacterBuilderUIComponents {
 
         return isValid;
 
-      case 'stats':
-        // Need all 6 stats assigned (with actual values, not null)
+      case 'stats': {
         const stats = state.assignedStats || {};
-        const requiredStats = ['might', 'dexterity', 'awareness', 'reason', 'presence', 'luck'];
-        const allStatsAssigned = requiredStats.every(stat =>
-          stats[stat] !== null && stats[stat] !== undefined
-        );
-        if (!allStatsAssigned) return false;
-
-        // Also need all bonus stats applied (if any)
+        const statKeys = Object.keys(CONFIG.VAGABOND.stats ?? {});
+        const keys = statKeys.length ? statKeys : ['might', 'dexterity', 'awareness', 'reason', 'presence', 'luck'];
+        if (!keys.every(s => stats[s] !== null && stats[s] !== undefined)) return false;
         const bonusStatsCount = state.bonusStatsCount || 0;
         const appliedBonusesCount = Object.keys(state.appliedBonuses || {}).length;
-
         return appliedBonusesCount >= bonusStatsCount;
+      }
 
       case 'perks':
         // Perks step is always complete - user can choose to take no perks

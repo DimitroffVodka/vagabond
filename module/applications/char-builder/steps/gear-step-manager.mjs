@@ -536,23 +536,9 @@ export class GearStepManager extends BaseStepManager {
       const trainedSkills = state.skills || [];
       const assignedStats = state.assignedStats || {};
 
-      // Build skills object (includes weapon skills)
-      const skillsDefinition = {
-        arcana: { stat: 'reason' },
-        craft: { stat: 'reason' },
-        medicine: { stat: 'reason' },
-        brawl: { stat: 'might' },
-        finesse: { stat: 'dexterity' },
-        melee: { stat: 'might' },
-        ranged: { stat: 'awareness' },
-        sneak: { stat: 'dexterity' },
-        detect: { stat: 'awareness' },
-        mysticism: { stat: 'awareness' },
-        survival: { stat: 'awareness' },
-        influence: { stat: 'presence' },
-        leadership: { stat: 'presence' },
-        performance: { stat: 'presence' }
-      };
+      const skillsDefinition = Object.fromEntries(
+        (CONFIG.VAGABOND.homebrew?.skills ?? []).map(s => [s.key, { stat: s.stat }])
+      );
 
       const skills = {};
       for (const [key, def] of Object.entries(skillsDefinition)) {

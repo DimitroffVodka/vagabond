@@ -575,6 +575,49 @@
     flex-direction: column;
   }
 
+  .hb-sa-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    margin-bottom: 0.25rem;
+
+    th {
+      text-align: center;
+      padding: 0.2rem 0.3rem;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.7;
+      border-bottom: 1px solid var(--vagabond-c-faint);
+    }
+
+    td {
+      padding: 0.15rem 0.2rem;
+      vertical-align: middle;
+      text-align: center;
+    }
+
+    tbody tr:nth-child(even) { background: $c-inset-2; }
+
+    .hb-sa-roll-col {
+      width: 1.8rem;
+      opacity: 0.55;
+      font-size: 0.72rem;
+    }
+
+    .hb-sa-value {
+      width: 42px;
+      text-align: center;
+    }
+
+    .hb-sa-remove-btn {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.35rem;
+      opacity: 0.45;
+      &:hover { opacity: 1; color: var(--vagabond-c-red); }
+    }
+  }
+
   // ─── Tab 8: Advanced ──────────────────────────────────────────────────
 
   .tab-advanced {

@@ -372,23 +372,9 @@ export class SpellsStepManager extends BaseStepManager {
       // Get trained skills from builder state
       const trainedSkills = state.skills || [];
 
-      // Build skills object with trained status (includes weapon skills)
-      const skillsDefinition = {
-        arcana: { stat: 'reason' },
-        craft: { stat: 'reason' },
-        medicine: { stat: 'reason' },
-        brawl: { stat: 'might' },
-        finesse: { stat: 'dexterity' },
-        melee: { stat: 'might' },
-        ranged: { stat: 'awareness' },
-        sneak: { stat: 'dexterity' },
-        detect: { stat: 'awareness' },
-        mysticism: { stat: 'awareness' },
-        survival: { stat: 'awareness' },
-        influence: { stat: 'presence' },
-        leadership: { stat: 'presence' },
-        performance: { stat: 'presence' }
-      };
+      const skillsDefinition = Object.fromEntries(
+        (CONFIG.VAGABOND.homebrew?.skills ?? []).map(s => [s.key, { stat: s.stat }])
+      );
 
       const skills = {};
       for (const [key, def] of Object.entries(skillsDefinition)) {

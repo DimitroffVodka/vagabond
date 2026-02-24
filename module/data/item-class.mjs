@@ -133,6 +133,16 @@ export default class VagabondClass extends VagabondItemBase {
     return schema;
   }
 
+  static migrateData(source) {
+    if (Array.isArray(source.levelFeatures)) {
+      source.levelFeatures = source.levelFeatures.filter(f => f != null);
+    }
+    if (Array.isArray(source.levelSpells)) {
+      source.levelSpells = source.levelSpells.filter(f => f != null);
+    }
+    return super.migrateData(source);
+  }
+
   prepareDerivedData() {
     // Add any calculations or derived data here
     this.featureCount = this.levelFeatures.length;
