@@ -536,21 +536,9 @@ export class GearStepManager extends BaseStepManager {
       const trainedSkills = state.skills || [];
       const assignedStats = state.assignedStats || {};
 
-      // Build skills object
-      const skillsDefinition = {
-        arcana: { stat: 'reason' },
-        craft: { stat: 'reason' },
-        medicine: { stat: 'reason' },
-        brawl: { stat: 'might' },
-        finesse: { stat: 'dexterity' },
-        sneak: { stat: 'dexterity' },
-        detect: { stat: 'awareness' },
-        mysticism: { stat: 'awareness' },
-        survival: { stat: 'awareness' },
-        influence: { stat: 'presence' },
-        leadership: { stat: 'presence' },
-        performance: { stat: 'presence' }
-      };
+      const skillsDefinition = Object.fromEntries(
+        (CONFIG.VAGABOND.homebrew?.skills ?? []).map(s => [s.key, { stat: s.stat }])
+      );
 
       const skills = {};
       for (const [key, def] of Object.entries(skillsDefinition)) {
@@ -560,13 +548,6 @@ export class GearStepManager extends BaseStepManager {
           bonus: 0
         };
       }
-
-      const weaponSkills = {
-        melee: { trained: trainedSkills.includes('melee'), stat: 'might', bonus: 0 },
-        brawl: { trained: trainedSkills.includes('brawl'), stat: 'might', bonus: 0 },
-        finesse: { trained: trainedSkills.includes('finesse'), stat: 'dexterity', bonus: 0 },
-        ranged: { trained: trainedSkills.includes('ranged'), stat: 'dexterity', bonus: 0 }
-      };
 
       const actorData = {
         name: 'Preview Character',
@@ -581,7 +562,6 @@ export class GearStepManager extends BaseStepManager {
             luck: { value: assignedStats.luck || 0 }
           },
           skills: skills,
-          weaponSkills: weaponSkills
         },
         items: []
       };

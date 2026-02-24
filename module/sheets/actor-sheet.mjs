@@ -295,6 +295,15 @@ export class VagabondActorSheet extends api.HandlebarsApplicationMixin(
         };
       }
 
+      // Split skills into regular and weapon-attack groups for the sliding panel.
+      // Skills with showInSkillsList:true (brawl, finesse) appear in BOTH columns
+      // because they're used for non-attack actions too (grapples, thievery, etc.).
+      if (this.actor.system.skills) {
+        const allSkills = Object.entries(this.actor.system.skills);
+        context.regularSkills = Object.fromEntries(allSkills.filter(([, s]) => !s.isWeaponSkill || s.showInSkillsList));
+        context.attackSkills  = Object.fromEntries(allSkills.filter(([, s]) =>  s.isWeaponSkill));
+      }
+
       // Panel state
       context.isPanelOpen = this.actor.getFlag('vagabond', 'isPanelOpen') ?? true;
 
@@ -313,6 +322,11 @@ export class VagabondActorSheet extends api.HandlebarsApplicationMixin(
         return isArmor && item.system.equipped;
       });
       context.equippedArmorType = equippedArmor ? equippedArmor.system.armorTypeDisplay : '-';
+
+      // Stats layout class for the stats-grid element
+      context.statsGridClass = (CONFIG.VAGABOND.homebrew?.derivations?.statsLayout ?? 'progression') === 'centered'
+        ? 'stats-grid--centered'
+        : 'stats-grid--progression';
 
       // Prepare fatigue boxes (dynamic max from setting + bonus)
       const fatigue = this.actor.system.fatigue || 0;
@@ -932,7 +946,8 @@ export class VagabondActorSheet extends api.HandlebarsApplicationMixin(
     const { img } =
       this.document.constructor.getDefaultArtwork?.(this.document.toObject()) ??
       {};
-    const fp = new FilePicker({
+    const FilePickerClass = foundry.applications.apps.FilePicker.implementation ?? foundry.applications.apps.FilePicker;
+    const fp = new FilePickerClass({
       current,
       type: 'image',
       redirectToRoot: img ? [img] : [],

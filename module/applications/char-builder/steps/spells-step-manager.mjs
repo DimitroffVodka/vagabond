@@ -228,7 +228,7 @@ export class SpellsStepManager extends BaseStepManager {
       damageTypeLabel: sys.damageType !== '-' ? sys.damageType : null,
       crit: sys.crit || null,
       delivery: sys.delivery || null,
-      deliveryLabel: sys.delivery ? game.i18n.localize(`VAGABOND.Spell.Delivery.${sys.delivery}`) : null,
+      deliveryLabel: sys.delivery ? (CONFIG.VAGABOND.deliveryTypes[sys.delivery] ?? game.i18n.localize(`VAGABOND.Spell.Delivery.${sys.delivery}`) ?? sys.delivery) : null,
       manaCost: sys.manaCost || 0,
       range: sys.range || null,
       duration: sys.duration || null,
@@ -372,42 +372,13 @@ export class SpellsStepManager extends BaseStepManager {
       // Get trained skills from builder state
       const trainedSkills = state.skills || [];
 
-      // Build skills object with trained status
-      const skillsDefinition = {
-        arcana: { stat: 'reason' },
-        craft: { stat: 'reason' },
-        medicine: { stat: 'reason' },
-        brawl: { stat: 'might' },
-        finesse: { stat: 'dexterity' },
-        sneak: { stat: 'dexterity' },
-        detect: { stat: 'awareness' },
-        mysticism: { stat: 'awareness' },
-        survival: { stat: 'awareness' },
-        influence: { stat: 'presence' },
-        leadership: { stat: 'presence' },
-        performance: { stat: 'presence' }
-      };
+      const skillsDefinition = Object.fromEntries(
+        (CONFIG.VAGABOND.homebrew?.skills ?? []).map(s => [s.key, { stat: s.stat }])
+      );
 
       const skills = {};
       for (const [key, def] of Object.entries(skillsDefinition)) {
         skills[key] = {
-          trained: trainedSkills.includes(key),
-          stat: def.stat,
-          bonus: 0
-        };
-      }
-
-      // Build weapon skills object with trained status
-      const weaponSkillsDefinition = {
-        melee: { stat: 'might' },
-        brawl: { stat: 'might' },
-        finesse: { stat: 'dexterity' },
-        ranged: { stat: 'awareness' }
-      };
-
-      const weaponSkills = {};
-      for (const [key, def] of Object.entries(weaponSkillsDefinition)) {
-        weaponSkills[key] = {
           trained: trainedSkills.includes(key),
           stat: def.stat,
           bonus: 0
@@ -428,7 +399,6 @@ export class SpellsStepManager extends BaseStepManager {
             luck: { value: finalStats.luck || 0 }
           },
           skills: skills,
-          weaponSkills: weaponSkills
         },
         items: []
       };

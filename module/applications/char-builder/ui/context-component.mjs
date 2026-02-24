@@ -702,20 +702,15 @@ export class ContextComponent {
 
         return true;
 
-      case 'stats':
-        // Need all 6 stats assigned (with actual values, not null)
+      case 'stats': {
         const stats = state.assignedStats || {};
-        const requiredStats = ['might', 'dexterity', 'awareness', 'reason', 'presence', 'luck'];
-        const allStatsAssigned = requiredStats.every(stat =>
-          stats[stat] !== null && stats[stat] !== undefined
-        );
-        if (!allStatsAssigned) return false;
-
-        // Also need all bonus stats applied (if any)
+        const statKeys = Object.keys(CONFIG.VAGABOND.stats ?? {});
+        const keys = statKeys.length ? statKeys : ['might', 'dexterity', 'awareness', 'reason', 'presence', 'luck'];
+        if (!keys.every(s => stats[s] !== null && stats[s] !== undefined)) return false;
         const bonusStatsCount = state.bonusStatsCount || 0;
         const appliedBonusesCount = Object.keys(state.appliedBonuses || {}).length;
-
         return appliedBonusesCount >= bonusStatsCount;
+      }
       case 'perks':
         return true; // Perks are optional
       case 'spells':
@@ -735,9 +730,7 @@ export class ContextComponent {
    * @private
    */
   _getAllSkillsWithWeaponSkills() {
-    const regularSkills = Object.keys(CONFIG.VAGABOND?.skills || {});
-    const weaponSkills = ['melee', 'ranged']; // Add weapon skills at the end
-    return [...regularSkills, ...weaponSkills];
+    return Object.keys(CONFIG.VAGABOND?.skills || {});
   }
 
   /**

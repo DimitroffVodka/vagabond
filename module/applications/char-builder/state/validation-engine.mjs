@@ -594,9 +594,7 @@ export class ValidationEngine {
    * @private
    */
   _getAllSkillsWithWeaponSkills() {
-    const regularSkills = Object.keys(CONFIG.VAGABOND?.skills || {});
-    const weaponSkills = ['melee', 'ranged']; // Add weapon skills at the end
-    return [...regularSkills, ...weaponSkills];
+    return Object.keys(CONFIG.VAGABOND?.skills || {});
   }
 
   _validateRequired(rule, state, category) {
@@ -627,10 +625,10 @@ export class ValidationEngine {
 
   _validateAllAssigned(rule, state) {
     const stats = state.assignedStats || {};
-    const requiredStats = ['might', 'dexterity', 'awareness', 'reason', 'presence', 'luck'];
-    
-    return { 
-      isValid: requiredStats.every(stat => stats[stat] !== null && stats[stat] !== undefined) 
+    const requiredStats = Object.keys(CONFIG.VAGABOND.stats ?? {});
+    const keys = requiredStats.length ? requiredStats : ['might', 'dexterity', 'awareness', 'reason', 'presence', 'luck'];
+    return {
+      isValid: keys.every(stat => stats[stat] !== null && stats[stat] !== undefined)
     };
   }
 
@@ -806,11 +804,12 @@ export class ValidationEngine {
 
         return { isValid: true };
 
-      case 'stats':
-        // Need all 6 stats assigned AND an array selected
+      case 'stats': {
+        // Need all stats assigned AND an array selected
         const stats = state.assignedStats || {};
-        const requiredStats = ['might', 'dexterity', 'awareness', 'reason', 'presence', 'luck'];
-        const allStatsAssigned = requiredStats.every(stat =>
+        const requiredStats = Object.keys(CONFIG.VAGABOND.stats ?? {});
+        const keys = requiredStats.length ? requiredStats : ['might', 'dexterity', 'awareness', 'reason', 'presence', 'luck'];
+        const allStatsAssigned = keys.every(stat =>
           stats[stat] !== null && stats[stat] !== undefined
         );
         const arraySelected = !!state.selectedArrayId;
@@ -821,6 +820,7 @@ export class ValidationEngine {
         const allBonusesApplied = appliedBonusesCount >= bonusStatsCount;
 
         return { isValid: allStatsAssigned && arraySelected && allBonusesApplied };
+      }
 
       case 'spells':
         // Need to select required number of spells based on class spell limit

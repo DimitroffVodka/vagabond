@@ -34,20 +34,6 @@ export default class VagabondClass extends VagabondItemBase {
       initial: null,
       required: false,
       nullable: true,
-      choices: {
-        arcana: 'VAGABOND.Skills.Arcana',
-        craft: 'VAGABOND.Skills.Craft',
-        medicine: 'VAGABOND.Skills.Medicine',
-        brawl: 'VAGABOND.Skills.Brawl',
-        finesse: 'VAGABOND.Skills.Finesse',
-        sneak: 'VAGABOND.Skills.Sneak',
-        detect: 'VAGABOND.Skills.Detect',
-        mysticism: 'VAGABOND.Skills.Mysticism',
-        survival: 'VAGABOND.Skills.Survival',
-        influence: 'VAGABOND.Skills.Influence',
-        leadership: 'VAGABOND.Skills.Leadership',
-        performance: 'VAGABOND.Skills.Performance'
-      },
       label: 'VAGABOND.Item.Class.FIELDS.manaSkill.label',
       hint: 'VAGABOND.Item.Class.FIELDS.manaSkill.hint'
     });
@@ -57,30 +43,13 @@ export default class VagabondClass extends VagabondItemBase {
       initial: null,
       required: false,
       nullable: true,
-      choices: {
-        might: 'VAGABOND.Ability.Might.long',
-        dexterity: 'VAGABOND.Ability.Dexterity.long',
-        reason: 'VAGABOND.Ability.Reason.long',
-        awareness: 'VAGABOND.Ability.Awareness.long',
-        presence: 'VAGABOND.Ability.Presence.long',
-        luck: 'VAGABOND.Ability.Luck.long'
-      },
       label: 'VAGABOND.Item.Class.FIELDS.castingStat.label',
       hint: 'VAGABOND.Item.Class.FIELDS.castingStat.hint'
     });
 
     // Key stats - the primary stats for this class (can be multiple)
     schema.keyStats = new fields.ArrayField(
-      new fields.StringField({
-        choices: {
-          might: 'VAGABOND.Ability.Might.long',
-          dexterity: 'VAGABOND.Ability.Dexterity.long',
-          reason: 'VAGABOND.Ability.Reason.long',
-          awareness: 'VAGABOND.Ability.Awareness.long',
-          presence: 'VAGABOND.Ability.Presence.long',
-          luck: 'VAGABOND.Ability.Luck.long'
-        }
-      }),
+      new fields.StringField(),
       {
         initial: [],
         label: 'VAGABOND.Item.Class.FIELDS.keyStats.label',
@@ -111,7 +80,7 @@ export default class VagabondClass extends VagabondItemBase {
           required: true,
           initial: 1,
           min: 1,
-          max: 10,
+          max: CONFIG.VAGABOND.homebrew?.leveling?.maxLevel ?? 10,
           integer: true
         }),
         name: new fields.StringField({ ...requiredString, initial: '' }),
@@ -148,7 +117,7 @@ export default class VagabondClass extends VagabondItemBase {
           required: true,
           initial: 1,
           min: 1,
-          max: 10,
+          max: CONFIG.VAGABOND.homebrew?.leveling?.maxLevel ?? 10,
           integer: true
         }),
         spells: new fields.NumberField({
@@ -162,6 +131,16 @@ export default class VagabondClass extends VagabondItemBase {
     );
 
     return schema;
+  }
+
+  static migrateData(source) {
+    if (Array.isArray(source.levelFeatures)) {
+      source.levelFeatures = source.levelFeatures.filter(f => f != null);
+    }
+    if (Array.isArray(source.levelSpells)) {
+      source.levelSpells = source.levelSpells.filter(f => f != null);
+    }
+    return super.migrateData(source);
   }
 
   prepareDerivedData() {
