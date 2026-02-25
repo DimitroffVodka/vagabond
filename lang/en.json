@@ -287,6 +287,7 @@
       "Character": "Vagabond Character Sheet",
       "NPC": "Vagabond NPC Sheet",
       "Party": "Vagabond Party Sheet",
+      "Construct": "Vagabond Construct Sheet",
       "Item": "Vagabond Item Sheet"
     },
     "Settings": {
@@ -423,17 +424,25 @@
       "Party": {
         "Tabs": {
           "Party": "Party",
+          "Notes": "Notes",
           "Vehicle": "Vehicle",
           "Effects": "Effects"
         },
+        "Notes": {
+          "SharedNotes": "Shared Notes",
+          "GmNotes": "GM Notes",
+          "PersonalNotes": "My Notes",
+          "Unavailable": "Notes unavailable."
+        },
         "FIELDS": {
           "members": {"label": "Party Members"},
-          "vehicle": {"label": "Vehicle"},
-          "vehicle.type": {"label": "Vehicle Type"},
-          "vehicle.speed": {"label": "Speed"},
-          "vehicle.crawl": {"label": "Crawl Speed"},
-          "vehicle.travel": {"label": "Travel Speed"}
+          "type":    {"label": "Party Type"},
+          "speed":   {"label": "Speed"},
+          "crawl":   {"label": "Crawl Speed"},
+          "travel":  {"label": "Travel Speed"}
         },
+        "NamePlaceholder": "Party name...",
+        "TypePlaceholder": "e.g. Adventurers, Mercenaries, Crew...",
         "Vehicle": {
           "NamePlaceholder": "Vehicle name...",
           "TypePlaceholder": "e.g. Airship, Wagon...",
@@ -458,7 +467,7 @@
           "RemoveCrew": "Remove from crew",
           "NoCrew": "No crew assigned.",
           "NoCrewAvailable": "No available characters to assign.",
-          "Attack": "Roll",
+          "Attack": "Shift +: Favor / Ctrl +: Hinder",
           "AttackSkill": "Select skill to roll",
           "Difficulty": "Difficulty",
           "RollDamage": "Roll damage",
@@ -496,6 +505,7 @@
           "AlreadyMember": "That actor is already a party member.",
           "NoAvailable": "No available characters to add.",
           "PickCharacter": "Character",
+          "PickMember": "Party Member",
           "Add": "Add",
           "Wealth": "Wealth",
           "TotalWealth": "Party Total Wealth"
@@ -513,7 +523,58 @@
           "UnlinkedWarning": "Note: {names} use unlinked tokens. Their current state will be saved and restored, but any changes made while gathered will be lost.",
           "GatherDone": "Gathered {count} party member(s).",
           "ReleaseDone": "Released party members."
+        },
+        "NpcCard": {
+          "HD": "HD",
+          "Actions": "Actions",
+          "Abilities": "Abilities",
+          "Immune": "Immune",
+          "Weak": "Weak",
+          "StatusImmune": "Status Immune"
         }
+      },
+      "Construct": {
+        "Tabs": {
+          "Construct": "Construct"
+        },
+        "FIELDS": {
+          "type": {"label": "Construct Type"},
+          "speed": {"label": "Speed"},
+          "crawl": {"label": "Crawl Speed"},
+          "travel": {"label": "Travel Speed"}
+        },
+        "NamePlaceholder": "Construct name...",
+        "TypePlaceholder": "e.g. Galleon, Mech, Fortress...",
+        "Parts": "Parts",
+        "AddPart": "Add Part",
+        "NewPart": "New Part",
+        "EditPart": "Edit part",
+        "DeletePart": "Delete Part",
+        "DeletePartConfirm": "Delete {name}? This cannot be undone.",
+        "NoParts": "No parts yet.",
+        "NoPartsHint": "Click 'Add Part' to create a construct part.",
+        "HPCurrent": "Current HP",
+        "HPMax": "Maximum HP",
+        "Armor": "Armor",
+        "AttackMod": "Attack Modifier",
+        "Damage": "Damage",
+        "Crew": "Crew",
+        "AddCrew": "Add crew member",
+        "RemoveCrew": "Remove from crew",
+        "NoCrew": "No crew assigned.",
+        "NoCrewAvailable": "No available characters or NPCs to assign.",
+        "PickCrew": "Crew Member",
+        "Attack": "Shift +: Favor / Ctrl +: Hinder",
+        "AttackSkill": "Select skill to roll",
+        "Difficulty": "Difficulty",
+        "RollDamage": "Roll damage",
+        "Hold": "Hold",
+        "AddHold": "Add Container",
+        "NewContainer": "New Container",
+        "HoldHint": "Add Container items here to store and organize the construct's hold.",
+        "OpenHold": "Open container",
+        "DeleteHold": "Remove Container",
+        "DeleteHoldConfirm": "Delete \"{name}\"? All items stored inside will also be deleted. This cannot be undone."
       },
       "NPC": {
         "FIELDS": {
@@ -1280,7 +1341,8 @@
     "Actor": {
       "character": "Character",
       "npc": "NPC",
-      "party": "Party"
+      "party": "Party",
+      "construct": "Construct"
     },
     "Item": {
       "gear": "- Remove",

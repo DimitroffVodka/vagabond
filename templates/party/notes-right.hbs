@@ -1,0 +1,41 @@
+{{! Party Notes Tab — Right Column (separate part for selective re-render) }}
+<div data-application-part="notes-right" class="notes-column notes-column--right">
+
+  {{#if isGM}}
+    <div class="notes-section">
+      <h3 class="notes-section-title">
+        <i class="fas fa-lock"></i>
+        {{localize 'VAGABOND.Actor.Party.Notes.GmNotes'}}
+      </h3>
+      {{#if gmNotes.pageUuid}}
+        <prose-mirror
+          data-document-uuid="{{gmNotes.pageUuid}}"
+          data-page-uuid="{{gmNotes.pageUuid}}"
+          value="{{gmNotes.content}}"
+          toggled="true"
+        >{{{gmNotes.enrichedContent}}}</prose-mirror>
+      {{/if}}
+    </div>
+  {{/if}}
+
+  {{#each personalNotes}}
+    <div class="notes-section">
+      <h3 class="notes-section-title">
+        <i class="fas fa-user"></i>
+        {{characterName}}
+        {{#if playerName}}<span class="notes-player-name">[{{playerName}}]</span>{{/if}}
+      </h3>
+      {{#if pageUuid}}
+        <prose-mirror
+          data-document-uuid="{{pageUuid}}"
+          data-page-uuid="{{pageUuid}}"
+          value="{{content}}"
+          toggled="true"
+        >{{{enrichedContent}}}</prose-mirror>
+      {{else}}
+        <p class="notes-unavailable">{{localize 'VAGABOND.Actor.Party.Notes.Unavailable'}}</p>
+      {{/if}}
+    </div>
+  {{/each}}
+
+</div>

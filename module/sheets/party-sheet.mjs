@@ -1,18 +1,21 @@
 import { VagabondActorSheet } from './actor-sheet.mjs';
 import { prepareActiveEffectCategories } from '../helpers/effects.mjs';
 import { TargetHelper } from '../helpers/target-helper.mjs';
-import { VagabondDamageHelper } from '../helpers/damage-helper.mjs';
 import { PartyCompactView } from '../applications/party-compact-view.mjs';
 
 /**
- * Party/Vehicle actor sheet.
- * Three tabs: Party (member cards), Vehicle (parts + crew), Effects.
+ * Party actor sheet.
+ * Two tabs: Party (member cards for characters + NPCs), Effects.
+ * All users with party permission see both tabs.
+ * The compact-view button is GM-only (enforced in the template via isGM).
  */
 export class VagabondPartySheet extends VagabondActorSheet {
   constructor(object, options) {
     super(object, options);
     this._listenerController = null;
     this._actorUpdateHookId = null;
+    this._effectHookIds = null;
+    this._notesHookId = null;
   }
 
   /** @override */
@@ -33,9 +36,11 @@ export class VagabondPartySheet extends VagabondActorSheet {
       template: 'systems/vagabond/templates/party/party-tab.hbs',
       scrollable: [''],
     },
-    vehicle: {
-      template: 'systems/vagabond/templates/party/vehicle-tab.hbs',
-      scrollable: [''],
+    notes: {
+      template: 'systems/vagabond/templates/party/notes-tab.hbs',
+    },
+    'notes-right': {
+      template: 'systems/vagabond/templates/party/notes-right.hbs',
     },
     effects: {
       template: 'systems/vagabond/templates/actor/effects.hbs',
@@ -45,14 +50,9 @@ export class VagabondPartySheet extends VagabondActorSheet {
 
   /** @override */
   _configureRenderOptions(options) {
+    const hadParts = !!options.parts;
     super._configureRenderOptions(options);
-    if (game.user.isGM) {
-      options.parts = ['tabs', 'party', 'vehicle', 'effects'];
-    } else {
-      // Non-GM players (crew members with Owner permission) see only the Vehicle tab.
-      options.parts = ['vehicle'];
-      this.tabGroups['primary'] = 'vehicle';
-    }
+    if (!hadParts) options.parts = ['tabs', 'party', 'notes', 'notes-right', 'effects'];
   }
 
   /** @override */
@@ -67,6 +67,7 @@ export class VagabondPartySheet extends VagabondActorSheet {
       limited: this.actor.limited,
       fields: this.document.schema.fields,
       systemFields: this.document.system.schema.fields,
+      isGM: game.user.isGM,
     };
 
     context.tabs = this._getTabs(options.parts);
@@ -75,14 +76,8 @@ export class VagabondPartySheet extends VagabondActorSheet {
     // Resolve full member data for party tab cards
     context.members = await this._resolveMembers();
 
-    // Aggregate supplies across all members
+    // Aggregate supplies across all members (characters only)
     context.supplies = this._aggregateSupplies(context.members);
-
-    // Vehicle parts (vehiclePart items owned by this actor)
-    context.vehicleParts = this.actor.items.filter(i => i.type === 'vehiclePart');
-
-    // Cargo (container items owned by this actor)
-    context.cargo = this.actor.items.filter(i => i.type === 'container');
 
     return context;
   }
@@ -100,6 +95,7 @@ export class VagabondPartySheet extends VagabondActorSheet {
 
   /**
    * Resolve a single member UUID into card data.
+   * Handles both character and NPC actor types.
    * @param {string} uuid
    * @returns {Promise<Object|null>}
    * @private
@@ -114,6 +110,42 @@ export class VagabondPartySheet extends VagabondActorSheet {
     if (!actor) return null;
 
     const sys = actor.system;
+
+    // ── NPC member ──────────────────────────────────────────────────────────
+    if (actor.type === 'npc') {
+      const hpMax = sys.health.max || 1;
+      const hpPct = Math.clamp(Math.round((sys.health.value / hpMax) * 100), 0, 100);
+      const fatigue = sys.fatigue ?? 0;
+      const fatigueMax = sys.fatigueMax ?? 5;
+      const fatiguePct = fatigueMax > 0
+        ? Math.clamp(Math.round((fatigue / fatigueMax) * 100), 0, 100)
+        : 0;
+
+      return {
+        uuid: actor.uuid,
+        id: actor.id,
+        name: actor.name,
+        img: actor.img,
+        isNPC: true,
+        hd: sys.hd ?? 1,
+        hp: { value: sys.health.value, max: sys.health.max, pct: hpPct },
+        armor: sys.armor ?? 0,
+        fatigue,
+        fatigueMax,
+        fatiguePct,
+        speedFormatted: this._formatNpcSpeed(sys),
+        senses: sys.senses ?? '',
+        immunities: sys.immunities ?? [],
+        weaknesses: sys.weaknesses ?? [],
+        statusImmunities: sys.statusImmunities ?? [],
+        // Include all actions/abilities with original indices preserved
+        actions: sys.actions ?? [],
+        abilities: sys.abilities ?? [],
+      };
+    }
+
+    // ── Character member (default path) ─────────────────────────────────────
+    if (actor.type !== 'character') return null;
 
     // Armor: use the actor's derived armor value (includes Active Effect bonuses)
     const armor = sys.armor ?? 0;
@@ -174,6 +206,7 @@ export class VagabondPartySheet extends VagabondActorSheet {
       id: actor.id,
       name: actor.name,
       img: actor.img,
+      isNPC: false,
       playerName,
       level: sys.attributes.level?.value ?? 1,
       ancestry: sys.ancestryData?.name ?? null,
@@ -246,7 +279,29 @@ export class VagabondPartySheet extends VagabondActorSheet {
   }
 
   /**
+   * Build a formatted speed string for an NPC system object.
+   * Reads speed, speedTypes, and speedValues directly from the schema fields.
+   * @param {object} sys - actor.system for an NPC
+   * @returns {string}
+   * @private
+   */
+  _formatNpcSpeed(sys) {
+    const base = sys.speed ?? 0;
+    const types = Array.isArray(sys.speedTypes) ? sys.speedTypes : [];
+    if (!types.length) return `${base}'`;
+    const parts = [];
+    for (const key of types) {
+      const i18nKey = CONFIG.VAGABOND.speedTypes?.[key];
+      const label = i18nKey ? game.i18n.localize(i18nKey) : key;
+      const val = sys.speedValues?.[key] ?? 0;
+      parts.push(val > 0 ? `${label}: ${val}'` : label);
+    }
+    return parts.length ? `${base}' (${parts.join(', ')})` : `${base}'`;
+  }
+
+  /**
    * Aggregate rations, beverages, and currency across all resolved members.
+   * NPC members contribute 0 to all totals (they don't carry party supplies).
    * @param {Object[]} members
    * @returns {{ rations: number, beverages: number, currency: {gold, silver, copper} }}
    * @private
@@ -266,57 +321,209 @@ export class VagabondPartySheet extends VagabondActorSheet {
     );
   }
 
-  /** @override */
-  async _preparePartContext(partId, context) {
-    const partContext = await super._preparePartContext(partId, context);
-    switch (partId) {
-      case 'party':
-        partContext.tab = context.tabs[partId];
-        break;
-      case 'vehicle':
-        partContext.tab = context.tabs[partId];
-        partContext.vehicleParts = await this._resolveVehicleParts(context.vehicleParts);
-        break;
+  // ── Notes Tab ──────────────────────────────────────────────────────────────
+
+  /**
+   * Prepare context data for the notes tab.
+   * Enriches shared notes, resolves/creates GM and personal note journals.
+   * @returns {Promise<Object>}
+   * @private
+   */
+  async _prepareNotesContext() {
+    const TE = foundry.applications.ux.TextEditor.implementation;
+
+    const ctx = { personalNotes: [], gmNotes: null };
+
+    // GM notes — only created/resolved for the GM
+    if (game.user.isGM) {
+      const journal = await this._resolveNoteJournal('gm');
+      const page = journal?.pages?.contents[0];
+      ctx.gmNotes = {
+        pageUuid: page?.uuid ?? null,
+        content: page?.text?.content ?? '',
+        enrichedContent: page
+          ? await TE.enrichHTML(page.text?.content ?? '', { relativeTo: page })
+          : '',
+      };
     }
-    return partContext;
+
+    // Personal notes — one per visible character member
+    const uuids = this.document.system.members ?? [];
+    for (const uuid of uuids) {
+      let actor;
+      try { actor = await fromUuid(uuid); } catch { continue; }
+      if (!actor || actor.type !== 'character') continue;
+
+      // Only show personal notes to users who own this character (or GM)
+      const canSee = game.user.isGM
+        || actor.getUserLevel(game.user) >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER;
+      if (!canSee) continue;
+
+      const journal = await this._resolveNoteJournal('personal', actor.id);
+      if (!journal) continue;
+
+      const page = journal.pages?.contents[0];
+      const playerUser = game.users.find(u => !u.isGM && u.character?.id === actor.id);
+      ctx.personalNotes.push({
+        characterId: actor.id,
+        characterName: actor.name,
+        playerName: playerUser?.name ?? null,
+        pageUuid: page?.uuid ?? null,
+        content: page?.text?.content ?? '',
+        enrichedContent: page
+          ? await TE.enrichHTML(page.text?.content ?? '', { relativeTo: page })
+          : '',
+      });
+    }
+
+    return ctx;
   }
 
   /**
-   * Resolve vehicle part items into display-ready objects with crew data.
-   * @param {VagabondItem[]} parts
-   * @returns {Promise<Object[]>}
+   * Build the ownership object for a note journal / page.
+   * Personal notes: OWNER for every user who owns the character + NONE default.
+   * GM notes:       NONE default (GMs are implicit owners).
+   * @param {'gm'|'personal'} noteType
+   * @param {string|null} characterId
+   * @returns {Object}
    * @private
    */
-  async _resolveVehicleParts(parts) {
-    return Promise.all(parts.map(async (part) => {
-      const crewEntries = part.system.crew ?? [];
-      const crew = (await Promise.all(
-        crewEntries.map(({ uuid, skill }) =>
-          fromUuid(uuid).then(a => a ? { uuid: a.uuid, name: a.name, img: a.img, skill } : null)
-        )
-      )).filter(Boolean);
+  _buildNoteOwnership(noteType, characterId) {
+    const ownership = { default: CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE };
+    if (noteType === 'personal') {
+      const actor = game.actors.get(characterId);
+      if (actor) {
+        for (const user of game.users) {
+          if (actor.getUserLevel(user) >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER) {
+            ownership[user.id] = CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER;
+          }
+        }
+      }
+    }
+    return ownership;
+  }
 
-      const hpMax = part.system.health.max || 1;
-      const hpPct = Math.clamp(
-        Math.round((part.system.health.value / hpMax) * 100), 0, 100
-      );
+  /**
+   * Resolve an existing note journal from flags, or create one (GM only).
+   * Both the JournalEntry AND its first JournalEntryPage receive the same
+   * ownership object — Foundry checks the PAGE's own ownership when deciding
+   * whether a player may update it; inheriting from the parent is not enough.
+   * @param {'gm'|'personal'} noteType
+   * @param {string|null} characterId  Actor id for personal notes.
+   * @returns {Promise<JournalEntry|null>}
+   * @private
+   */
+  async _resolveNoteJournal(noteType, characterId = null) {
+    const flagKey = noteType === 'gm' ? 'notes.gm' : `notes.personal.${characterId}`;
 
-      return {
-        id: part.id,
-        name: part.name,
-        img: part.img,
-        health: {
-          value: part.system.health.value,
-          max: part.system.health.max,
-          pct: hpPct,
+    // Return existing journal if the UUID is still valid
+    const existingUuid = this.document.getFlag('vagabond', flagKey);
+    if (existingUuid) {
+      try {
+        const journal = await fromUuid(existingUuid);
+        if (journal) {
+          // Auto-repair: journals created before page ownership was stamped.
+          // The GM client runs this check once; the early-out makes repeat renders
+          // cheap (no network call when ownership is already correct).
+          if (game.user.isGM && noteType === 'personal') {
+            await this._repairPageOwnership(journal, characterId);
+          }
+          return journal;
+        }
+      } catch { /* stale UUID — fall through to recreate */ }
+    }
+
+    // Only GMs can create journal documents
+    if (!game.user.isGM) return null;
+
+    const ownership = this._buildNoteOwnership(noteType, characterId);
+    const folder = await this._ensureNotesFolder();
+
+    const name = noteType === 'gm'
+      ? `[GM] ${this.document.name} — Notes`
+      : `[Personal] ${game.actors.get(characterId)?.name ?? characterId} — Notes`;
+
+    const journal = await JournalEntry.create({
+      name,
+      ownership,
+      folder: folder?.id ?? null,
+      flags: {
+        vagabond: {
+          isPartyNote: true,
+          partyId: this.document.id,
+          noteType,
+          characterId: characterId ?? null,
         },
-        armor: part.system.armor,
-        attackModifier: part.system.attackModifier,
-        damageFormula: part.system.damageFormula,
-        damageType: part.system.damageType,
-        crew,
-      };
-    }));
+      },
+      pages: [{
+        name: 'Notes',
+        type: 'text',
+        // Mirror journal ownership onto the page — the server permission check
+        // uses the page's own ownership, not the parent journal's.
+        ownership: { ...ownership },
+        text: { content: '', format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML },
+      }],
+    });
+
+    await this.document.setFlag('vagabond', flagKey, journal.uuid);
+    return journal;
+  }
+
+  /**
+   * Ensure the first page of a personal-note journal has the correct ownership.
+   * Called by the GM only. No-ops immediately when ownership is already correct.
+   * @param {JournalEntry} journal
+   * @param {string} characterId
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _repairPageOwnership(journal, characterId) {
+    const page = journal.pages.contents[0];
+    if (!page) return;
+    const required = this._buildNoteOwnership('personal', characterId);
+    const needsFix = Object.entries(required).some(
+      ([uid, level]) => (page.ownership?.[uid] ?? page.ownership?.default ?? 0) < level
+    );
+    if (!needsFix) return;
+    await page.update({ ownership: { ...(page.ownership ?? {}), ...required } });
+  }
+
+  /**
+   * Get or create the hidden Party Notes folder.
+   * @returns {Promise<Folder|null>}
+   * @private
+   */
+  async _ensureNotesFolder() {
+    const existing = game.folders.find(
+      f => f.type === 'JournalEntry' && f.flags?.vagabond?.isPartyNotesFolder
+    );
+    if (existing) return existing;
+
+    return Folder.create({
+      name: 'Party Notes',
+      type: 'JournalEntry',
+      ownership: { default: CONST.DOCUMENT_OWNERSHIP_LEVELS.NONE },
+      flags: { vagabond: { isPartyNotesFolder: true } },
+    });
+  }
+
+  /** @override */
+  async _preparePartContext(partId, context) {
+    const partContext = await super._preparePartContext(partId, context);
+    if (partId === 'party') {
+      partContext.tab = context.tabs[partId];
+    } else if (partId === 'notes') {
+      partContext.tab = context.tabs[partId];
+      const TE = foundry.applications.ux.TextEditor.implementation;
+      partContext.enrichedSharedNotes = await TE.enrichHTML(
+        this.document.system.sharedNotes ?? '',
+        { relativeTo: this.document, rollData: this.document.getRollData?.() ?? {} }
+      );
+    } else if (partId === 'notes-right') {
+      const notesCtx = await this._prepareNotesContext();
+      Object.assign(partContext, notesCtx);
+    }
+    return partContext;
   }
 
   /** @override */
@@ -334,9 +541,9 @@ export class VagabondPartySheet extends VagabondActorSheet {
           tab.id = 'party';
           tab.label = 'VAGABOND.Actor.Party.Tabs.Party';
           break;
-        case 'vehicle':
-          tab.id = 'vehicle';
-          tab.label = 'VAGABOND.Actor.Party.Tabs.Vehicle';
+        case 'notes':
+          tab.id = 'notes';
+          tab.label = 'VAGABOND.Actor.Party.Tabs.Notes';
           break;
         case 'effects':
           tab.id = 'effects';
@@ -367,23 +574,7 @@ export class VagabondPartySheet extends VagabondActorSheet {
       this.render(false, { parts: ['party'] });
     });
 
-    // Re-register item hooks (re-render vehicle tab when parts change)
-    if (this._itemHookIds) {
-      Hooks.off('createItem', this._itemHookIds.createItem);
-      Hooks.off('updateItem', this._itemHookIds.updateItem);
-      Hooks.off('deleteItem', this._itemHookIds.deleteItem);
-    }
-    const reRenderVehicle = (item) => {
-      if (item.parent?.id === this.actor.id) this.render(false, { parts: ['vehicle'] });
-    };
-    this._itemHookIds = {
-      createItem: Hooks.on('createItem', reRenderVehicle),
-      updateItem: Hooks.on('updateItem', reRenderVehicle),
-      deleteItem: Hooks.on('deleteItem', reRenderVehicle),
-    };
-
     // Re-register ActiveEffect hooks so status changes on members refresh the party tab immediately.
-    // Status effects fire createActiveEffect / deleteActiveEffect, not updateActor.
     if (this._effectHookIds) {
       Hooks.off('createActiveEffect', this._effectHookIds.create);
       Hooks.off('updateActiveEffect', this._effectHookIds.update);
@@ -407,12 +598,19 @@ export class VagabondPartySheet extends VagabondActorSheet {
     // Wire up member card interactions
     this._bindMemberActions(signal);
 
-    // Wire up vehicle tab interactions
-    this._bindVehicleActions(signal);
+    // Wire up journal-backed note editors (GM + personal)
+    this._bindNotesActions(signal);
+
+    // Re-render the right notes column whenever any note for this party is saved
+    if (this._notesHookId) Hooks.off('updateJournalEntryPage', this._notesHookId);
+    this._notesHookId = Hooks.on('updateJournalEntryPage', (page) => {
+      if (page.parent?.flags?.vagabond?.partyId !== this.document.id) return;
+      this.render(false, { parts: ['notes-right'] });
+    });
   }
 
   /**
-   * Bind member card interactive elements.
+   * Bind member card interactive elements (works for both character and NPC cards).
    * @param {AbortSignal} signal
    * @private
    */
@@ -422,7 +620,7 @@ export class VagabondPartySheet extends VagabondActorSheet {
       .querySelectorAll('[data-action="openMemberSheet"]')
       .forEach(el => {
         el.addEventListener('click', async (e) => {
-          // Don't fire if click landed on a nested interactive element
+          // Don't fire if click landed on a nested interactive element or button
           if (e.target.closest('[data-action]:not([data-action="openMemberSheet"])') ||
               e.target.closest('button')) return;
           const uuid = el.closest('[data-actor-uuid]')?.dataset.actorUuid;
@@ -502,7 +700,7 @@ export class VagabondPartySheet extends VagabondActorSheet {
         }, { signal });
       });
 
-    // Equipped items / spells → open item sheet on the member actor
+    // Equipped items / spells → open item sheet on the member actor (character only)
     this.element
       .querySelectorAll('[data-action="openMemberItem"]')
       .forEach(el => {
@@ -517,7 +715,7 @@ export class VagabondPartySheet extends VagabondActorSheet {
         }, { signal });
       });
 
-    // Status icon → send to chat
+    // Status icon → send to chat (character cards)
     this.element
       .querySelectorAll('[data-action="memberStatusChat"]')
       .forEach(icon => {
@@ -532,7 +730,7 @@ export class VagabondPartySheet extends VagabondActorSheet {
         }, { signal });
       });
 
-    // Compact view button
+    // Compact view button (GM only — enforced in template, but safe to bind here)
     this.element
       .querySelectorAll('[data-action="openCompactView"]')
       .forEach(btn => {
@@ -556,10 +754,50 @@ export class VagabondPartySheet extends VagabondActorSheet {
           await this._removeMember(uuid);
         }, { signal });
       });
+
+    // NPC action chips → send NPC action to chat
+    this.element
+      .querySelectorAll('[data-action="memberNpcAction"]')
+      .forEach(el => {
+        el.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const uuid = el.dataset.actorUuid;
+          const actionIndex = parseInt(el.dataset.actionIndex);
+          if (!uuid || isNaN(actionIndex)) return;
+          const actor = await fromUuid(uuid);
+          if (!actor) return;
+          const action = actor.system.actions?.[actionIndex];
+          if (!action) return;
+          const { VagabondChatCard } = globalThis.vagabond.utils;
+          const targetsAtRollTime = TargetHelper.captureCurrentTargets();
+          await VagabondChatCard.npcAction(actor, action, actionIndex, targetsAtRollTime);
+        }, { signal });
+      });
+
+    // NPC ability chips → send NPC ability to chat
+    this.element
+      .querySelectorAll('[data-action="memberNpcAbility"]')
+      .forEach(el => {
+        el.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const uuid = el.dataset.actorUuid;
+          const actionIndex = parseInt(el.dataset.actionIndex);
+          if (!uuid || isNaN(actionIndex)) return;
+          const actor = await fromUuid(uuid);
+          if (!actor) return;
+          const ability = actor.system.abilities?.[actionIndex];
+          if (!ability) return;
+          const { VagabondChatCard } = globalThis.vagabond.utils;
+          const targetsAtRollTime = TargetHelper.captureCurrentTargets();
+          // VagabondChatCard.npcAction handles abilities too (same card format)
+          await VagabondChatCard.npcAction(actor, ability, actionIndex, targetsAtRollTime);
+        }, { signal });
+      });
   }
 
   /**
    * Handle dropping an actor onto the party sheet — adds them as a member.
+   * Only accepts character and npc actors.
    * @param {DragEvent} event
    * @param {Object} data
    * @override
@@ -568,12 +806,22 @@ export class VagabondPartySheet extends VagabondActorSheet {
     if (!this.actor.isOwner) return false;
     const uuid = data.uuid;
     if (!uuid) return false;
+    try {
+      const actor = await fromUuid(uuid);
+      // Only world actors (not compendium actors — actor.pack would be set for those)
+      if (!actor || actor.pack || (actor.type !== 'character' && actor.type !== 'npc')) return false;
+    } catch {
+      return false;
+    }
     await this._addMember(uuid);
     return true;
   }
 
   /**
    * Add an actor UUID to the party member list.
+   * For character actors, also:
+   *  - Grants party OWNER to every user who holds OWNER on that character.
+   *  - Pre-creates the personal note journal so the player sees it immediately.
    * @param {string} uuid
    * @private
    */
@@ -583,12 +831,35 @@ export class VagabondPartySheet extends VagabondActorSheet {
       ui.notifications.warn(game.i18n.localize('VAGABOND.Actor.Party.Card.AlreadyMember'));
       return;
     }
-    members.push(uuid);
-    await this.actor.update({ 'system.members': members });
+
+    const actor = await fromUuid(uuid);
+
+    // Build the base update (always done)
+    const updateData = { 'system.members': [...members, uuid] };
+
+    // For character actors: propagate character ownership → party ownership
+    if (actor?.type === 'character') {
+      const ownership = foundry.utils.deepClone(this.actor.ownership ?? {});
+      for (const user of game.users) {
+        if (!user.isGM && actor.getUserLevel(user) >= CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER) {
+          ownership[user.id] = CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER;
+        }
+      }
+      updateData.ownership = ownership;
+    }
+
+    await this.actor.update(updateData);
+
+    // Pre-create the personal note journal now so the player doesn't see a blank
+    // "unavailable" state the first time they open the Notes tab.
+    if (actor?.type === 'character' && game.user.isGM) {
+      await this._resolveNoteJournal('personal', actor.id);
+    }
   }
 
   /**
    * Remove an actor UUID from the party member list, with a confirmation dialog.
+   * When removing a character, moves their personal note journal out of the hidden folder.
    * @param {string} uuid
    * @private
    */
@@ -600,18 +871,32 @@ export class VagabondPartySheet extends VagabondActorSheet {
       content: `<p>${game.i18n.format('VAGABOND.Actor.Party.Card.RemoveConfirm', { name })}</p>`,
     });
     if (!confirmed) return;
+
+    // Orphan the character's personal note journal so the GM can find it in the sidebar
+    if (actor?.type === 'character') {
+      const noteUuid = this.document.getFlag('vagabond', `notes.personal.${actor.id}`);
+      if (noteUuid) {
+        try {
+          const journal = await fromUuid(noteUuid);
+          if (journal) await journal.update({ folder: null });
+        } catch { /* journal may have been deleted already */ }
+        await this.document.unsetFlag('vagabond', `notes.personal.${actor.id}`);
+      }
+    }
+
     const members = (this.actor.system.members ?? []).filter(u => u !== uuid);
     await this.actor.update({ 'system.members': members });
   }
 
   /**
-   * Open a dialog to pick an actor and add them as a party member.
+   * Open a dialog to pick an actor (character or NPC) and add them as a party member.
    * @private
    */
   async _openMemberPicker() {
     const currentMembers = new Set(this.actor.system.members ?? []);
+    // Only list world actors (not compendium actors)
     const available = game.actors
-      .filter(a => a.type === 'character' && !currentMembers.has(a.uuid))
+      .filter(a => (a.type === 'character' || a.type === 'npc') && !currentMembers.has(a.uuid))
       .sort((a, b) => a.name.localeCompare(b.name));
 
     if (!available.length) {
@@ -620,7 +905,12 @@ export class VagabondPartySheet extends VagabondActorSheet {
     }
 
     const options = available
-      .map(a => `<option value="${a.uuid}">${a.name}</option>`)
+      .map(a => {
+        const typeLabel = a.type === 'npc'
+          ? game.i18n.localize('TYPES.Actor.npc')
+          : game.i18n.localize('TYPES.Actor.character');
+        return `<option value="${a.uuid}">[${typeLabel}] ${a.name}</option>`;
+      })
       .join('');
 
     const uuid = await foundry.applications.api.DialogV2.wait({
@@ -629,7 +919,7 @@ export class VagabondPartySheet extends VagabondActorSheet {
         icon: 'fas fa-user-plus',
       },
       content: `<div class="form-group">
-        <label>${game.i18n.localize('VAGABOND.Actor.Party.Card.PickCharacter')}</label>
+        <label>${game.i18n.localize('VAGABOND.Actor.Party.Card.PickMember')}</label>
         <select name="actor-uuid" autofocus>${options}</select>
       </div>`,
       buttons: [{
@@ -642,6 +932,33 @@ export class VagabondPartySheet extends VagabondActorSheet {
     });
 
     if (uuid) await this._addMember(uuid);
+  }
+
+  /**
+   * Attach debounced change listeners to journal-backed prose-mirror editors
+   * (GM notes and personal notes). These editors don't use collaborate mode to
+   * avoid timing issues with freshly-created journal pages and form conflicts.
+   * @param {AbortSignal} signal
+   * @private
+   */
+  _bindNotesActions(signal) {
+    for (const editor of this.element.querySelectorAll('prose-mirror[data-page-uuid]')) {
+      const pageUuid = editor.dataset.pageUuid;
+      if (!pageUuid) continue;
+
+      const doSave = async () => {
+        try {
+          const page = await fromUuid(pageUuid);
+          if (page) await page.update({ 'text.content': editor.value ?? '' });
+        } catch (err) {
+          console.error('Vagabond | Notes: failed to save note:', err);
+        }
+      };
+
+      // Debounced save while typing (auto-save after a brief pause)
+      const debouncedSave = foundry.utils.debounce(doSave, 500);
+      editor.addEventListener('change', debouncedSave, { signal });
+    }
   }
 
   /**
@@ -700,395 +1017,6 @@ export class VagabondPartySheet extends VagabondActorSheet {
       });
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Vehicle Tab Actions
-  // ─────────────────────────────────────────────────────────────────────────
-
-  /**
-   * Bind all vehicle tab interactive elements.
-   * @param {AbortSignal} signal
-   * @private
-   */
-  _bindVehicleActions(signal) {
-    // Add part
-    this.element.querySelectorAll('[data-action="addPart"]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        await this.actor.createEmbeddedDocuments('Item', [{
-          name: game.i18n.localize('VAGABOND.Actor.Party.Vehicle.NewPart'),
-          type: 'vehiclePart',
-        }]);
-      }, { signal });
-    });
-
-    // Edit part (open item sheet)
-    this.element.querySelectorAll('[data-action="editPart"]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const partId = btn.closest('[data-part-id]')?.dataset.partId;
-        if (!partId) return;
-        const item = this.actor.items.get(partId);
-        item?.sheet.render(true);
-      }, { signal });
-    });
-
-    // Delete part
-    this.element.querySelectorAll('[data-action="deletePart"]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const partId = btn.closest('[data-part-id]')?.dataset.partId;
-        if (!partId) return;
-        const item = this.actor.items.get(partId);
-        if (!item) return;
-        const confirmed = await foundry.applications.api.DialogV2.confirm({
-          window: { title: `${game.i18n.localize('VAGABOND.Actor.Party.Vehicle.DeletePart')}: ${item.name}` },
-          content: `<p>${game.i18n.format('VAGABOND.Actor.Party.Vehicle.DeletePartConfirm', { name: item.name })}</p>`,
-        });
-        if (confirmed) await item.delete();
-      }, { signal });
-    });
-
-    // Inline part field editing (HP, armor, attackModifier, damageFormula, damageType)
-    this.element.querySelectorAll('[data-part-field]').forEach(input => {
-      input.addEventListener('change', async () => {
-        const partId = input.closest('[data-part-id]')?.dataset.partId;
-        const field = input.dataset.partField;
-        if (!partId || !field) return;
-        const item = this.actor.items.get(partId);
-        if (!item) return;
-        const value = input.type === 'number' ? Number(input.value) : input.value;
-        await item.update({ [field]: value });
-      }, { signal });
-    });
-
-    // HP heart — left click: -1 (Shift: -10), right click: +1 (Shift: +10)
-    this.element.querySelectorAll('.part-hp-clicker').forEach(icon => {
-      icon.addEventListener('click', async (e) => {
-        const partId = icon.closest('[data-part-id]')?.dataset.partId;
-        if (!partId) return;
-        const item = this.actor.items.get(partId);
-        if (!item) return;
-        const delta = e.shiftKey ? -10 : -1;
-        const newVal = Math.max(0, item.system.health.value + delta);
-        await item.update({ 'system.health.value': newVal });
-      }, { signal });
-      icon.addEventListener('contextmenu', async (e) => {
-        e.preventDefault();
-        const partId = icon.closest('[data-part-id]')?.dataset.partId;
-        if (!partId) return;
-        const item = this.actor.items.get(partId);
-        if (!item) return;
-        const delta = e.shiftKey ? 10 : 1;
-        const newVal = Math.min(item.system.health.max, item.system.health.value + delta);
-        await item.update({ 'system.health.value': newVal });
-      }, { signal });
-    });
-
-    // Roll part damage directly (damage-only card, no attack roll)
-    // Use class selector rather than data-action to avoid ApplicationV2 interference.
-    // data-part-id is set directly on the <i> element in the template.
-    this.element.querySelectorAll('.part-roll-damage').forEach(icon => {
-      icon.addEventListener('click', async () => {
-        const partId = icon.dataset.partId;
-        if (!partId) return;
-        await this._rollPartDamage(partId);
-      }, { signal });
-    });
-
-    // Skill selector → live difficulty display.
-    // Difficulties are read directly from actor.system (the same source used by the
-    // character sheet template). The async IIFE resolves immediately for local actors
-    // already in the game.actors collection.
-    this.element.querySelectorAll('.crew-skill-select').forEach(select => {
-      // Change listener: update difficulty display and persist skill to item data.
-      select.addEventListener('change', async () => {
-        const skillKey = select.value;
-
-        // Update live difficulty display.
-        const span = select.closest('.part-crew-member')?.querySelector('.crew-skill-difficulty');
-        if (span) span.textContent = select._skillDifficulties?.[skillKey] ?? '–';
-
-        // Write the new skill into system.crew on the vehiclePart item.
-        // render:false prevents a double re-render (the updateItem hook will re-render the vehicle tab).
-        const partId = select.dataset.partId;
-        const crewUuid = select.dataset.actorUuid;
-        const part = this.actor.items.get(partId);
-        if (part && crewUuid) {
-          const crew = foundry.utils.deepClone(part.system.crew ?? []);
-          const entry = crew.find(e => e.uuid === crewUuid);
-          if (entry) {
-            entry.skill = skillKey;
-            await part.update({ 'system.crew': crew }, { render: false });
-          }
-        }
-      }, { signal });
-
-      // Build difficulty map and set initial value asynchronously.
-      (async () => {
-        const crewUuid = select.dataset.actorUuid;
-        if (!crewUuid) return;
-        const a = await fromUuid(crewUuid);
-        if (!a) return;
-        const sys = a.system;
-        const diffs = {};
-        for (const skillKey of Object.keys(CONFIG.VAGABOND.weaponSkills)) {
-          const sk = sys.skills?.[skillKey]
-                  ?? sys.saves?.[skillKey];
-          if (sk?.difficulty !== undefined) diffs[skillKey] = sk.difficulty;
-        }
-        select._skillDifficulties = diffs;
-        const span = select.closest('.part-crew-member')?.querySelector('.crew-skill-difficulty');
-        if (span) span.textContent = diffs[select.value] ?? '–';
-      })();
-    });
-
-    // Attack with part — per crew member
-    // Shift = favored, Ctrl = hindered (same as character sheet rolls)
-    this.element.querySelectorAll('[data-action="attackPart"]').forEach(btn => {
-      btn.addEventListener('click', async (event) => {
-        const partId = btn.dataset.partId;
-        const crewUuid = btn.dataset.actorUuid;
-        if (!partId || !crewUuid) return;
-        // Read the skill selector in the same crew row
-        const row = btn.closest('.part-crew-member');
-        const skillKey = row?.querySelector('.crew-skill-select')?.value ?? 'melee';
-        // Resolve crew actor now so we can read their favorHinder state
-        const crewActor = await fromUuid(crewUuid);
-        if (!crewActor) return;
-        const { VagabondRollBuilder } = await import('../helpers/roll-builder.mjs');
-        const systemFavorHinder = crewActor.system.favorHinder || 'none';
-        const favorHinder = VagabondRollBuilder.calculateEffectiveFavorHinder(
-          systemFavorHinder,
-          event.shiftKey,
-          event.ctrlKey
-        );
-        await this._attackWithPart(partId, crewActor, skillKey, favorHinder);
-      }, { signal });
-    });
-
-    // Add crew member to a part
-    this.element.querySelectorAll('[data-action="addCrew"]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const partId = btn.dataset.partId;
-        if (!partId) return;
-        await this._openCrewPicker(partId);
-      }, { signal });
-    });
-
-    // Open cargo container item sheet
-    this.element.querySelectorAll('[data-action="openCargo"]').forEach(el => {
-      el.addEventListener('click', () => {
-        const itemId = el.closest('[data-item-id]')?.dataset.itemId;
-        if (!itemId) return;
-        const item = this.actor.items.get(itemId);
-        item?.sheet.render(true);
-      }, { signal });
-    });
-
-    // Add a new container to cargo
-    this.element.querySelectorAll('[data-action="addCargo"]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        await this.actor.createEmbeddedDocuments('Item', [{
-          name: game.i18n.localize('VAGABOND.Actor.Party.Vehicle.NewContainer'),
-          type: 'container',
-        }]);
-      }, { signal });
-    });
-
-    // Delete a cargo container (with confirmation)
-    this.element.querySelectorAll('[data-action="deleteCargo"]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const itemId = btn.closest('[data-item-id]')?.dataset.itemId;
-        if (!itemId) return;
-        const item = this.actor.items.get(itemId);
-        if (!item) return;
-        const confirmed = await foundry.applications.api.DialogV2.confirm({
-          window: { title: `${game.i18n.localize('VAGABOND.Actor.Party.Vehicle.DeleteCargo')}: ${item.name}` },
-          content: `<p>${game.i18n.format('VAGABOND.Actor.Party.Vehicle.DeleteCargoConfirm', { name: item.name })}</p>`,
-        });
-        if (confirmed) await item.delete();
-      }, { signal });
-    });
-
-    // Remove crew member from a part
-    this.element.querySelectorAll('[data-action="removeCrew"]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const partId = btn.dataset.partId;
-        const uuid = btn.dataset.actorUuid;
-        if (!partId || !uuid) return;
-        await this._removeCrewMember(partId, uuid);
-      }, { signal });
-    });
-  }
-
-  /**
-   * Open a dialog to pick a party member and add them as crew on a vehicle part.
-   * @param {string} partId
-   * @private
-   */
-  async _openCrewPicker(partId) {
-    const item = this.actor.items.get(partId);
-    if (!item) return;
-
-    const currentCrew = new Set((item.system.crew ?? []).map(e => e.uuid));
-    const available = game.actors
-      .filter(a => a.type === 'character' && !currentCrew.has(a.uuid))
-      .sort((a, b) => a.name.localeCompare(b.name));
-
-    if (!available.length) {
-      ui.notifications.info(game.i18n.localize('VAGABOND.Actor.Party.Vehicle.NoCrewAvailable'));
-      return;
-    }
-
-    const options = available.map(a => `<option value="${a.uuid}">${a.name}</option>`).join('');
-    const uuid = await foundry.applications.api.DialogV2.wait({
-      window: {
-        title: game.i18n.localize('VAGABOND.Actor.Party.Vehicle.AddCrew'),
-        icon: 'fas fa-user-plus',
-      },
-      content: `<div class="form-group">
-        <label>${game.i18n.localize('VAGABOND.Actor.Party.Card.PickCharacter')}</label>
-        <select name="actor-uuid" autofocus>${options}</select>
-      </div>`,
-      buttons: [{
-        action: 'add',
-        label: game.i18n.localize('VAGABOND.Actor.Party.Card.Add'),
-        icon: 'fas fa-plus',
-        callback: (_ev, _btn, dialog) => dialog.element.querySelector('[name="actor-uuid"]').value,
-      }],
-      close: () => null,
-    });
-
-    if (uuid) {
-      const crew = foundry.utils.deepClone(item.system.crew ?? []);
-      if (!crew.some(e => e.uuid === uuid)) {
-        crew.push({ uuid, skill: 'melee' });
-        await item.update({ 'system.crew': crew });
-      }
-    }
-  }
-
-  /**
-   * Remove a crew member UUID from a vehicle part.
-   * @param {string} partId
-   * @param {string} uuid
-   * @private
-   */
-  async _removeCrewMember(partId, uuid) {
-    const item = this.actor.items.get(partId);
-    if (!item) return;
-    const crew = (item.system.crew ?? []).filter(e => e.uuid !== uuid);
-    await item.update({ 'system.crew': crew });
-  }
-
-  /**
-   * Roll damage for a vehicle part and post a damage-only chat card.
-   * Used when the player clicks the damage icon directly (no attack roll).
-   * @param {string} partId
-   * @private
-   */
-  async _rollPartDamage(partId) {
-    try {
-      const part = this.actor.items.get(partId);
-      if (!part) return;
-
-      const { VagabondChatCard } = globalThis.vagabond.utils;
-      const base = part.system.damageFormula || '1d6';
-      const damageRoll = new Roll(base);
-      await damageRoll.evaluate();
-
-      const targetsAtRollTime = TargetHelper.captureCurrentTargets();
-
-      await VagabondChatCard.createActionCard({
-        actor: this.actor,
-        item: part,
-        title: part.name,
-        subtitle: game.i18n.localize('VAGABOND.Actor.Party.Vehicle.Damage'),
-        damageRoll,
-        damageFormula: base,
-        damageType: part.system.damageType || 'physical',
-        hasDefenses: false,
-        targetsAtRollTime,
-      });
-    } catch(err) {
-      console.error('VagabondPartySheet | _rollPartDamage failed:', err);
-      ui.notifications.error('Failed to roll part damage. See console for details.');
-    }
-  }
-
-  /**
-   * Roll a vehicle part attack for a specific crew member using a chosen weapon skill.
-   * Flow: d20 + attackModifier ≥ weaponSkill.difficulty → hit → roll damage.
-   * @param {string} partId        - ID of the vehiclePart item
-   * @param {Actor} crewActor      - Resolved crew member actor
-   * @param {string} skillKey      - Weapon skill key: 'melee' | 'brawl' | 'finesse' | 'ranged'
-   * @param {string} favorHinder   - 'favor' | 'hinder' | 'none'
-   * @private
-   */
-  async _attackWithPart(partId, crewActor, skillKey, favorHinder = 'none') {
-    const part = this.actor.items.get(partId);
-    if (!part) return;
-
-    const { VagabondChatCard } = globalThis.vagabond.utils;
-
-    // Read difficulty directly from actor.system — prepareDerivedData() has already
-    // computed it (trained, stat totals, perk bonuses) and stored it on the object.
-    // This is the same source used by the character sheet template for display.
-    // config.weaponSkills covers weapon skills (melee/brawl/finesse/ranged)
-    // AND regular skills (influence, arcana, etc.) — check all three namespaces.
-    const sys = crewActor.system;
-    const skill = sys.skills?.[skillKey]
-               ?? sys.saves?.[skillKey];
-    if (!skill) {
-      ui.notifications.warn(`${crewActor.name} has no "${skillKey}" skill data.`);
-      return;
-    }
-
-    const difficulty = skill.difficulty ?? 20;
-    const attackModifier = part.system.attackModifier ?? 0;
-    // critNumber is a schema-defined field, always safe to read from system directly
-    const critNumber = crewActor.system.critNumber ?? 20;
-
-    // Build attack roll formula — attackModifier shifts the roll up or down.
-    // VagabondRollBuilder handles favor/hinder dice and custom dice appearance.
-    const { VagabondRollBuilder } = await import('../helpers/roll-builder.mjs');
-    const baseFormula = attackModifier !== 0 ? `1d20 + ${attackModifier}` : '1d20';
-    const roll = await VagabondRollBuilder.buildAndEvaluateD20(crewActor, favorHinder, baseFormula);
-
-    // Check hit and crit using the natural d20 result
-    const naturalResult = roll.dice[0]?.results?.[0]?.result ?? roll.total;
-    const isCritical = naturalResult >= critNumber;
-    const isHit = roll.total >= difficulty;
-
-    // Roll damage respecting the game settings (rollDamageWithCheck, alwaysRollDamage)
-    let damageRoll = null;
-    if (VagabondDamageHelper.shouldRollDamage(isHit)) {
-      const base = part.system.damageFormula || '1d6';
-      const damageFormula = isCritical ? `(${base}) + (${base})` : base;
-      damageRoll = new Roll(damageFormula);
-      await damageRoll.evaluate();
-    }
-
-    // Skill label for the chat card tag
-    const skillLabelKey = CONFIG.VAGABOND.weaponSkills[skillKey] ?? `VAGABOND.WeaponSkills.${skillKey}`;
-    const skillLabel = game.i18n.localize(skillLabelKey);
-
-    // Capture targeted tokens at roll time
-    const targetsAtRollTime = TargetHelper.captureCurrentTargets();
-
-    await VagabondChatCard.createActionCard({
-      actor: crewActor,
-      item: part,
-      title: part.name,
-      subtitle: `${crewActor.name} · ${skillLabel}`,
-      rollData: { roll, difficulty, isHit, isCritical },
-      damageRoll,
-      damageFormula: part.system.damageFormula || '1d6',
-      damageType: part.system.damageType || 'physical',
-      tags: [{ label: skillLabel, cssClass: 'tag-skill' }],
-      hasDefenses: true,
-      attackType: 'melee',
-      targetsAtRollTime,
-    });
-  }
-
   /** @override */
   async close(options) {
     this._listenerController?.abort();
@@ -1097,17 +1025,15 @@ export class VagabondPartySheet extends VagabondActorSheet {
       Hooks.off('updateActor', this._actorUpdateHookId);
       this._actorUpdateHookId = null;
     }
-    if (this._itemHookIds) {
-      Hooks.off('createItem', this._itemHookIds.createItem);
-      Hooks.off('updateItem', this._itemHookIds.updateItem);
-      Hooks.off('deleteItem', this._itemHookIds.deleteItem);
-      this._itemHookIds = null;
-    }
     if (this._effectHookIds) {
       Hooks.off('createActiveEffect', this._effectHookIds.create);
       Hooks.off('updateActiveEffect', this._effectHookIds.update);
       Hooks.off('deleteActiveEffect', this._effectHookIds.delete);
       this._effectHookIds = null;
+    }
+    if (this._notesHookId) {
+      Hooks.off('updateJournalEntryPage', this._notesHookId);
+      this._notesHookId = null;
     }
     return super.close(options);
   }

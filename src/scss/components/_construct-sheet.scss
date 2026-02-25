@@ -1,0 +1,607 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Construct Sheet — construct tab, part cards, hold
+// Imported inside `.vagabond {}` in vagabond.scss — do NOT add an outer wrapper
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Construct Header ─────────────────────────────────────────────────────
+.construct-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px;
+  border-bottom: 2px solid $c-black;
+  background-image: url('../assets/images/sheets/tabNavBG.webp');
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  .construct-portrait {
+    width: 110px;
+    height: 110px;
+    object-fit: cover;
+    object-position: top center;
+    border-radius: 10px;
+    border: 2px solid $c-yellow;
+    flex-shrink: 0;
+    background-color: $c-black;
+    filter: drop-shadow(2px 2px 1px $c-inset-1);
+    cursor: pointer;
+  }
+
+  .construct-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .construct-name {
+    font-family: $font-title;
+    font-size: 1.5em;
+    color: $c-white;
+    border-bottom: none;
+    width: 100%;
+    line-height: 2;
+    background-image: url('../assets/images/sheets/titleBG.webp');
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    filter: drop-shadow(2px 2px 1px $c-inset-1);
+    text-shadow:
+      2px 2px 0 $c-black,
+      -2px 2px 0 $c-black,
+      -2px -2px 0 $c-black,
+      2px -2px 0 $c-black;
+  }
+
+  .construct-type {
+    font-family: $font-title;
+    font-size: 1.3em;
+    color: $c-yellow;
+    width: 100%;
+  }
+
+  .construct-speeds {
+    display: flex;
+    justify-content: space-around;
+    gap: 8px;
+    margin-top: 2px;
+    text-shadow:
+      2px 2px 0 $c-dark-bluey,
+      -2px 2px 0 $c-dark-bluey,
+      -2px -2px 0 $c-dark-bluey,
+      2px -2px 0 $c-dark-bluey;
+    background: $c-tan-lite;
+    padding: 4px 8px;
+    border-radius: 8px;
+  }
+
+  .construct-speed-stat {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+
+    .speed-label {
+      font-family: $font-title;
+      font-size: 1.3em;
+      color: $c-yellow;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .speed-unit {
+      font-family: $font-title;
+      font-size: 0.9em;
+      color: $c-yellow;
+      margin-left: -5px;
+      text-align: left;
+    }
+
+    .speed-input {
+      field-sizing: content;
+      min-width: 1ch;
+      font-family: $font-number;
+      font-size: 1.3em;
+      text-align: left;
+      text-shadow:
+        1px 1px 0 $c-dark-bluey,
+        -1px 1px 0 $c-dark-bluey,
+        -1px -1px 0 $c-dark-bluey,
+        1px -1px 0 $c-dark-bluey;
+    }
+
+    input { color: $c-yellow; }
+  }
+}
+
+// ── Section header (shared by Parts and Hold) ──────────────────────────
+.construct-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-bottom: 1px solid $c-tan-lite;
+  background: $c-inset-2;
+
+  .construct-section-title {
+    font-family: $font-title;
+    font-size: 1.2em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $c-muted;
+    margin: 0;
+  }
+
+  .construct-add-part {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    background: $c-bg2;
+    color: $c-white;
+    border: none;
+    border-radius: 4px;
+    font-family: $font-title;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: opacity 0.15s;
+
+    &:hover { opacity: 0.8; }
+    i { font-size: 1.0em; }
+  }
+}
+
+// ── Empty state ────────────────────────────────────────────────────────
+.construct-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 20px;
+  color: $c-muted;
+  text-align: center;
+  font-family: $font-title;
+
+  p { margin: 4px 0; }
+  .hint { font-size: 12px; opacity: 0.7; }
+}
+
+// ── Parts grid ─────────────────────────────────────────────────────────
+.construct-parts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  padding: 10px;
+}
+
+// ── Construct Part Card ────────────────────────────────────────────────
+// Note: inner part-* classes are shared with party-sheet vehicle styles
+.construct-part-card {
+  background: $bg-paper;
+  background-repeat: $bg-repeat;
+  background-size: $bg-size;
+  border: 1px solid $c-tan-lite;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+
+  .part-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    background: $c-inset-2;
+    border-bottom: 1px solid $c-tan-lite;
+    position: relative;
+  }
+
+  .part-icon {
+    width: 28px;
+    height: 28px;
+    object-fit: cover;
+    border-radius: 3px;
+    border: 1px solid $c-tan-lite;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color 0.15s;
+    &:hover { border-color: $c-bg2; }
+  }
+
+  .part-name {
+    flex: 1;
+    font-family: $font-title;
+    font-size: 1.2em;
+    color: $c-text-1;
+    margin: 0;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    &:hover { text-decoration: underline; }
+  }
+
+  .part-delete-btn {
+    background: transparent;
+    border: none;
+    color: $c-muted;
+    font-size: 1.0em;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: color 0.15s, background 0.15s;
+    &:hover { color: $c-red; background: rgba(157, 0, 0, 0.1); }
+  }
+
+  // HP bar row
+  .part-hp-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 8px;
+    border-bottom: 1px solid $c-tan-lite;
+    font-size: 1.2em;
+  }
+
+  .part-hp-icon {
+    font-size: 1.0em;
+    color: $c-text-1;
+    flex-shrink: 0;
+    margin-right: 8px;
+  }
+
+  .part-hp-clicker {
+    cursor: pointer;
+    transition: color 0.15s, transform 0.1s;
+    &:hover { color: #ff8f83; transform: scale(1.2); }
+  }
+
+  .part-armor-stat {
+    margin-right: 4px;
+    padding-right: 6px;
+    border-right: 1px solid $c-tan-lite;
+    flex-shrink: 0;
+  }
+
+  .part-sep { color: $c-tan; font-size: 1.1em; font-family: $font-title; }
+
+  .part-armor-input {
+    width: 52px;
+    text-align: center;
+    font-family: $font-title;
+  }
+
+  .part-hp-bg {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    background: rgba(0,0,0,0.08);
+    border: 1px solid rgba(0,0,0,0.25);
+    font-family: $font-title;
+    font-size: 1.2em;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: var(--hp-fill, 0%);
+      background: linear-gradient(102deg,
+        $c-text-2 0%,
+        $c-text-2 55%,
+      );
+      border-radius: 3px;
+      z-index: 0;
+      transition: width 0.3s ease;
+    }
+
+    > * { position: relative; z-index: 1; }
+  }
+
+  .part-hp-input {
+    field-sizing: content;
+    min-width: 1ch;
+    width: auto;
+    padding: 0;
+    text-align: center;
+    font-family: $font-title;
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    -moz-appearance: textfield;
+  }
+
+  // Stats row
+  .part-stats-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    border-bottom: 1px solid $c-tan-lite;
+  }
+
+  .part-stat {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 1.2em;
+
+    .part-stat-icon { font-size: 1.0em; color: $c-muted; }
+    .part-roll-damage {
+      cursor: pointer;
+      transition: color 0.15s;
+      &:hover { color: $c-bg2; }
+    }
+    .part-sign { color: $c-muted; font-size: 1.2em; }
+  }
+
+  .part-stat-input {
+    width: 38px;
+    font-family: $font-title;
+    font-size: 1.2em;
+    text-align: center;
+  }
+
+  .part-formula-stat {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .part-formula-input {
+    flex: 1;
+    min-width: 50px;
+    font-family: $font-title;
+    font-size: 1.2em;
+  }
+
+  .part-damage-type {
+    font-family: $font-title;
+    font-size: 1.2em;
+    border: none;
+    border-bottom: 1px solid $c-tan-lite;
+    background: transparent;
+    color: $c-text-1;
+    cursor: pointer;
+    padding: 1px 2px;
+    width: auto;
+    flex-shrink: 0;
+  }
+
+  // Part field shared input styles
+  .part-field {
+    border: none;
+    border-bottom: 1px solid transparent;
+    background: transparent;
+    color: $c-text-2;
+    border-radius: 0;
+    transition: border-color 0.15s;
+
+    &:focus { border-bottom-color: $c-bg2; outline: none; }
+  }
+
+  .hp-bar-text {
+    color: $c-yellow;
+    text-shadow:
+      1px 1px 0 $c-black,
+      -1px 1px 0 $c-black,
+      -1px -1px 0 $c-black,
+      1px -1px 0 $c-black;
+  }
+
+  // Crew section
+  .part-crew-section {
+    padding: 5px 8px;
+  }
+
+  .part-crew-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .part-crew-label {
+    font-family: $font-title;
+    font-size: 1.0em;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $c-muted;
+  }
+
+  .part-add-crew {
+    background: transparent;
+    border: 1px solid $c-tan-lite;
+    border-radius: 3px;
+    color: $c-muted;
+    font-size: 1.0em;
+    padding: 1px 5px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+
+    &:hover { color: $c-bg2; border-color: $c-bg2; }
+  }
+
+  .part-crew-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .part-crew-member {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 0;
+
+    // NPC crew: no skill selector column, name takes remaining space
+    &.npc-crew {
+      .crew-name { flex: 1; }
+    }
+
+    .crew-portrait {
+      width: 36px;
+      height: 36px;
+      object-fit: cover;
+      object-position: top center;
+      border-radius: 2px;
+      border: 1px solid $c-tan-lite;
+      flex-shrink: 0;
+    }
+
+    .crew-name {
+      flex: 1;
+      font-family: $font-title;
+      font-size: 1.2em;
+      color: $c-text-1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+
+    .crew-skill-select {
+      font-family: $font-title;
+      font-size: 1.0em;
+      border: none;
+      border-bottom: 1px solid $c-tan-lite;
+      background: transparent;
+      color: $c-text-1;
+      cursor: pointer;
+      padding: 1px 2px;
+      max-width: 64px;
+      flex-shrink: 0;
+
+      &:focus { outline: none; border-bottom-color: $c-bg2; }
+    }
+
+    .crew-skill-difficulty {
+      font-family: $font-title;
+      font-size: 1.1em;
+      font-weight: bold;
+      color: $c-text-1;
+      min-width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .crew-attack-btn {
+      border: none;
+      border-radius: 3px;
+      background: none;
+      color: $c-text-2;
+      font-size: 1.3em;
+      cursor: pointer;
+      padding: 2px 5px;
+      flex-shrink: 0;
+      transition: opacity 0.15s;
+      &:hover { opacity: 0.8; }
+    }
+
+    .crew-remove-btn {
+      background: transparent;
+      border: none;
+      color: $c-muted;
+      font-size: 9px;
+      cursor: pointer;
+      padding: 1px 3px;
+      border-radius: 2px;
+      transition: color 0.15s;
+      flex-shrink: 0;
+      &:hover { color: $c-red; }
+    }
+  }
+
+  .part-crew-empty {
+    font-family: $font-title;
+    font-size: 1.0em;
+    color: $c-muted;
+    text-align: center;
+    padding: 4px 0;
+    border: 1px dashed $c-tan-lite;
+    border-radius: 3px;
+    margin: 2px 0;
+  }
+}
+
+// ── Hold ───────────────────────────────────────────────────────────────────
+.construct-hold-section {
+  padding-bottom: 8px;
+
+  .construct-add-hold {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    background: $c-bg2;
+    color: $c-white;
+    border: none;
+    border-radius: 4px;
+    font-family: $font-title;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: opacity 0.15s;
+
+    &:hover { opacity: 0.8; }
+    i { font-size: 1.0em; }
+  }
+}
+
+.construct-hold-hint {
+  margin: 4px 10px 6px;
+  font-size: 12px;
+  opacity: 0.7;
+  color: $c-muted;
+}
+
+.construct-hold-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 10px;
+}
+
+.construct-hold-card {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: $c-inset-2;
+  border: 1px solid $c-tan-lite;
+  border-radius: 4px;
+
+  .hold-icon {
+    width: 28px;
+    height: 28px;
+    object-fit: cover;
+    background: $c-black;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .hold-name {
+    font-family: $font-title;
+    font-size: 1.1em;
+    color: $c-text-1;
+  }
+
+  .hold-delete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: $c-muted;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 3px;
+    margin-left: 2px;
+    transition: color 0.15s, background 0.15s;
+
+    &:hover { color: $c-red; background: rgba(157, 0, 0, 0.1); }
+    i { font-size: 0.85em; }
+  }
+}

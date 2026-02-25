@@ -1,0 +1,126 @@
+{{! Construct Tab — construct stats + parts + hold }}
+<section
+  class="tab construct scrollable {{tab.cssClass}}"
+  data-group="primary"
+  data-tab="construct"
+>
+
+  {{! ── Construct Header ──────────────────────────────────────────────────── }}
+  <div class="construct-header">
+    <img
+      class="construct-portrait"
+      src="{{actor.img}}"
+      alt="{{actor.name}}"
+      data-edit="img"
+      data-action="onEditImage"
+      data-tooltip="{{actor.name}}"
+    >
+
+    <div class="construct-info">
+      <input
+        type="text"
+        name="name"
+        value="{{actor.name}}"
+        class="construct-name"
+        placeholder="{{localize 'VAGABOND.Actor.Construct.NamePlaceholder'}}"
+      >
+      <input
+        type="text"
+        name="system.type"
+        value="{{system.type}}"
+        class="construct-type"
+        placeholder="{{localize 'VAGABOND.Actor.Construct.TypePlaceholder'}}"
+      >
+
+      <div class="construct-speeds">
+        <div class="construct-speed-stat">
+          <span class="speed-label">{{localize 'VAGABOND.Actor.Character.FIELDS.combat.speed.base.label'}}: </span>
+          <input type="number" name="system.speed" value="{{system.speed}}" class="speed-input" min="0">
+          <span class="speed-unit">{{localize 'VAGABOND.UI.Units.Feet'}}</span>
+        </div>
+        <div class="construct-speed-stat">
+          <span class="speed-label">{{localize 'VAGABOND.Actor.Character.FIELDS.combat.speed.crawl.label'}}: </span>
+          <input type="number" name="system.crawl" value="{{system.crawl}}" class="speed-input" min="0">
+          <span class="speed-unit">{{localize 'VAGABOND.UI.Units.Feet'}}</span>
+        </div>
+        <div class="construct-speed-stat">
+          <span class="speed-label">{{localize 'VAGABOND.Actor.Character.FIELDS.combat.speed.travel.label'}}: </span>
+          <input type="number" name="system.travel" value="{{system.travel}}" class="speed-input" min="0">
+          <span class="speed-unit">{{localize 'VAGABOND.UI.Units.Miles'}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{! ── Construct Parts ─────────────────────────────────────────────────────── }}
+  <div class="construct-parts-section">
+    <div class="construct-section-header">
+      <h3 class="construct-section-title">{{localize 'VAGABOND.Actor.Construct.Parts'}}</h3>
+      <button
+        type="button"
+        class="construct-add-part"
+        data-action="addPart"
+        data-tooltip="{{localize 'VAGABOND.Actor.Construct.AddPart'}}"
+      >
+        <i class="fas fa-plus"></i>
+        {{localize 'VAGABOND.Actor.Construct.AddPart'}}
+      </button>
+    </div>
+
+    {{#if constructParts.length}}
+      <div class="construct-parts-grid">
+        {{#each constructParts}}
+          {{> "systems/vagabond/templates/construct/construct-part-card.hbs" config=../config}}
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="construct-empty-state">
+        <p>{{localize 'VAGABOND.Actor.Construct.NoParts'}}</p>
+        <p class="hint">{{localize 'VAGABOND.Actor.Construct.NoPartsHint'}}</p>
+      </div>
+    {{/if}}
+  </div>
+
+  {{! ── Hold ────────────────────────────────────────────────────────────── }}
+  <div class="construct-hold-section">
+    <div class="construct-section-header">
+      <h3 class="construct-section-title">{{localize 'VAGABOND.Actor.Construct.Hold'}}</h3>
+      <button
+        type="button"
+        class="construct-add-hold"
+        data-action="addHold"
+        data-tooltip="{{localize 'VAGABOND.Actor.Construct.AddHold'}}"
+      >
+        <i class="fas fa-plus"></i>
+        {{localize 'VAGABOND.Actor.Construct.AddHold'}}
+      </button>
+    </div>
+    <p class="construct-hold-hint">{{localize 'VAGABOND.Actor.Construct.HoldHint'}}</p>
+
+    {{#if hold.length}}
+      <div class="construct-hold-cards">
+        {{#each hold}}
+          <div class="construct-hold-card" data-item-id="{{id}}">
+            <img
+              class="hold-icon clickable"
+              src="{{img}}"
+              alt="{{name}}"
+              data-action="openHold"
+              data-tooltip="{{localize 'VAGABOND.Actor.Construct.OpenHold'}}"
+            >
+            <span class="hold-name clickable" data-action="openHold">{{name}}</span>
+            <button
+              type="button"
+              class="hold-delete"
+              data-action="deleteHold"
+              data-tooltip="{{localize 'VAGABOND.Actor.Construct.DeleteHold'}}"
+            >
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        {{/each}}
+      </div>
+    {{/if}}
+  </div>
+
+</section>

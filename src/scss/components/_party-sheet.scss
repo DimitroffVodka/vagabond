@@ -52,6 +52,121 @@
   margin-left: 1px;
 }
 
+// ── Party Header ─────────────────────────────────────────────────────────────
+.party-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  background-image: url('../assets/images/sheets/tabNavBG.webp');
+  background-repeat: no-repeat;
+  background-size: cover;
+  border-bottom: 3px solid $c-black;
+}
+
+.party-portrait {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  object-position: top center;
+  background-color: $c-black;
+  border-radius: 4px;
+  border: 2px solid $c-yellow;
+  cursor: pointer;
+  flex-shrink: 0;
+  filter: drop-shadow(2px 2px 2px $c-inset-1);
+  transition: border-color 0.15s;
+
+  &:hover { border-color: $c-bg2; }
+}
+
+.party-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.party-name {
+    font-family: $font-title;
+    font-size: 1.5em !important;
+    color: $c-white !important;
+    border-bottom: none;
+    width: 100%;
+    line-height: 2;
+    background-image: url('../assets/images/sheets/titleBG.webp') !important;
+    background-repeat: no-repeat !important;
+    background-size: 100% 100% !important;
+    filter: drop-shadow(2px 2px 1px $c-inset-1);
+    text-shadow:
+      2px 2px 0 $c-black,
+      -2px 2px 0 $c-black,
+      -2px -2px 0 $c-black,
+      2px -2px 0 $c-black;
+}
+
+.party-type {
+  font-family: $font-title;
+  font-size: 1em;
+  color: $c-yellow;
+  width: 100%;
+  opacity: 0.9;
+}
+
+.party-speeds {
+    display: flex;
+    justify-content: space-around;
+    gap: 8px;
+    margin-top: 2px;
+    text-shadow:
+      2px 2px 0 $c-dark-bluey,
+      -2px 2px 0 $c-dark-bluey,
+      -2px -2px 0 $c-dark-bluey,
+      2px -2px 0 $c-dark-bluey;
+    background: $c-tan-lite;
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+
+.party-speed-stat {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+
+    .speed-label {
+      font-family: $font-title;
+      font-size: 1.3em;
+      color: $c-yellow;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .speed-unit {
+      font-family: $font-title;
+      font-size: 0.9em;
+      color: $c-yellow;
+      margin-left: -5px;
+      text-align: left;
+    }
+
+    .speed-input {
+      field-sizing: content;
+      min-width: 1ch;
+      font-family: $font-number;
+      font-size: 1.3em;
+      text-align: left;
+      text-shadow:
+        1px 1px 0 $c-dark-bluey,
+        -1px 1px 0 $c-dark-bluey,
+        -1px -1px 0 $c-dark-bluey,
+        1px -1px 0 $c-dark-bluey;
+    }
+
+    input { color: $c-yellow; }
+
+}
+
 // ── Add Member header ──────────────────────────────────────────────────────────
 .party-members-header {
   display: flex;
@@ -121,6 +236,49 @@
   grid-template-columns: repeat(clamp(2, var(--member-count, 2), 4), 1fr);
   gap: 15px;
   padding: 10px;
+}
+
+// ── Shared HP / Fatigue bar styles (used by both .party-member-card and .party-npc-card) ──
+.member-hp-bar-bg,
+.member-fatigue-bar-bg {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  overflow: hidden;
+  font-family: $font-title;
+  font-size: 1.05em;
+  background: rgba(0,0,0,0.08);
+  border: 1px solid rgba(0,0,0,0.4);
+  filter: drop-shadow(2px 2px 1px $c-inset-1);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    border-radius: 3px;
+    z-index: 0;
+    transition: width 0.3s ease;
+  }
+
+  i, span { position: relative; z-index: 1; }
+  i { font-size: 0.85em; }
+  span { color: $c-yellow; }
+}
+
+.member-hp-bar-bg {
+  flex: 1;
+  &::before { width: var(--hp-fill, 0%); background: rgba(238, 69, 50, 0.561); }
+  i { color: $c-yellow; }
+}
+
+.member-fatigue-bar-bg {
+  flex: 0 0 auto;
+  margin-left: auto;
+  &::before { width: var(--fatigue-fill, 0%); background: rgba(80, 80, 80, 0.35); }
+  i { color: $c-yellow; }
 }
 
 // ── Member card ────────────────────────────────────────────────────────────────
@@ -288,48 +446,6 @@
     gap: 4px;
   }
 
-  .member-hp-bar-bg,
-  .member-fatigue-bar-bg {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 2px 5px;
-    border-radius: 3px;
-    overflow: hidden;
-    font-family: $font-title;
-    font-size: 1.05em;
-    background: rgba(0,0,0,0.08);
-    border: 1px solid rgba(0,0,0,0.4);
-    filter: drop-shadow(2px 2px 1px $c-inset-1);
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; bottom: 0;
-      border-radius: 3px;
-      z-index: 0;
-      transition: width 0.3s ease;
-    }
-
-    i, span { position: relative; z-index: 1; }
-    i { font-size: 0.85em; }
-    span { color: $c-yellow; }
-  }
-
-  .member-hp-bar-bg {
-    flex: 1;
-    &::before { width: var(--hp-fill, 0%); background: rgba(238, 69, 50, 0.561); }
-    i { color: $c-yellow; }
-  }
-
-  .member-fatigue-bar-bg {
-    flex: 0 0 auto;
-    margin-left: auto;
-    &::before { width: var(--fatigue-fill, 0%); background: rgba(80, 80, 80, 0.35); }
-    i { color: $c-yellow; }
-  }
-
   // ── Div 2: Statuses ────────────────────────────────────────────────────────
   .member-statuses {
     display: flex;
@@ -474,11 +590,241 @@
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Vehicle Tab
+// NPC Member Card
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ── Vehicle Header ─────────────────────────────────────────────────────────
-.vehicle-header {
+.party-npc-card {
+  background: $bg-paper;
+  background-repeat: $bg-repeat;
+  background-size: $bg-size;
+  border: 2px solid $c-tan-lite;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+
+  // ── Header ──────────────────────────────────────────────────────────────
+  .npc-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px;
+    background-image: url('../assets/images/sheets/tabNavBG.webp');
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-bottom: 3px solid $c-black;
+    position: relative;
+    color: $c-yellow;
+    cursor: pointer;
+    transition: filter 0.12s;
+
+    &:hover { filter: brightness(1.1); }
+  }
+
+  .member-remove-btn {
+    position: absolute;
+    top: -13px;
+    right: -10px;
+    width: 18px;
+    height: 18px;
+    padding: 1px 10px;
+    border: none;
+    font-size: 0.85em;
+    cursor: pointer;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.9;
+    transition: opacity 0.15s, color 0.15s, background 0.15s;
+    z-index: 1;
+
+    &:hover { color: $c-white; background: rgba(198, 5, 5, 0.7); opacity: 1; }
+  }
+
+  .npc-portrait {
+    width: 54px;
+    height: 54px;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+    background-color: $c-black;
+    border-radius: 4px;
+    border: 1px solid $c-yellow;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color 0.15s;
+    filter: drop-shadow(2px 2px 1px $c-inset-1);
+
+    &:hover { border-color: $c-bg2; }
+  }
+
+  .npc-header-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .npc-name-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .npc-name {
+    flex: 1;
+    font-family: $font-title;
+    font-size: 1.2em;
+    color: $c-yellow;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+    text-shadow:
+      2px 2px 0 $c-black,
+      -2px 2px 0 $c-black,
+      -2px -2px 0 $c-black,
+      2px -2px 0 $c-black;
+  }
+
+  .npc-vitals-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+
+  .npc-hd {
+    font-family: $font-title;
+    font-size: 1.0em;
+    color: $c-yellow;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-weight: bold;
+  }
+
+  .npc-armor-stat {
+    font-family: $font-title;
+    font-size: 1.0em;
+    color: $c-yellow;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    i { font-size: 0.85em; margin-right: 2px; }
+  }
+
+  // ── Info rows (speed, senses) ────────────────────────────────────────────
+  .npc-info-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 3px 8px;
+    border-bottom: 1px solid $c-tan-lite;
+    font-family: $font-title;
+    font-size: 1.0em;
+    color: $c-text-1;
+  }
+
+  .npc-info-icon {
+    font-size: 0.9em;
+    color: $c-muted;
+    flex-shrink: 0;
+  }
+
+
+  // ── Resistance rows ──────────────────────────────────────────────────────
+  .npc-resist-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 3px 8px;
+    border-bottom: 1px solid $c-tan-lite;
+  }
+
+  .npc-resist-label {
+    font-family: $font-title;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $c-text-2;
+    flex-shrink: 0;
+  }
+
+  .npc-resist-values {
+    font-family: $font-title;
+    font-size: 0.9em;
+    color: $c-text-1;
+  }
+
+  // ── Action / Ability rows ────────────────────────────────────────────────
+  .npc-actions-row {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px 8px;
+    border-bottom: 1px solid $c-tan-lite;
+
+    &:last-child { border-bottom: none; }
+  }
+
+  .npc-section-label {
+    font-family: $font-title;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $c-text-2;
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+
+  .npc-action-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+  }
+
+  .npc-action-chip {
+    font-family: $font-title;
+    font-size: 1.0em;
+    padding: 1px 6px;
+    background: $c-inset-2;
+    border: 1px solid $c-tan-lite;
+    border-radius: 3px;
+    color: $c-text-1;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.12s, border-color 0.12s;
+
+    &:hover {
+      background: $c-bg2;
+      border-color: $c-bg2;
+      color: $c-white;
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Vehicle styles removed — vehicle/construct functionality is now on the
+// Construct actor type. See _construct-sheet.scss.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Keep this comment block so that future readers know where vehicle styles went.
+// The following CSS classes were removed:
+//   .vehicle-header, .vehicle-info, .vehicle-name, .vehicle-type,
+//   .vehicle-speeds, .vehicle-speed-stat, .vehicle-section-header,
+//   .vehicle-section-title, .vehicle-add-part, .vehicle-empty-state,
+//   .vehicle-parts-grid, .vehicle-part-card, .vehicle-cargo-section,
+//   .vehicle-cargo-hint, .vehicle-cargo-cards, .vehicle-cargo-card
+//
+// DEAD CODE (unreachable after this line) — placeholder so git diff stays clean.
+// This entire block is intentionally left empty.
+._vehicle-header-placeholder {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -1236,5 +1582,61 @@
 
     &:hover { color: $c-red; background: rgba(157, 0, 0, 0.1); }
     i { font-size: 0.85em; }
+  }
+}
+
+// ── Notes Tab ────────────────────────────────────────────────────────────────
+.tab.notes {
+  padding: 1rem;
+
+  .notes-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .notes-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .notes-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    padding: 0.75rem;
+  }
+
+  .notes-section-title {
+    font-family: $font-title;
+    font-size: 1em;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: $c-text-2;
+
+    .notes-player-name {
+      margin-left: auto;
+      font-size: 0.85em;
+      opacity: 0.7;
+    }
+  }
+
+  prose-mirror, .notes-content {
+    min-height: 120px;
+    font-size: 0.9em;
+  }
+
+  .notes-unavailable {
+    color: $c-muted;
+    font-style: italic;
+    font-size: 0.9em;
+    margin: 0;
   }
 }

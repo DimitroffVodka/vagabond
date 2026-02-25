@@ -12,6 +12,7 @@ import {
   VagabondCharacterSheet,
   VagabondNPCSheet,
   VagabondPartySheet,
+  VagabondConstructSheet,
 } from './sheets/_module.mjs';
 import { VagabondItemSheet } from './sheets/item-sheet.mjs';
 // Import helper/utility classes and constants.
@@ -346,8 +347,14 @@ async function preloadHandlebarsTemplates() {
     'systems/vagabond/templates/actor/parts/inventory-card.hbs',
     // Party sheet partials
     'systems/vagabond/templates/party/party-member-card.hbs',
+    'systems/vagabond/templates/party/party-npc-card.hbs',
     'systems/vagabond/templates/party/vehicle-part-card.hbs',
     'systems/vagabond/templates/party/party-compact-view.hbs',
+    'systems/vagabond/templates/party/notes-tab.hbs',
+    'systems/vagabond/templates/party/notes-right.hbs',
+    // Construct sheet partials
+    'systems/vagabond/templates/construct/construct-tab.hbs',
+    'systems/vagabond/templates/construct/construct-part-card.hbs',
     //Chat cards
     'systems/vagabond/templates/chat/damage-display.hbs',
   ];
@@ -529,6 +536,7 @@ Hooks.once('init', function () {
     character: models.VagabondCharacter,
     npc: models.VagabondNPC,
     party: models.VagabondParty,
+    construct: models.VagabondConstruct,
   };
   CONFIG.Item.documentClass = VagabondItem;
   CONFIG.Item.dataModels = {
@@ -582,6 +590,13 @@ Hooks.once('init', function () {
     types: ['party'],
     makeDefault: true,
     label: 'VAGABOND.SheetLabels.Party',
+  });
+
+  // Register Construct sheet
+  collections.Actors.registerSheet('vagabond', VagabondConstructSheet, {
+    types: ['construct'],
+    makeDefault: true,
+    label: 'VAGABOND.SheetLabels.Construct',
   });
   collections.Items.unregisterSheet('core', sheets.ItemSheet);
   collections.Items.registerSheet('vagabond', VagabondItemSheet, {

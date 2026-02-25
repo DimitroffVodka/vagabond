@@ -17,13 +17,14 @@ export default class VagabondParty extends VagabondActorBase {
       { initial: [], label: 'Party Members' }
     );
 
-    // Vehicle stats
-    schema.vehicle = new fields.SchemaField({
-      type: new fields.StringField({ initial: '', label: 'Vehicle Type' }),
-      speed: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0, label: 'Speed' }),
-      crawl: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0, label: 'Crawl Speed' }),
-      travel: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0, label: 'Travel Speed' }),
-    });
+    // Shared notes — visible and editable by all party Owners, readable by Observers
+    schema.sharedNotes = new fields.HTMLField({ initial: '', nullable: true });
+
+    // Party descriptor and travel speeds (shown in sheet header)
+    schema.type   = new fields.StringField({ initial: '', label: 'Party Type' });
+    schema.speed  = new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 });
+    schema.crawl  = new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 });
+    schema.travel = new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 });
 
     return schema;
   }

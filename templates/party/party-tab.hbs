@@ -5,6 +5,51 @@
   data-tab="party"
 >
 
+  {{! ── Party Header ─────────────────────────────────────────────────────── }}
+  <div class="party-header">
+    <img
+      class="party-portrait"
+      src="{{actor.img}}"
+      alt="{{actor.name}}"
+      data-edit="img"
+      data-action="onEditImage"
+      data-tooltip="{{actor.name}}"
+    >
+    <div class="party-info">
+      <input
+        type="text"
+        name="name"
+        value="{{actor.name}}"
+        class="party-name"
+        placeholder="{{localize 'VAGABOND.Actor.Party.NamePlaceholder'}}"
+      >
+      <input
+        type="text"
+        name="system.type"
+        value="{{system.type}}"
+        class="party-type"
+        placeholder="{{localize 'VAGABOND.Actor.Party.TypePlaceholder'}}"
+      >
+      <div class="party-speeds">
+        <div class="party-speed-stat">
+          <span class="speed-label">{{localize 'VAGABOND.Actor.Character.FIELDS.combat.speed.base.label'}}:</span>
+          <input type="number" name="system.speed" value="{{system.speed}}" class="speed-input" min="0">
+          <span class="speed-unit">{{localize 'VAGABOND.UI.Units.Feet'}}</span>
+        </div>
+        <div class="party-speed-stat">
+          <span class="speed-label">{{localize 'VAGABOND.Actor.Character.FIELDS.combat.speed.crawl.label'}}:</span>
+          <input type="number" name="system.crawl" value="{{system.crawl}}" class="speed-input" min="0">
+          <span class="speed-unit">{{localize 'VAGABOND.UI.Units.Feet'}}</span>
+        </div>
+        <div class="party-speed-stat">
+          <span class="speed-label">{{localize 'VAGABOND.Actor.Character.FIELDS.combat.speed.travel.label'}}:</span>
+          <input type="number" name="system.travel" value="{{system.travel}}" class="speed-input" min="0">
+          <span class="speed-unit">{{localize 'VAGABOND.UI.Units.Miles'}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   {{! ── Supplies Bar ───────────────────────────────────── }}
   <div class="party-supplies-bar">
     <span class="supplies-label"><i class="fa-sharp fa-regular fa-wheat"></i> {{localize 'VAGABOND.Actor.Party.Card.Rations'}}: </span>
@@ -23,6 +68,7 @@
 
   {{! ── Member Management Header ──────────────────────── }}
   <div class="party-members-header">
+    {{#if isGM}}
     <button
       type="button"
       class="party-compact-view-btn"
@@ -32,6 +78,7 @@
       <i class="fas fa-table-columns"></i>
       {{localize 'VAGABOND.Actor.Party.CompactView.Open'}}
     </button>
+    {{/if}}
     <button
       type="button"
       class="party-add-member"
@@ -47,7 +94,11 @@
   {{#if members.length}}
     <div class="party-member-grid" style="--member-count: {{members.length}}">
       {{#each members}}
-        {{> "systems/vagabond/templates/party/party-member-card.hbs"}}
+        {{#if isNPC}}
+          {{> "systems/vagabond/templates/party/party-npc-card.hbs" config=../config}}
+        {{else}}
+          {{> "systems/vagabond/templates/party/party-member-card.hbs"}}
+        {{/if}}
       {{/each}}
     </div>
   {{else}}

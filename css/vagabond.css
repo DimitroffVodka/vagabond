@@ -11957,6 +11957,99 @@ details[open] .vagabond .npc-immunity-toggle i {
   color: var(--vagabond-c-chat-yellow);
   margin-left: 1px;
 }
+.vagabond .party-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  background-image: url("../assets/images/sheets/tabNavBG.webp");
+  background-repeat: no-repeat;
+  background-size: cover;
+  border-bottom: 3px solid var(--vagabond-c-black);
+}
+.vagabond .party-portrait {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  object-position: top center;
+  background-color: var(--vagabond-c-black);
+  border-radius: 4px;
+  border: 2px solid var(--vagabond-c-chat-yellow);
+  cursor: pointer;
+  flex-shrink: 0;
+  filter: drop-shadow(2px 2px 2px var(--vagabond-c-inset-1));
+  transition: border-color 0.15s;
+}
+.vagabond .party-portrait:hover {
+  border-color: var(--vagabond-c-bg2);
+}
+.vagabond .party-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.vagabond .party-name {
+  font-family: "Germania", serif;
+  font-size: 1.5em !important;
+  color: var(--vagabond-c-white) !important;
+  border-bottom: none;
+  width: 100%;
+  line-height: 2;
+  background-image: url("../assets/images/sheets/titleBG.webp") !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  filter: drop-shadow(2px 2px 1px var(--vagabond-c-inset-1));
+  text-shadow: 2px 2px 0 var(--vagabond-c-black), -2px 2px 0 var(--vagabond-c-black), -2px -2px 0 var(--vagabond-c-black), 2px -2px 0 var(--vagabond-c-black);
+}
+.vagabond .party-type {
+  font-family: "Germania", serif;
+  font-size: 1em;
+  color: var(--vagabond-c-chat-yellow);
+  width: 100%;
+  opacity: 0.9;
+}
+.vagabond .party-speeds {
+  display: flex;
+  justify-content: space-around;
+  gap: 8px;
+  margin-top: 2px;
+  text-shadow: 2px 2px 0 var(--vagabond-c-dark-bluey), -2px 2px 0 var(--vagabond-c-dark-bluey), -2px -2px 0 var(--vagabond-c-dark-bluey), 2px -2px 0 var(--vagabond-c-dark-bluey);
+  background: var(--vagabond-c-tan-lite);
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+.vagabond .party-speed-stat {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+.vagabond .party-speed-stat .speed-label {
+  font-family: "Germania", serif;
+  font-size: 1.3em;
+  color: var(--vagabond-c-chat-yellow);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.vagabond .party-speed-stat .speed-unit {
+  font-family: "Germania", serif;
+  font-size: 0.9em;
+  color: var(--vagabond-c-chat-yellow);
+  margin-left: -5px;
+  text-align: left;
+}
+.vagabond .party-speed-stat .speed-input {
+  field-sizing: content;
+  min-width: 1ch;
+  font-family: "Ludlow", serif;
+  font-size: 1.3em;
+  text-align: left;
+  text-shadow: 1px 1px 0 var(--vagabond-c-dark-bluey), -1px 1px 0 var(--vagabond-c-dark-bluey), -1px -1px 0 var(--vagabond-c-dark-bluey), 1px -1px 0 var(--vagabond-c-dark-bluey);
+}
+.vagabond .party-speed-stat input {
+  color: var(--vagabond-c-chat-yellow);
+}
 .vagabond .party-members-header {
   display: flex;
   justify-content: flex-end;
@@ -12028,6 +12121,67 @@ details[open] .vagabond .npc-immunity-toggle i {
   grid-template-columns: repeat(clamp(2, var(--member-count, 2), 4), 1fr);
   gap: 15px;
   padding: 10px;
+}
+.vagabond .member-hp-bar-bg,
+.vagabond .member-fatigue-bar-bg {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  overflow: hidden;
+  font-family: "Germania", serif;
+  font-size: 1.05em;
+  background: rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  filter: drop-shadow(2px 2px 1px var(--vagabond-c-inset-1));
+}
+.vagabond .member-hp-bar-bg::before,
+.vagabond .member-fatigue-bar-bg::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  border-radius: 3px;
+  z-index: 0;
+  transition: width 0.3s ease;
+}
+.vagabond .member-hp-bar-bg i, .vagabond .member-hp-bar-bg span,
+.vagabond .member-fatigue-bar-bg i,
+.vagabond .member-fatigue-bar-bg span {
+  position: relative;
+  z-index: 1;
+}
+.vagabond .member-hp-bar-bg i,
+.vagabond .member-fatigue-bar-bg i {
+  font-size: 0.85em;
+}
+.vagabond .member-hp-bar-bg span,
+.vagabond .member-fatigue-bar-bg span {
+  color: var(--vagabond-c-chat-yellow);
+}
+.vagabond .member-hp-bar-bg {
+  flex: 1;
+}
+.vagabond .member-hp-bar-bg::before {
+  width: var(--hp-fill, 0%);
+  background: rgba(238, 69, 50, 0.561);
+}
+.vagabond .member-hp-bar-bg i {
+  color: var(--vagabond-c-chat-yellow);
+}
+.vagabond .member-fatigue-bar-bg {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+.vagabond .member-fatigue-bar-bg::before {
+  width: var(--fatigue-fill, 0%);
+  background: rgba(80, 80, 80, 0.35);
+}
+.vagabond .member-fatigue-bar-bg i {
+  color: var(--vagabond-c-chat-yellow);
 }
 .vagabond .party-member-card {
   background: var(--vagabond-bg-paper);
@@ -12173,67 +12327,6 @@ details[open] .vagabond .npc-immunity-toggle i {
   display: flex;
   gap: 4px;
 }
-.vagabond .party-member-card .member-hp-bar-bg,
-.vagabond .party-member-card .member-fatigue-bar-bg {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 2px 5px;
-  border-radius: 3px;
-  overflow: hidden;
-  font-family: "Germania", serif;
-  font-size: 1.05em;
-  background: rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.4);
-  filter: drop-shadow(2px 2px 1px var(--vagabond-c-inset-1));
-}
-.vagabond .party-member-card .member-hp-bar-bg::before,
-.vagabond .party-member-card .member-fatigue-bar-bg::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  border-radius: 3px;
-  z-index: 0;
-  transition: width 0.3s ease;
-}
-.vagabond .party-member-card .member-hp-bar-bg i, .vagabond .party-member-card .member-hp-bar-bg span,
-.vagabond .party-member-card .member-fatigue-bar-bg i,
-.vagabond .party-member-card .member-fatigue-bar-bg span {
-  position: relative;
-  z-index: 1;
-}
-.vagabond .party-member-card .member-hp-bar-bg i,
-.vagabond .party-member-card .member-fatigue-bar-bg i {
-  font-size: 0.85em;
-}
-.vagabond .party-member-card .member-hp-bar-bg span,
-.vagabond .party-member-card .member-fatigue-bar-bg span {
-  color: var(--vagabond-c-chat-yellow);
-}
-.vagabond .party-member-card .member-hp-bar-bg {
-  flex: 1;
-}
-.vagabond .party-member-card .member-hp-bar-bg::before {
-  width: var(--hp-fill, 0%);
-  background: rgba(238, 69, 50, 0.561);
-}
-.vagabond .party-member-card .member-hp-bar-bg i {
-  color: var(--vagabond-c-chat-yellow);
-}
-.vagabond .party-member-card .member-fatigue-bar-bg {
-  flex: 0 0 auto;
-  margin-left: auto;
-}
-.vagabond .party-member-card .member-fatigue-bar-bg::before {
-  width: var(--fatigue-fill, 0%);
-  background: rgba(80, 80, 80, 0.35);
-}
-.vagabond .party-member-card .member-fatigue-bar-bg i {
-  color: var(--vagabond-c-chat-yellow);
-}
 .vagabond .party-member-card .member-statuses {
   display: flex;
   flex-wrap: wrap;
@@ -12363,7 +12456,202 @@ details[open] .vagabond .npc-immunity-toggle i {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.vagabond .vehicle-header {
+.vagabond .party-npc-card {
+  background: var(--vagabond-bg-paper);
+  background-repeat: var(--vagabond-bg-repeat);
+  background-size: var(--vagabond-bg-size);
+  border: 2px solid var(--vagabond-c-tan-lite);
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+.vagabond .party-npc-card .npc-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  background-image: url("../assets/images/sheets/tabNavBG.webp");
+  background-repeat: no-repeat;
+  background-size: cover;
+  border-bottom: 3px solid var(--vagabond-c-black);
+  position: relative;
+  color: var(--vagabond-c-chat-yellow);
+  cursor: pointer;
+  transition: filter 0.12s;
+}
+.vagabond .party-npc-card .npc-card-header:hover {
+  filter: brightness(1.1);
+}
+.vagabond .party-npc-card .member-remove-btn {
+  position: absolute;
+  top: -13px;
+  right: -10px;
+  width: 18px;
+  height: 18px;
+  padding: 1px 10px;
+  border: none;
+  font-size: 0.85em;
+  cursor: pointer;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  z-index: 1;
+}
+.vagabond .party-npc-card .member-remove-btn:hover {
+  color: var(--vagabond-c-white);
+  background: rgba(198, 5, 5, 0.7);
+  opacity: 1;
+}
+.vagabond .party-npc-card .npc-portrait {
+  width: 54px;
+  height: 54px;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+  background-color: var(--vagabond-c-black);
+  border-radius: 4px;
+  border: 1px solid var(--vagabond-c-chat-yellow);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+  filter: drop-shadow(2px 2px 1px var(--vagabond-c-inset-1));
+}
+.vagabond .party-npc-card .npc-portrait:hover {
+  border-color: var(--vagabond-c-bg2);
+}
+.vagabond .party-npc-card .npc-header-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.vagabond .party-npc-card .npc-name-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.vagabond .party-npc-card .npc-name {
+  flex: 1;
+  font-family: "Germania", serif;
+  font-size: 1.2em;
+  color: var(--vagabond-c-chat-yellow);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+  text-shadow: 2px 2px 0 var(--vagabond-c-black), -2px 2px 0 var(--vagabond-c-black), -2px -2px 0 var(--vagabond-c-black), 2px -2px 0 var(--vagabond-c-black);
+}
+.vagabond .party-npc-card .npc-vitals-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+.vagabond .party-npc-card .npc-hd {
+  font-family: "Germania", serif;
+  font-size: 1em;
+  color: var(--vagabond-c-chat-yellow);
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-weight: bold;
+}
+.vagabond .party-npc-card .npc-armor-stat {
+  font-family: "Germania", serif;
+  font-size: 1em;
+  color: var(--vagabond-c-chat-yellow);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.vagabond .party-npc-card .npc-armor-stat i {
+  font-size: 0.85em;
+  margin-right: 2px;
+}
+.vagabond .party-npc-card .npc-info-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 3px 8px;
+  border-bottom: 1px solid var(--vagabond-c-tan-lite);
+  font-family: "Germania", serif;
+  font-size: 1em;
+  color: var(--vagabond-c-text-primary);
+}
+.vagabond .party-npc-card .npc-info-icon {
+  font-size: 0.9em;
+  color: var(--vagabond-c-muted);
+  flex-shrink: 0;
+}
+.vagabond .party-npc-card .npc-resist-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 3px 8px;
+  border-bottom: 1px solid var(--vagabond-c-tan-lite);
+}
+.vagabond .party-npc-card .npc-resist-label {
+  font-family: "Germania", serif;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--vagabond-c-text-secondary);
+  flex-shrink: 0;
+}
+.vagabond .party-npc-card .npc-resist-values {
+  font-family: "Germania", serif;
+  font-size: 0.9em;
+  color: var(--vagabond-c-text-primary);
+}
+.vagabond .party-npc-card .npc-actions-row {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--vagabond-c-tan-lite);
+}
+.vagabond .party-npc-card .npc-actions-row:last-child {
+  border-bottom: none;
+}
+.vagabond .party-npc-card .npc-section-label {
+  font-family: "Germania", serif;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--vagabond-c-text-secondary);
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+.vagabond .party-npc-card .npc-action-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.vagabond .party-npc-card .npc-action-chip {
+  font-family: "Germania", serif;
+  font-size: 1em;
+  padding: 1px 6px;
+  background: var(--vagabond-c-inset-2);
+  border: 1px solid var(--vagabond-c-tan-lite);
+  border-radius: 3px;
+  color: var(--vagabond-c-text-primary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s, border-color 0.12s;
+}
+.vagabond .party-npc-card .npc-action-chip:hover {
+  background: var(--vagabond-c-bg2);
+  border-color: var(--vagabond-c-bg2);
+  color: var(--vagabond-c-white);
+}
+.vagabond ._vehicle-header-placeholder {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -12373,7 +12661,7 @@ details[open] .vagabond .npc-immunity-toggle i {
   background-repeat: no-repeat;
   background-size: cover;
 }
-.vagabond .vehicle-header .vehicle-portrait {
+.vagabond ._vehicle-header-placeholder .vehicle-portrait {
   width: 110px;
   height: 110px;
   object-fit: cover;
@@ -12385,14 +12673,14 @@ details[open] .vagabond .npc-immunity-toggle i {
   background-color: var(--vagabond-c-black);
   filter: drop-shadow(2px 2px 1px var(--vagabond-c-inset-1));
 }
-.vagabond .vehicle-header .vehicle-info {
+.vagabond ._vehicle-header-placeholder .vehicle-info {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 4px;
   min-width: 0;
 }
-.vagabond .vehicle-header .vehicle-name {
+.vagabond ._vehicle-header-placeholder .vehicle-name {
   font-family: "Germania", serif;
   font-size: 1.5em;
   color: var(--vagabond-c-white);
@@ -12405,13 +12693,13 @@ details[open] .vagabond .npc-immunity-toggle i {
   filter: drop-shadow(2px 2px 1px var(--vagabond-c-inset-1));
   text-shadow: 2px 2px 0 var(--vagabond-c-black), -2px 2px 0 var(--vagabond-c-black), -2px -2px 0 var(--vagabond-c-black), 2px -2px 0 var(--vagabond-c-black);
 }
-.vagabond .vehicle-header .vehicle-type {
+.vagabond ._vehicle-header-placeholder .vehicle-type {
   font-family: "Germania", serif;
   font-size: 1.3em;
   color: var(--vagabond-c-chat-yellow);
   width: 100%;
 }
-.vagabond .vehicle-header .vehicle-speeds {
+.vagabond ._vehicle-header-placeholder .vehicle-speeds {
   display: flex;
   justify-content: space-around;
   gap: 8px;
@@ -12421,26 +12709,26 @@ details[open] .vagabond .npc-immunity-toggle i {
   padding: 4px 8px;
   border-radius: 8px;
 }
-.vagabond .vehicle-header .vehicle-speed-stat {
+.vagabond ._vehicle-header-placeholder .vehicle-speed-stat {
   display: flex;
   align-items: center;
   white-space: nowrap;
 }
-.vagabond .vehicle-header .vehicle-speed-stat .speed-label {
+.vagabond ._vehicle-header-placeholder .vehicle-speed-stat .speed-label {
   font-family: "Germania", serif;
   font-size: 1.3em;
   color: var(--vagabond-c-chat-yellow);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
-.vagabond .vehicle-header .vehicle-speed-stat .speed-unit {
+.vagabond ._vehicle-header-placeholder .vehicle-speed-stat .speed-unit {
   font-family: "Germania", serif;
   font-size: 0.9em;
   color: var(--vagabond-c-chat-yellow);
   margin-left: -5px;
   text-align: left;
 }
-.vagabond .vehicle-header .vehicle-speed-stat .speed-input {
+.vagabond ._vehicle-header-placeholder .vehicle-speed-stat .speed-input {
   field-sizing: content;
   min-width: 1ch;
   font-family: "Ludlow", serif;
@@ -12448,7 +12736,7 @@ details[open] .vagabond .npc-immunity-toggle i {
   text-align: left;
   text-shadow: 1px 1px 0 var(--vagabond-c-dark-bluey), -1px 1px 0 var(--vagabond-c-dark-bluey), -1px -1px 0 var(--vagabond-c-dark-bluey), 1px -1px 0 var(--vagabond-c-dark-bluey);
 }
-.vagabond .vehicle-header .vehicle-speed-stat input {
+.vagabond ._vehicle-header-placeholder .vehicle-speed-stat input {
   color: var(--vagabond-c-chat-yellow);
 }
 .vagabond .vehicle-section-header {
@@ -13061,6 +13349,617 @@ details[open] .vagabond .npc-immunity-toggle i {
   background: rgba(157, 0, 0, 0.1);
 }
 .vagabond .vehicle-cargo-card .cargo-delete i {
+  font-size: 0.85em;
+}
+.vagabond .tab.notes {
+  padding: 1rem;
+}
+.vagabond .tab.notes .notes-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+.vagabond .tab.notes .notes-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.vagabond .tab.notes .notes-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  padding: 0.75rem;
+}
+.vagabond .tab.notes .notes-section-title {
+  font-family: "Germania", serif;
+  font-size: 1em;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--vagabond-c-text-secondary);
+}
+.vagabond .tab.notes .notes-section-title .notes-player-name {
+  margin-left: auto;
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+.vagabond .tab.notes prose-mirror, .vagabond .tab.notes .notes-content {
+  min-height: 120px;
+  font-size: 0.9em;
+}
+.vagabond .tab.notes .notes-unavailable {
+  color: var(--vagabond-c-muted);
+  font-style: italic;
+  font-size: 0.9em;
+  margin: 0;
+}
+.vagabond .construct-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px;
+  border-bottom: 2px solid var(--vagabond-c-black);
+  background-image: url("../assets/images/sheets/tabNavBG.webp");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.vagabond .construct-header .construct-portrait {
+  width: 110px;
+  height: 110px;
+  object-fit: cover;
+  object-position: top center;
+  border-radius: 10px;
+  border: 2px solid var(--vagabond-c-chat-yellow);
+  flex-shrink: 0;
+  background-color: var(--vagabond-c-black);
+  filter: drop-shadow(2px 2px 1px var(--vagabond-c-inset-1));
+  cursor: pointer;
+}
+.vagabond .construct-header .construct-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.vagabond .construct-header .construct-name {
+  font-family: "Germania", serif;
+  font-size: 1.5em;
+  color: var(--vagabond-c-white);
+  border-bottom: none;
+  width: 100%;
+  line-height: 2;
+  background-image: url("../assets/images/sheets/titleBG.webp");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  filter: drop-shadow(2px 2px 1px var(--vagabond-c-inset-1));
+  text-shadow: 2px 2px 0 var(--vagabond-c-black), -2px 2px 0 var(--vagabond-c-black), -2px -2px 0 var(--vagabond-c-black), 2px -2px 0 var(--vagabond-c-black);
+}
+.vagabond .construct-header .construct-type {
+  font-family: "Germania", serif;
+  font-size: 1.3em;
+  color: var(--vagabond-c-chat-yellow);
+  width: 100%;
+}
+.vagabond .construct-header .construct-speeds {
+  display: flex;
+  justify-content: space-around;
+  gap: 8px;
+  margin-top: 2px;
+  text-shadow: 2px 2px 0 var(--vagabond-c-dark-bluey), -2px 2px 0 var(--vagabond-c-dark-bluey), -2px -2px 0 var(--vagabond-c-dark-bluey), 2px -2px 0 var(--vagabond-c-dark-bluey);
+  background: var(--vagabond-c-tan-lite);
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+.vagabond .construct-header .construct-speed-stat {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+.vagabond .construct-header .construct-speed-stat .speed-label {
+  font-family: "Germania", serif;
+  font-size: 1.3em;
+  color: var(--vagabond-c-chat-yellow);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.vagabond .construct-header .construct-speed-stat .speed-unit {
+  font-family: "Germania", serif;
+  font-size: 0.9em;
+  color: var(--vagabond-c-chat-yellow);
+  margin-left: -5px;
+  text-align: left;
+}
+.vagabond .construct-header .construct-speed-stat .speed-input {
+  field-sizing: content;
+  min-width: 1ch;
+  font-family: "Ludlow", serif;
+  font-size: 1.3em;
+  text-align: left;
+  text-shadow: 1px 1px 0 var(--vagabond-c-dark-bluey), -1px 1px 0 var(--vagabond-c-dark-bluey), -1px -1px 0 var(--vagabond-c-dark-bluey), 1px -1px 0 var(--vagabond-c-dark-bluey);
+}
+.vagabond .construct-header .construct-speed-stat input {
+  color: var(--vagabond-c-chat-yellow);
+}
+.vagabond .construct-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--vagabond-c-tan-lite);
+  background: var(--vagabond-c-inset-2);
+}
+.vagabond .construct-section-header .construct-section-title {
+  font-family: "Germania", serif;
+  font-size: 1.2em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--vagabond-c-muted);
+  margin: 0;
+}
+.vagabond .construct-section-header .construct-add-part {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: var(--vagabond-c-bg2);
+  color: var(--vagabond-c-white);
+  border: none;
+  border-radius: 4px;
+  font-family: "Germania", serif;
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.vagabond .construct-section-header .construct-add-part:hover {
+  opacity: 0.8;
+}
+.vagabond .construct-section-header .construct-add-part i {
+  font-size: 1em;
+}
+.vagabond .construct-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 20px;
+  color: var(--vagabond-c-muted);
+  text-align: center;
+  font-family: "Germania", serif;
+}
+.vagabond .construct-empty-state p {
+  margin: 4px 0;
+}
+.vagabond .construct-empty-state .hint {
+  font-size: 12px;
+  opacity: 0.7;
+}
+.vagabond .construct-parts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  padding: 10px;
+}
+.vagabond .construct-part-card {
+  background: var(--vagabond-bg-paper);
+  background-repeat: var(--vagabond-bg-repeat);
+  background-size: var(--vagabond-bg-size);
+  border: 1px solid var(--vagabond-c-tan-lite);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+}
+.vagabond .construct-part-card .part-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--vagabond-c-inset-2);
+  border-bottom: 1px solid var(--vagabond-c-tan-lite);
+  position: relative;
+}
+.vagabond .construct-part-card .part-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 1px solid var(--vagabond-c-tan-lite);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+}
+.vagabond .construct-part-card .part-icon:hover {
+  border-color: var(--vagabond-c-bg2);
+}
+.vagabond .construct-part-card .part-name {
+  flex: 1;
+  font-family: "Germania", serif;
+  font-size: 1.2em;
+  color: var(--vagabond-c-text-primary);
+  margin: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vagabond .construct-part-card .part-name:hover {
+  text-decoration: underline;
+}
+.vagabond .construct-part-card .part-delete-btn {
+  background: transparent;
+  border: none;
+  color: var(--vagabond-c-muted);
+  font-size: 1em;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: color 0.15s, background 0.15s;
+}
+.vagabond .construct-part-card .part-delete-btn:hover {
+  color: var(--vagabond-c-red);
+  background: rgba(157, 0, 0, 0.1);
+}
+.vagabond .construct-part-card .part-hp-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--vagabond-c-tan-lite);
+  font-size: 1.2em;
+}
+.vagabond .construct-part-card .part-hp-icon {
+  font-size: 1em;
+  color: var(--vagabond-c-text-primary);
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+.vagabond .construct-part-card .part-hp-clicker {
+  cursor: pointer;
+  transition: color 0.15s, transform 0.1s;
+}
+.vagabond .construct-part-card .part-hp-clicker:hover {
+  color: #ff8f83;
+  transform: scale(1.2);
+}
+.vagabond .construct-part-card .part-armor-stat {
+  margin-right: 4px;
+  padding-right: 6px;
+  border-right: 1px solid var(--vagabond-c-tan-lite);
+  flex-shrink: 0;
+}
+.vagabond .construct-part-card .part-sep {
+  color: var(--vagabond-c-tan);
+  font-size: 1.1em;
+  font-family: "Germania", serif;
+}
+.vagabond .construct-part-card .part-armor-input {
+  width: 52px;
+  text-align: center;
+  font-family: "Germania", serif;
+}
+.vagabond .construct-part-card .part-hp-bg {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  font-family: "Germania", serif;
+  font-size: 1.2em;
+}
+.vagabond .construct-part-card .part-hp-bg::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--hp-fill, 0%);
+  background: linear-gradient(102deg, var(--vagabond-c-text-secondary) 0%, var(--vagabond-c-text-secondary) 55%);
+  border-radius: 3px;
+  z-index: 0;
+  transition: width 0.3s ease;
+}
+.vagabond .construct-part-card .part-hp-bg > * {
+  position: relative;
+  z-index: 1;
+}
+.vagabond .construct-part-card .part-hp-input {
+  field-sizing: content;
+  min-width: 1ch;
+  width: auto;
+  padding: 0;
+  text-align: center;
+  font-family: "Germania", serif;
+  -moz-appearance: textfield;
+}
+.vagabond .construct-part-card .part-hp-input::-webkit-inner-spin-button, .vagabond .construct-part-card .part-hp-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.vagabond .construct-part-card .part-stats-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--vagabond-c-tan-lite);
+}
+.vagabond .construct-part-card .part-stat {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 1.2em;
+}
+.vagabond .construct-part-card .part-stat .part-stat-icon {
+  font-size: 1em;
+  color: var(--vagabond-c-muted);
+}
+.vagabond .construct-part-card .part-stat .part-roll-damage {
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.vagabond .construct-part-card .part-stat .part-roll-damage:hover {
+  color: var(--vagabond-c-bg2);
+}
+.vagabond .construct-part-card .part-stat .part-sign {
+  color: var(--vagabond-c-muted);
+  font-size: 1.2em;
+}
+.vagabond .construct-part-card .part-stat-input {
+  width: 38px;
+  font-family: "Germania", serif;
+  font-size: 1.2em;
+  text-align: center;
+}
+.vagabond .construct-part-card .part-formula-stat {
+  flex: 1;
+  min-width: 0;
+}
+.vagabond .construct-part-card .part-formula-input {
+  flex: 1;
+  min-width: 50px;
+  font-family: "Germania", serif;
+  font-size: 1.2em;
+}
+.vagabond .construct-part-card .part-damage-type {
+  font-family: "Germania", serif;
+  font-size: 1.2em;
+  border: none;
+  border-bottom: 1px solid var(--vagabond-c-tan-lite);
+  background: transparent;
+  color: var(--vagabond-c-text-primary);
+  cursor: pointer;
+  padding: 1px 2px;
+  width: auto;
+  flex-shrink: 0;
+}
+.vagabond .construct-part-card .part-field {
+  border: none;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: var(--vagabond-c-text-secondary);
+  border-radius: 0;
+  transition: border-color 0.15s;
+}
+.vagabond .construct-part-card .part-field:focus {
+  border-bottom-color: var(--vagabond-c-bg2);
+  outline: none;
+}
+.vagabond .construct-part-card .hp-bar-text {
+  color: var(--vagabond-c-chat-yellow);
+  text-shadow: 1px 1px 0 var(--vagabond-c-black), -1px 1px 0 var(--vagabond-c-black), -1px -1px 0 var(--vagabond-c-black), 1px -1px 0 var(--vagabond-c-black);
+}
+.vagabond .construct-part-card .part-crew-section {
+  padding: 5px 8px;
+}
+.vagabond .construct-part-card .part-crew-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.vagabond .construct-part-card .part-crew-label {
+  font-family: "Germania", serif;
+  font-size: 1em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--vagabond-c-muted);
+}
+.vagabond .construct-part-card .part-add-crew {
+  background: transparent;
+  border: 1px solid var(--vagabond-c-tan-lite);
+  border-radius: 3px;
+  color: var(--vagabond-c-muted);
+  font-size: 1em;
+  padding: 1px 5px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.vagabond .construct-part-card .part-add-crew:hover {
+  color: var(--vagabond-c-bg2);
+  border-color: var(--vagabond-c-bg2);
+}
+.vagabond .construct-part-card .part-crew-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.vagabond .construct-part-card .part-crew-member {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 0;
+}
+.vagabond .construct-part-card .part-crew-member.npc-crew .crew-name {
+  flex: 1;
+}
+.vagabond .construct-part-card .part-crew-member .crew-portrait {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  object-position: top center;
+  border-radius: 2px;
+  border: 1px solid var(--vagabond-c-tan-lite);
+  flex-shrink: 0;
+}
+.vagabond .construct-part-card .part-crew-member .crew-name {
+  flex: 1;
+  font-family: "Germania", serif;
+  font-size: 1.2em;
+  color: var(--vagabond-c-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.vagabond .construct-part-card .part-crew-member .crew-skill-select {
+  font-family: "Germania", serif;
+  font-size: 1em;
+  border: none;
+  border-bottom: 1px solid var(--vagabond-c-tan-lite);
+  background: transparent;
+  color: var(--vagabond-c-text-primary);
+  cursor: pointer;
+  padding: 1px 2px;
+  max-width: 64px;
+  flex-shrink: 0;
+}
+.vagabond .construct-part-card .part-crew-member .crew-skill-select:focus {
+  outline: none;
+  border-bottom-color: var(--vagabond-c-bg2);
+}
+.vagabond .construct-part-card .part-crew-member .crew-skill-difficulty {
+  font-family: "Germania", serif;
+  font-size: 1.1em;
+  font-weight: bold;
+  color: var(--vagabond-c-text-primary);
+  min-width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.vagabond .construct-part-card .part-crew-member .crew-attack-btn {
+  border: none;
+  border-radius: 3px;
+  background: none;
+  color: var(--vagabond-c-text-secondary);
+  font-size: 1.3em;
+  cursor: pointer;
+  padding: 2px 5px;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.vagabond .construct-part-card .part-crew-member .crew-attack-btn:hover {
+  opacity: 0.8;
+}
+.vagabond .construct-part-card .part-crew-member .crew-remove-btn {
+  background: transparent;
+  border: none;
+  color: var(--vagabond-c-muted);
+  font-size: 9px;
+  cursor: pointer;
+  padding: 1px 3px;
+  border-radius: 2px;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.vagabond .construct-part-card .part-crew-member .crew-remove-btn:hover {
+  color: var(--vagabond-c-red);
+}
+.vagabond .construct-part-card .part-crew-empty {
+  font-family: "Germania", serif;
+  font-size: 1em;
+  color: var(--vagabond-c-muted);
+  text-align: center;
+  padding: 4px 0;
+  border: 1px dashed var(--vagabond-c-tan-lite);
+  border-radius: 3px;
+  margin: 2px 0;
+}
+.vagabond .construct-hold-section {
+  padding-bottom: 8px;
+}
+.vagabond .construct-hold-section .construct-add-hold {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: var(--vagabond-c-bg2);
+  color: var(--vagabond-c-white);
+  border: none;
+  border-radius: 4px;
+  font-family: "Germania", serif;
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.vagabond .construct-hold-section .construct-add-hold:hover {
+  opacity: 0.8;
+}
+.vagabond .construct-hold-section .construct-add-hold i {
+  font-size: 1em;
+}
+.vagabond .construct-hold-hint {
+  margin: 4px 10px 6px;
+  font-size: 12px;
+  opacity: 0.7;
+  color: var(--vagabond-c-muted);
+}
+.vagabond .construct-hold-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 10px;
+}
+.vagabond .construct-hold-card {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: var(--vagabond-c-inset-2);
+  border: 1px solid var(--vagabond-c-tan-lite);
+  border-radius: 4px;
+}
+.vagabond .construct-hold-card .hold-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: cover;
+  background: var(--vagabond-c-black);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.vagabond .construct-hold-card .hold-name {
+  font-family: "Germania", serif;
+  font-size: 1.1em;
+  color: var(--vagabond-c-text-primary);
+}
+.vagabond .construct-hold-card .hold-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--vagabond-c-muted);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  margin-left: 2px;
+  transition: color 0.15s, background 0.15s;
+}
+.vagabond .construct-hold-card .hold-delete:hover {
+  color: var(--vagabond-c-red);
+  background: rgba(157, 0, 0, 0.1);
+}
+.vagabond .construct-hold-card .hold-delete i {
   font-size: 0.85em;
 }
 .vagabond .item-sheet-header {

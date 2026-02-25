@@ -1,0 +1,30 @@
+{{! Party Notes Tab }}
+<section class="tab notes {{tab.cssClass}}" data-group="primary" data-tab="notes">
+  <div class="notes-columns">
+
+    {{! ── Left column: Shared Notes only ────────────────────────────────── }}
+    <div class="notes-column notes-column--left">
+      <div class="notes-section">
+        <h3 class="notes-section-title">
+          <i class="fas fa-users"></i>
+          {{localize 'VAGABOND.Actor.Party.Notes.SharedNotes'}}
+        </h3>
+        {{#if editable}}
+          <prose-mirror
+            name="system.sharedNotes"
+            data-document-uuid="{{actor.uuid}}"
+            value="{{system.sharedNotes}}"
+            collaborate="true"
+            toggled="true"
+          >{{{enrichedSharedNotes}}}</prose-mirror>
+        {{else}}
+          <div class="notes-content">{{{enrichedSharedNotes}}}</div>
+        {{/if}}
+      </div>
+    </div>
+
+    {{! ── Right column: rendered as a separate part so it can be refreshed ── }}
+    <div data-application-part="notes-right" class="notes-column notes-column--right"></div>
+
+  </div>
+</section>

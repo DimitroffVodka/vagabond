@@ -1,0 +1,134 @@
+{{! NPC Member Card — rendered once per NPC party member }}
+<div class="party-npc-card" data-actor-uuid="{{uuid}}">
+
+  {{! ── Header (entire header is clickable to open sheet) ──────────────────── }}
+  <header class="npc-card-header" data-action="openMemberSheet">
+    <button
+      type="button"
+      class="member-remove-btn"
+      data-action="removeMember"
+      data-tooltip="{{localize 'VAGABOND.Actor.Party.Card.Remove'}}"
+    ><i class="fas fa-times"></i></button>
+
+    <img
+      class="npc-portrait clickable"
+      src="{{img}}"
+      alt="{{name}}"
+      data-action="panToToken"
+      data-tooltip="{{name}} HD:{{hd}}"
+    >
+
+    <div class="npc-header-info">
+      <div class="npc-name-row">
+        <h3 class="npc-name">{{name}}</h3>
+      </div>
+
+      {{! Row 1: HD + Armor }}
+      <div class="npc-vitals-row">
+        <span class="npc-hd">HD: {{hd}}</span>
+        <span class="npc-armor-stat" data-tooltip="{{localize 'VAGABOND.Actor.Party.Card.Armor'}}">
+          <i class="fas fa-shield-halved"></i> {{armor}}
+        </span>
+      </div>
+
+      {{! Row 2: HP bar + Fatigue bar }}
+      <div class="npc-vitals-row">
+        <div
+          class="member-hp-bar-bg clickable"
+          style="--hp-fill: {{hp.pct}}%"
+          data-action="memberHpChange"
+          data-tooltip="{{localize 'VAGABOND.Actor.base.FIELDS.health.value.label'}} {{hp.value}}/{{hp.max}} | Left: -1 / Right: +1"
+        >
+          <i class="fas fa-heart"></i>
+          <span>{{hp.value}}/{{hp.max}}</span>
+        </div>
+        <div
+          class="member-fatigue-bar-bg clickable"
+          style="--fatigue-fill: {{fatiguePct}}%"
+          data-action="memberFatigueChange"
+          data-tooltip="{{localize 'VAGABOND.Actor.Party.Card.Fatigue'}} {{fatigue}}/{{fatigueMax}} | Left: +1 / Right: -1"
+        >
+          <i class="fas fa-skull"></i>
+          <span>×{{fatigue}}</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  {{! ── Speed ───────────────────────────────────────────────────────────── }}
+  <div class="npc-info-row">
+    <i class="fas fa-person-running npc-info-icon"></i>
+    <span>{{speedFormatted}}</span>
+  </div>
+
+  {{! ── Senses ─────────────────────────────────────────────────────────── }}
+  {{#if senses}}
+  <div class="npc-info-row">
+    <i class="fas fa-eye npc-info-icon"></i>
+    <span>{{senses}}</span>
+  </div>
+  {{/if}}
+
+  {{! ── Resistances ─────────────────────────────────────────────────────── }}
+  {{#if immunities.length}}
+  <div class="npc-resist-row">
+    <span class="npc-resist-label">{{localize 'VAGABOND.Actor.Party.NpcCard.Immune'}}:</span>
+    <span class="npc-resist-values">{{#each immunities}}{{localize (lookup ../config.damageTypes this)}}{{#unless @last}}, {{/unless}}{{/each}}</span>
+  </div>
+  {{/if}}
+
+  {{#if weaknesses.length}}
+  <div class="npc-resist-row">
+    <span class="npc-resist-label">{{localize 'VAGABOND.Actor.Party.NpcCard.Weak'}}:</span>
+    <span class="npc-resist-values">{{#each weaknesses}}{{localize (lookup ../config.damageTypes this)}}{{#unless @last}}, {{/unless}}{{/each}}</span>
+  </div>
+  {{/if}}
+
+  {{#if statusImmunities.length}}
+  <div class="npc-resist-row">
+    <span class="npc-resist-label">{{localize 'VAGABOND.Actor.Party.NpcCard.StatusImmune'}}:</span>
+    <span class="npc-resist-values">{{#each statusImmunities}}{{localize (lookup ../config.statusConditions this)}}{{#unless @last}}, {{/unless}}{{/each}}</span>
+  </div>
+  {{/if}}
+
+  {{! ── Actions ─────────────────────────────────────────────────────────── }}
+  {{#if actions.length}}
+  <div class="npc-actions-row">
+    <span class="npc-section-label">{{localize 'VAGABOND.Actor.Party.NpcCard.Actions'}}:</span>
+    <div class="npc-action-chips">
+      {{#each actions}}
+        {{#if name}}
+        <span
+          class="npc-action-chip clickable"
+          data-action="memberNpcAction"
+          data-actor-uuid="{{../uuid}}"
+          data-action-index="{{@index}}"
+          data-tooltip="{{name}}"
+        >{{name}}</span>
+        {{/if}}
+      {{/each}}
+    </div>
+  </div>
+  {{/if}}
+
+  {{! ── Abilities ───────────────────────────────────────────────────────── }}
+  {{#if abilities.length}}
+  <div class="npc-actions-row">
+    <span class="npc-section-label">{{localize 'VAGABOND.Actor.Party.NpcCard.Abilities'}}:</span>
+    <div class="npc-action-chips">
+      {{#each abilities}}
+        {{#if name}}
+        <span
+          class="npc-action-chip clickable"
+          data-action="memberNpcAbility"
+          data-actor-uuid="{{../uuid}}"
+          data-action-index="{{@index}}"
+          data-tooltip="{{name}}"
+        >{{name}}</span>
+        {{/if}}
+      {{/each}}
+    </div>
+  </div>
+  {{/if}}
+
+</div>
