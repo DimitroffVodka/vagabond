@@ -894,6 +894,17 @@ Hooks.on('createJournalEntry', async (journal, options, userId) => {
 /* -------------------------------------------- */
 
 /* -------------------------------------------- */
+/*  Actor Creation Hooks                        */
+/* -------------------------------------------- */
+
+// Party and construct actors default to neutral disposition (not hostile)
+Hooks.on('preCreateActor', (actor, _data, _options, _userId) => {
+  if (actor.type === 'party' || actor.type === 'construct') {
+    actor.updateSource({ 'prototypeToken.disposition': CONST.TOKEN_DISPOSITIONS.NEUTRAL });
+  }
+});
+
+/* -------------------------------------------- */
 /*  Item Creation Hooks                         */
 /* -------------------------------------------- */
 
@@ -1948,7 +1959,7 @@ async function _gatherParty(token, actor) {
   for (const memberUuid of members) {
     const memberActor = await fromUuid(memberUuid);
     if (!memberActor) continue;
-    for (const mt of canvas.tokens.placeables.filter(t => t.actor?.uuid === memberUuid)) {
+    for (const mt of canvas.tokens.placeables.filter(t => t.document.actorId === memberActor.id)) {
       memberTokens.push(mt);
       gatheredUuids.push(memberUuid);
     }

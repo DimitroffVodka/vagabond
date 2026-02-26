@@ -449,14 +449,14 @@
           "Speed": "Speed",
           "Crawl": "Crawl speed",
           "Travel": "Travel speed",
-          "Parts": "Vehicle Parts",
+          "Parts": "Construct Parts",
           "AddPart": "Add Part",
           "NewPart": "New Part",
           "EditPart": "Edit part",
           "DeletePart": "Delete Part",
           "DeletePartConfirm": "Delete {name}? This cannot be undone.",
-          "NoParts": "No vehicle parts yet.",
-          "NoPartsHint": "Click 'Add Part' to create a vehicle part.",
+          "NoParts": "No construct parts yet.",
+          "NoPartsHint": "Click 'Add Part' to create a construct part.",
           "HPCurrent": "Current HP",
           "HPMax": "Maximum HP",
           "Armor": "Armor",
@@ -1356,7 +1356,7 @@
       "equipment": "Gear",
       "starterPack": "Starter Pack",
       "container": "Container",
-      "vehiclePart": "Vehicle Part"
+      "vehiclePart": "Construct Part"
     },
     "CountdownDice": {
       "SceneControls": {

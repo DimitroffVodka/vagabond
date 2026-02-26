@@ -2585,10 +2585,10 @@ export class VagabondItemSheet extends api.HandlebarsApplicationMixin(
       // Set the containerId to track which container this item belongs to
       itemData.system.containerId = this.item.id;
 
-      // MOVE vs COPY logic: 
-      // Only delete the original if it belongs to the same actor owning this container.
-      // Items from Sidebar, Compendiums, or other Actors are copied.
-      if (droppedItem.parent && this.item.actor && droppedItem.parent.id === this.item.actor.id) {
+      // MOVE vs COPY logic:
+      // Delete the original whenever it came from any actor the current user owns.
+      // Items from compendiums or the sidebar have no parent, so they are copied.
+      if (droppedItem.parent?.documentName === 'Actor' && droppedItem.parent.isOwner) {
         await droppedItem.delete();
       }
 

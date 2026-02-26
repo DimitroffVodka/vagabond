@@ -2137,6 +2137,8 @@ export class VagabondActorSheet extends api.HandlebarsApplicationMixin(
 
     if (data.type === 'Item') {
       return this._onDropItem(event, data);
+    } else if (data.type === 'ContainerItem') {
+      return this._onDropContainerItem(event, data);
     } else if (data.type === 'ActiveEffect') {
       return this._onDropActiveEffect(event, data);
     } else if (data.type === 'Actor') {
@@ -2173,6 +2175,45 @@ export class VagabondActorSheet extends api.HandlebarsApplicationMixin(
     }
 
     return created;
+  }
+
+  /**
+   * Handle dropping a ContainerItem (dragged from a container sheet) onto this actor sheet.
+   * Moves the item out of the container and into the actor's inventory.
+   * @param {DragEvent} event
+   * @param {Object} data  - { type, containerUuid, itemIndex, itemData }
+   * @private
+   */
+  async _onDropContainerItem(event, data) {
+    if (!this.actor.isOwner) return false;
+
+    const { containerUuid, itemIndex, itemData } = data;
+    if (!containerUuid || itemIndex === undefined || !itemData) return false;
+
+    const containerItem = await fromUuid(containerUuid);
+    if (!containerItem || containerItem.type !== 'container') return false;
+
+    // User must have permission to edit the source container (handles same-actor
+    // inventory containers and cross-actor cases like a Construct's Hold)
+    if (!containerItem.isOwner) return false;
+
+    // Prepare item data for the inventory — strip stored _id, clear containerId
+    const newItemData = foundry.utils.deepClone(itemData);
+    delete newItemData._id;
+    newItemData.system.containerId = null;
+
+    // Assign next available gridPosition
+    const maxPosition = this.actor.items
+      .filter(i => i.type === 'equipment' && i.system.gridPosition != null)
+      .reduce((max, i) => Math.max(max, i.system.gridPosition ?? 0), -1);
+    newItemData.system.gridPosition = maxPosition + 1;
+
+    // Create the item on the actor, then remove it from the container
+    await this.actor.createEmbeddedDocuments('Item', [newItemData]);
+    const newItems = containerItem.system.items.filter((_, i) => i !== itemIndex);
+    await containerItem.update({ 'system.items': newItems });
+
+    return true;
   }
 
   /**
