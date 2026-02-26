@@ -23,7 +23,7 @@ Both are configured per **FX school** (fire, cold, shock, etc.). Each spell can 
 
 The panel is GM-only. It looks like this:
 
-![Configure Animations Panel](docs/Configure%20Animations%20Panel.png)
+<img width="992" height="727" alt="image" src="https://github.com/user-attachments/assets/68a61412-f4ad-4b63-98d1-a0eb54ae0585" />
 
 - **Left column:** school selector — click a school to switch to it
 - **Right column:** three sections for the active school — Cast Animation, Sound, and Area Animations table
