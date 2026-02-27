@@ -1151,4 +1151,8 @@ VAGABOND.fxSchools = {
   'arcane':   'VAGABOND.FxSchool.Arcane',
   'shadow':   'VAGABOND.FxSchool.Shadow',
   'radiant':  'VAGABOND.FxSchool.Radiant',
+  'earth':    'VAGABOND.FxSchool.Earth',
+  'defense':  'VAGABOND.FxSchool.Defense',
+  'genericlight': 'VAGABOND.FxSchool.GenericLight',
+  'genericdark':  'VAGABOND.FxSchool.GenericDark',
 };

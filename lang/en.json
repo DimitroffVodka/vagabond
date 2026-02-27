@@ -187,7 +187,11 @@
       "Psychic":  "Psychic",
       "Arcane":   "Arcane",
       "Shadow":   "Shadow",
-      "Radiant":  "Radiant"
+      "Radiant":  "Radiant",
+      "Earth":    "Earth",
+      "Defense":  "Defense",
+      "GenericLight": "Generic Light",
+      "GenericDark":  "Generic Dark"
     },
     "StatusConditions": {
       "Berserk": "Berserk",

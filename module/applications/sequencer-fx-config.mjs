@@ -186,7 +186,14 @@ export class SequencerFxConfig extends api.HandlebarsApplicationMixin(api.Applic
     const file      = this.element.querySelector(`input[name="${fieldName}"]`)?.value;
     const volume    = parseFloat(this.element.querySelector(`input[name="sounds.${school}.volume"]`)?.value) || 0.6;
     if (!file) { ui.notifications.warn(game.i18n.localize('VAGABOND.SequencerFX.NoFile')); return; }
-    foundry.audio.AudioHelper.play({ src: file, volume, autoplay: true, loop: false });
+    const token = SequencerFxConfig.#previewToken();
+    if (VagabondSpellSequencer.isAvailable() && token) {
+      try {
+        new Sequence().sound().file(file).volume(volume).atLocation(token).play();
+      } catch(err) { ui.notifications.error(err.message); }
+    } else {
+      foundry.audio.AudioHelper.play({ src: file, volume, autoplay: true, loop: false });
+    }
   }
 
   /** Returns the token to use for previews, or null with a warning. */

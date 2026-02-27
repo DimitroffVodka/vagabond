@@ -315,12 +315,29 @@ export class VagabondSpellSequencer {
     const distanceFt = this._getTotalDistanceFt(deliveryType, increaseCount);
 
     try {
+      const cfg      = this._getConfig();
+      const soundCfg = cfg.sounds?.[school];
+      const castCfg  = cfg.castAnims?.[school];
+
+      // Cast sound plays immediately at cast time
+      if (soundCfg?.cast) {
+        foundry.audio.AudioHelper.play({ src: soundCfg.cast, volume: soundCfg.volume ?? 0.6, autoplay: true, loop: false });
+      }
+
       const seq = new Sequence();
       this._addCastAnim(seq, school, casterToken);
       if (deliveryType) {
         this._addAreaAnim(seq, school, deliveryType, distanceFt, casterToken, targetTokens);
       }
       seq.play();
+
+      // Impact sound plays after the cast anim phase ends (mirrors the -200ms waitUntilFinished offset)
+      if (deliveryType && soundCfg?.impact) {
+        const castDelay = castCfg?.file ? Math.max(0, (castCfg.duration ?? 600) - 200) : 0;
+        setTimeout(() => {
+          foundry.audio.AudioHelper.play({ src: soundCfg.impact, volume: soundCfg.volume ?? 0.6, autoplay: true, loop: false });
+        }, castDelay);
+      }
     } catch (err) {
       // Never crash the spell cast due to FX errors
       console.warn('Vagabond | SpellSequencer error (non-fatal):', err);
