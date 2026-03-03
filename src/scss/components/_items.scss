@@ -1158,15 +1158,9 @@
 // Accordion styling for trait grants
 .accordion-item {
   margin-bottom: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: 4px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.3);
   transition: all 0.2s ease;
-
-  &.expanded {
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  }
 
   .accordion-header {
     display: flex;

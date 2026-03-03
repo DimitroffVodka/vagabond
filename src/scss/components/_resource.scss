@@ -505,25 +505,29 @@
   .accordion-item {
     padding: 2px;
     border-radius: 2px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     overflow: hidden;
+    border: none;
 
     // Header
     .accordion-header {
+      margin: 0;
+      padding: 2px;
       display: flex;
       justify-content: flex-start;
       align-items: center;
       cursor: pointer;
+      background: none;
       transition: background 0.2s ease;
       padding-left: 2px;
       color: $c-text-1;
 
       &::before {
         font-family: var(--font-awesome);
-        content: "\f219";   // Diamond marker
-        margin-right: 4px;
+        content: "\f666";   // Diamond marker
+        margin-right: 2px;
         font-weight: 900;
-        font-size: 0.6em;
+        font-size: 0.7em;
         line-height: 1;
         flex-shrink: 0;
       }
@@ -535,7 +539,7 @@
       // Name styling (covers feature-name, trait-name, perk-name)
       [class$="-name"] {
         margin: 0;
-        font-size: 16px;
+        font-size: 1.1em;
         font-weight: bold;
       }
     }
