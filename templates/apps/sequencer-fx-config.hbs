@@ -131,6 +131,7 @@
                 <th>Native Px</th>
                 <th>Scale Mode</th>
                 <th>Duration (ms)</th>
+                <th title="Base Y thickness multiplier for beam modes (chain/multiray/line). Default 1.0.">Y Scale</th>
               </tr>
             </thead>
             <tbody>
@@ -173,6 +174,35 @@
                     name="areaAnims.{{../key}}.{{deliveryKey}}.duration"
                     value="{{duration}}" step="50" min="100" max="10000"
                     class="sfx-num-input"/>
+                </td>
+                <td>
+                  <input type="number"
+                    name="areaAnims.{{../key}}.{{deliveryKey}}.scale"
+                    value="{{scale}}" step="0.05" min="0.05" max="10"
+                    placeholder="1" class="sfx-num-input"/>
+                </td>
+              </tr>
+              <tr class="sfx-template-row">
+                <td colspan="6">
+                  <div class="sfx-template-inner">
+                    <span class="sfx-template-label">Beam trim:</span>
+                    <label class="sfx-template-field">Grid
+                      <input type="number"
+                        name="areaAnims.{{../key}}.{{deliveryKey}}.template.gridSize"
+                        value="{{template.gridSize}}" class="sfx-tiny-input" placeholder="–" min="0"/>
+                    </label>
+                    <label class="sfx-template-field">Start
+                      <input type="number"
+                        name="areaAnims.{{../key}}.{{deliveryKey}}.template.startPoint"
+                        value="{{template.startPoint}}" class="sfx-tiny-input" placeholder="–" min="0"/>
+                    </label>
+                    <label class="sfx-template-field">End
+                      <input type="number"
+                        name="areaAnims.{{../key}}.{{deliveryKey}}.template.endPoint"
+                        value="{{template.endPoint}}" class="sfx-tiny-input" placeholder="–" min="0"/>
+                    </label>
+                    <span class="sfx-template-hint">px to trim from beam start/end (0 = disabled)</span>
+                  </div>
                 </td>
               </tr>
               {{/each}}

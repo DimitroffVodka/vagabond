@@ -7,8 +7,13 @@
  *   'length'   → distFt is a length  → display = distFt × pxPerFt  (cone, line)
  *   'diameter' → distFt is diameter  → display = distFt × pxPerFt  (cube)
  *   'fixed'    → always native size  → touch, glyph (small local effects)
+ *   'chain'    → beam hops caster→T1→T2→T3 sequentially
+ *   'multiray' → beams fan from caster to all targets simultaneously
  *
- * nativePx: the pixel width/height of the source animation at 1.0 scale
+ * nativePx: the pixel width of the source animation at 1.0 scale.
+ *   Used for X-axis stretching only. Does NOT affect beam thickness.
+ * scale (optional): base Y thickness multiplier for beam modes (chain/multiray/line). Default 1.0.
+ *   Actual scaleY = scale / distance_in_grids^0.73  (thins out naturally with distance).
  * file: path to .webm animation (JB2A or custom)
  * duration: milliseconds
  */
@@ -50,7 +55,7 @@ export const SPELL_FX = {
       cube:   { file: "", nativePx: 200, scaleMode: 'diameter', duration: 1200 },
       glyph:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 1000 },
       touch:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
-      imbue:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
+      imbue:  { file: "", nativePx: 100, scaleMode: 'chain',    duration: 800  },
       remote: { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
     },
     cold: {
@@ -61,7 +66,7 @@ export const SPELL_FX = {
       cube:   { file: "", nativePx: 200, scaleMode: 'diameter', duration: 1200 },
       glyph:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 1000 },
       touch:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
-      imbue:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
+      imbue:  { file: "", nativePx: 100, scaleMode: 'chain',    duration: 800  },
       remote: { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
     },
     shock: {
@@ -72,7 +77,7 @@ export const SPELL_FX = {
       cube:   { file: "", nativePx: 200, scaleMode: 'diameter', duration: 1200 },
       glyph:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 1000 },
       touch:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
-      imbue:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
+      imbue:  { file: "", nativePx: 100, scaleMode: 'chain',    duration: 800  },
       remote: { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
     },
     acid: {
@@ -83,7 +88,7 @@ export const SPELL_FX = {
       cube:   { file: "", nativePx: 200, scaleMode: 'diameter', duration: 1200 },
       glyph:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 1000 },
       touch:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
-      imbue:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
+      imbue:  { file: "", nativePx: 100, scaleMode: 'chain',    duration: 800  },
       remote: { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
     },
     poison: {
@@ -94,7 +99,7 @@ export const SPELL_FX = {
       cube:   { file: "", nativePx: 200, scaleMode: 'diameter', duration: 1200 },
       glyph:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 1000 },
       touch:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
-      imbue:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
+      imbue:  { file: "", nativePx: 100, scaleMode: 'chain',    duration: 800  },
       remote: { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
     },
     blunt: {
@@ -105,7 +110,7 @@ export const SPELL_FX = {
       cube:   { file: "", nativePx: 200, scaleMode: 'diameter', duration: 1200 },
       glyph:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 1000 },
       touch:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
-      imbue:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
+      imbue:  { file: "", nativePx: 100, scaleMode: 'chain',    duration: 800  },
       remote: { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
     },
     lava: {
@@ -116,7 +121,7 @@ export const SPELL_FX = {
       cube:   { file: "", nativePx: 200, scaleMode: 'diameter', duration: 1200 },
       glyph:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 1000 },
       touch:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
-      imbue:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
+      imbue:  { file: "", nativePx: 100, scaleMode: 'chain',    duration: 800  },
       remote: { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
     },
     wind: {
@@ -127,7 +132,7 @@ export const SPELL_FX = {
       cube:   { file: "", nativePx: 200, scaleMode: 'diameter', duration: 1200 },
       glyph:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 1000 },
       touch:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
-      imbue:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
+      imbue:  { file: "", nativePx: 100, scaleMode: 'chain',    duration: 800  },
       remote: { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
     },
     nature: {
@@ -138,7 +143,7 @@ export const SPELL_FX = {
       cube:   { file: "", nativePx: 200, scaleMode: 'diameter', duration: 1200 },
       glyph:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 1000 },
       touch:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
-      imbue:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
+      imbue:  { file: "", nativePx: 100, scaleMode: 'chain',    duration: 800  },
       remote: { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
     },
     healing: {
@@ -149,7 +154,7 @@ export const SPELL_FX = {
       cube:   { file: "", nativePx: 200, scaleMode: 'diameter', duration: 1200 },
       glyph:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 1000 },
       touch:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
-      imbue:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
+      imbue:  { file: "", nativePx: 100, scaleMode: 'chain',    duration: 800  },
       remote: { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
     },
     necrotic: {
@@ -160,7 +165,7 @@ export const SPELL_FX = {
       cube:   { file: "", nativePx: 200, scaleMode: 'diameter', duration: 1200 },
       glyph:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 1000 },
       touch:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
-      imbue:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
+      imbue:  { file: "", nativePx: 100, scaleMode: 'chain',    duration: 800  },
       remote: { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
     },
     psychic: {
@@ -171,7 +176,7 @@ export const SPELL_FX = {
       cube:   { file: "", nativePx: 200, scaleMode: 'diameter', duration: 1200 },
       glyph:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 1000 },
       touch:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
-      imbue:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
+      imbue:  { file: "", nativePx: 100, scaleMode: 'chain',    duration: 800  },
       remote: { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
     },
     arcane: {
@@ -182,7 +187,7 @@ export const SPELL_FX = {
       cube:   { file: "", nativePx: 200, scaleMode: 'diameter', duration: 1200 },
       glyph:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 1000 },
       touch:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
-      imbue:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
+      imbue:  { file: "", nativePx: 100, scaleMode: 'chain',    duration: 800  },
       remote: { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
     },
     shadow: {
@@ -193,7 +198,7 @@ export const SPELL_FX = {
       cube:   { file: "", nativePx: 200, scaleMode: 'diameter', duration: 1200 },
       glyph:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 1000 },
       touch:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
-      imbue:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
+      imbue:  { file: "", nativePx: 100, scaleMode: 'chain',    duration: 800  },
       remote: { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
     },
     radiant: {
@@ -204,7 +209,7 @@ export const SPELL_FX = {
       cube:   { file: "", nativePx: 200, scaleMode: 'diameter', duration: 1200 },
       glyph:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 1000 },
       touch:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
-      imbue:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
+      imbue:  { file: "", nativePx: 100, scaleMode: 'chain',    duration: 800  },
       remote: { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
     },
     earth: {
@@ -215,7 +220,7 @@ export const SPELL_FX = {
       cube:   { file: "", nativePx: 200, scaleMode: 'diameter', duration: 1200 },
       glyph:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 1000 },
       touch:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
-      imbue:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
+      imbue:  { file: "", nativePx: 100, scaleMode: 'chain',    duration: 800  },
       remote: { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
     },
     defense: {
@@ -226,7 +231,7 @@ export const SPELL_FX = {
       cube:   { file: "", nativePx: 200, scaleMode: 'diameter', duration: 1200 },
       glyph:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 1000 },
       touch:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
-      imbue:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
+      imbue:  { file: "", nativePx: 100, scaleMode: 'chain',    duration: 800  },
       remote: { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
     },
     genericlight: {
@@ -237,7 +242,7 @@ export const SPELL_FX = {
       cube:   { file: "", nativePx: 200, scaleMode: 'diameter', duration: 1200 },
       glyph:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 1000 },
       touch:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
-      imbue:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
+      imbue:  { file: "", nativePx: 100, scaleMode: 'chain',    duration: 800  },
       remote: { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
     },
     genericdark: {
@@ -248,7 +253,7 @@ export const SPELL_FX = {
       cube:   { file: "", nativePx: 200, scaleMode: 'diameter', duration: 1200 },
       glyph:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 1000 },
       touch:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
-      imbue:  { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
+      imbue:  { file: "", nativePx: 100, scaleMode: 'chain',    duration: 800  },
       remote: { file: "", nativePx: 100, scaleMode: 'fixed',    duration: 800  },
     },
   },

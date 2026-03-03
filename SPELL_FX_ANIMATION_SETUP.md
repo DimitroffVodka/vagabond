@@ -95,9 +95,10 @@ One row per delivery type. Each row has:
 | Field | What it does | Guidance |
 |-------|-------------|----------|
 | **File** | Path to the area `.webm` | Leave blank to skip that delivery type. |
-| **Native Px** | The pixel width/height of the source animation at 1.0 scale | Check the filename — JB2A often puts dimensions in the name (e.g. `_400x400`, `_800x800`). Use whichever dimension is largest. |
+| **Native Px** | The pixel width of the source animation at 1.0 scale | Check the filename — JB2A often puts dimensions in the name (e.g. `_400x400`, `_800x800`). For beam modes (`chain`, `multiray`, `line`) this controls X-axis stretching only — it does **not** affect beam thickness. |
 | **Scale Mode** | How the animation is sized relative to the spell's distance/area | See table below. |
 | **Duration (ms)** | How long the area animation plays | Match approximately to the animation's natural loop length. |
+| **Y Scale** | Base thickness multiplier for beam modes only (`chain`, `multiray`, `line`) | Controls how thick the beam appears. The actual scaleY shrinks automatically with distance (see Beam Animations section below). Leave blank for 1.0. |
 
 **Scale Mode explained:**
 
@@ -106,9 +107,37 @@ One row per delivery type. Each row has:
 | **Radius** | Sphere, Aura — `distFt` is a radius | display size = `distFt × 2 × pxPerFt ÷ nativePx` (full diameter) |
 | **Length** | Cone, Line — `distFt` is a length | display size = `distFt × pxPerFt ÷ nativePx` |
 | **Diameter** | Cube — `distFt` is a side length | display size = `distFt × pxPerFt ÷ nativePx` |
-| **Fixed** | Touch, Imbue, Remote, Glyph — small local effects | always plays at scale `1.0` regardless of spell distance |
+| **Fixed** | Touch, Remote, Glyph — small local effects | always plays at scale `1.0` regardless of spell distance |
+| **Chain** | Imbue — beam hops caster → T1 → T2 → T3 sequentially | Y scale auto-adjusts with distance; X stretches to fit each hop |
+| **Multiray** | Fan attack — beams fire simultaneously from caster to all targets | Same Y-scale auto-adjustment as chain; all beams play at once |
 
-**Practical rule of thumb:** If the animation is a circle or explosion that should grow with the spell's area, use **Radius**. If it's a directed beam or cone, use **Length**. If it's a small on-token effect, use **Fixed**.
+**Practical rule of thumb:** If the animation is a circle or explosion that should grow with the spell's area, use **Radius**. If it's a directed beam or cone, use **Length**. If it's a small on-token effect, use **Fixed**. For imbue/chain spells that hop between targets, use **Chain**.
+
+---
+
+### Beam Animations (Chain / Multiray / Line)
+
+Beam-mode animations are stretched along the X axis by Sequencer to reach the target. The Y axis (beam thickness) is controlled separately by a dynamic formula so beams don't look giant at long range:
+
+```text
+scaleY = Y Scale / max(3, gridsAway) ^ 0.73
+```
+
+| Distance | scaleY (with Y Scale = 1.0) |
+|---|---|
+| 1–3 grids (5–15 ft) | **0.46** (plateau — minimum floor) |
+| 5 grids (25 ft) | 0.28 |
+| 10 grids (50 ft) | 0.18 |
+| 20 grids (100 ft) | 0.11 |
+
+**Key points:**
+- The floor at 3 grids prevents very short beams from looking oversized.
+- `nativePx` only affects X stretching. It does **not** affect Y thickness.
+- Lower **Y Scale** for thinner beams (e.g. `0.5`), higher for thicker (e.g. `2.0`).
+- If you want the same animation file for both beam and fixed delivery types, set it in both rows with different scale modes.
+
+**Tuning Y Scale:**
+Start at `1.0` and cast a chain/multiray spell at medium range (~5 grids). If the beam looks too thick, lower Y Scale to `0.5` or `0.3`. If too thin, raise it. Far-range thickness will adjust proportionally.
 
 ---
 

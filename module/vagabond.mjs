@@ -46,6 +46,7 @@ import { LevelUpDialog } from './applications/level-up-dialog.mjs';
 import { PartyCompactView } from './applications/party-compact-view.mjs';
 import VagabondActiveEffectConfig from './applications/active-effect-config.mjs';
 import { VagabondSpellSequencer } from './helpers/spell-sequencer.mjs';
+import { VagabondItemSequencer } from './helpers/item-sequencer.mjs';
 
 const collections = foundry.documents.collections;
 const sheets = foundry.appv1.sheets;
@@ -355,6 +356,17 @@ function registerGameSettings() {
     icon: 'fas fa-wand-magic-sparkles',
     type: SequencerFxConfig,
     restricted: true,
+  });
+
+  // Setting 22: Use Item Animations — world-level master switch for weapon/alchemical/relic FX
+  game.settings.register('vagabond', 'useItemAnimations', {
+    name: 'VAGABOND.Settings.useItemAnimations.name',
+    hint: 'VAGABOND.Settings.useItemAnimations.hint',
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: false,
+    requiresReload: false,
   });
 
   // Setting 19: Homebrew Settings Menu button

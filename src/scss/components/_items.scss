@@ -1242,3 +1242,133 @@
     }
   }
 }
+
+// -----------------------------------------
+// Item FX (Sequencer) Section
+// -----------------------------------------
+
+.item-fx-details {
+  margin-top: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.03);
+
+  .item-fx-summary {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    list-style: none;
+    font-weight: 600;
+    font-size: 13px;
+    user-select: none;
+
+    &::-webkit-details-marker { display: none; }
+
+    i { font-size: 11px; transition: transform 0.15s; }
+
+    small { font-weight: 400; opacity: 0.7; }
+
+    .item-fx-active-badge {
+      margin-left: auto;
+      background: #2e7d32;
+      color: #fff;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+  }
+
+  &[open] .item-fx-summary i { transform: rotate(90deg); }
+}
+
+.item-fx-locked-icons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  i { opacity: 0.85; }
+}
+
+.item-fx-section {
+  padding: 8px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.item-fx-group {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 3px;
+  padding: 6px 8px;
+  margin: 0;
+
+  legend {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0 4px;
+    opacity: 0.8;
+  }
+
+  .item-fx-hint {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    opacity: 0.65;
+    font-size: 10px;
+  }
+}
+
+.item-fx-file-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-bottom: 4px;
+
+  input[type='text'] {
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
+  }
+
+  .item-fx-browse-btn {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.04);
+    cursor: pointer;
+    font-size: 12px;
+
+    &:hover { background: rgba(0, 0, 0, 0.1); }
+  }
+}
+
+.item-fx-scale-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+
+  .resource-label {
+    font-size: 11px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin: 0;
+  }
+
+  input[type='number'] {
+    width: 60px;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+}

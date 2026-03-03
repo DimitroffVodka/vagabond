@@ -112,6 +112,22 @@
   .sfx-delivery-label { font-weight: 600; white-space: nowrap; }
   .sfx-num-input { width: 70px; }
 
+  // Beam trim (template) sub-row
+  .sfx-template-row td { padding: 2px 4px 6px 4px; border-top: none; }
+  .sfx-template-inner {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--vagabond-c-muted, #888);
+  }
+  .sfx-template-label { font-weight: 600; }
+  .sfx-template-field { display: inline-flex; align-items: center; gap: 3px; }
+  .sfx-tiny-input { width: 52px; font-size: 0.78rem; padding: 1px 3px; }
+  .sfx-template-hint { font-style: italic; opacity: 0.7; }
+
   // Nav separator
   .sfx-nav-sep {
     border: none;

@@ -181,6 +181,40 @@ export class VagabondSpellSequencer {
   }
 
   /**
+   * Draw a fixed-thickness beam from srcPos to dstPos.
+   * Uses anchor+rotate+scale instead of stretchTo so Y (thickness) stays constant
+   * regardless of beam length. Falls back to stretchTo if nativePx is not set.
+   * @param {Sequence} seq
+   * @param {object} cfg   - { file, nativePx, scale, duration }
+   * @param {{x,y}} srcPos
+   * @param {{x,y}} dstPos
+   * @returns {EffectSection}
+   * @private
+   */
+  static _beamEffect(seq, cfg, srcPos, dstPos) {
+    const dx = dstPos.x - srcPos.x;
+    const dy = dstPos.y - srcPos.y;
+    const dist = Math.hypot(dx, dy);
+    if (!dist) return seq.effect().file(cfg.file).atLocation(srcPos).duration(cfg.duration);
+
+    // Y shrinks with distance^0.73, independent of nativePx (which only affects X via stretchTo).
+    // Floor at 3 grids so very short beams don't appear oversized.
+    // At 3 grids: ~46% of cfg.scale.  At 20 grids: ~11%.
+    const gridsAway = Math.max(3, dist / canvas.grid.size);
+    const scaleY = (cfg.scale ?? 1) / Math.pow(gridsAway, 0.73);
+
+    let fx = seq.effect()
+      .file(cfg.file)
+      .atLocation(srcPos)
+      .stretchTo(dstPos)
+      .scale({ y: scaleY })
+      .duration(cfg.duration);
+
+    if (cfg.template) fx = fx.template(cfg.template);
+    return fx;
+  }
+
+  /**
    * Add an area animation based on delivery type.
    * @param {Sequence} seq
    * @param {string} school
@@ -197,6 +231,26 @@ export class VagabondSpellSequencer {
     if (!cfg?.file) return;
 
     const scale = this._calcScale(distanceFt, cfg.nativePx, cfg.scaleMode);
+
+    // Sequencer's stretchTo rejects Token placeables in Foundry v13 —
+    // always use explicit {x, y} center coordinates for both ends.
+    const center = t => ({ x: t.x + (t.w ?? 0) / 2, y: t.y + (t.h ?? 0) / 2 });
+
+    // ── Beam-mode patterns: fixed Y-scale, X scales with distance ────────────
+    if (cfg.scaleMode === 'chain') {
+      const nodes = [casterToken, ...targetTokens];
+      for (let i = 0; i < nodes.length - 1; i++) {
+        this._beamEffect(seq, cfg, center(nodes[i]), center(nodes[i + 1]))
+          .waitUntilFinished(-100);
+      }
+      return;
+    }
+    if (cfg.scaleMode === 'multiray') {
+      for (const target of targetTokens) {
+        this._beamEffect(seq, cfg, center(casterToken), center(target));
+      }
+      return;
+    }
 
     switch (deliveryType) {
       case 'aura':
@@ -218,7 +272,7 @@ export class VagabondSpellSequencer {
         break;
 
       case 'sphere': {
-        const centroid = this._centroid(targetTokens) ?? { x: casterToken.x, y: casterToken.y };
+        const centroid = this._centroid(targetTokens) ?? center(casterToken);
         seq.effect()
           .file(cfg.file)
           .atLocation(centroid)
@@ -231,28 +285,22 @@ export class VagabondSpellSequencer {
         const cCx = casterToken.x + (casterToken.w ?? 0) / 2;
         const cCy = casterToken.y + (casterToken.h ?? 0) / 2;
         let lineAngle = 0;
-        if (targetTokens.length > 0) {
-          const t = targetTokens[0];
-          lineAngle = Math.atan2(
-            (t.y + (t.h ?? 0) / 2) - cCy,
-            (t.x + (t.w ?? 0) / 2) - cCx
-          );
+        // Fire toward centroid of all targets (matches how templates are aimed)
+        const lineCentroid = this._centroid(targetTokens);
+        if (lineCentroid) {
+          lineAngle = Math.atan2(lineCentroid.y - cCy, lineCentroid.x - cCx);
         }
         const pxPerFt = canvas.grid.size / (canvas.grid.distance || 5);
         const endpoint = {
           x: cCx + Math.cos(lineAngle) * distanceFt * pxPerFt,
           y: cCy + Math.sin(lineAngle) * distanceFt * pxPerFt,
         };
-        seq.effect()
-          .file(cfg.file)
-          .atLocation(casterToken)
-          .stretchTo(endpoint)
-          .duration(cfg.duration);
+        this._beamEffect(seq, cfg, { x: cCx, y: cCy }, endpoint);
         break;
       }
 
       case 'cube': {
-        const cubeCentroid = this._centroid(targetTokens) ?? { x: casterToken.x, y: casterToken.y };
+        const cubeCentroid = this._centroid(targetTokens) ?? center(casterToken);
         seq.effect()
           .file(cfg.file)
           .atLocation(cubeCentroid)
@@ -262,7 +310,7 @@ export class VagabondSpellSequencer {
       }
 
       case 'glyph': {
-        const glyphCenter = this._centroid(targetTokens) ?? { x: casterToken.x, y: casterToken.y };
+        const glyphCenter = this._centroid(targetTokens) ?? center(casterToken);
         seq.effect()
           .file(cfg.file)
           .atLocation(glyphCenter)
@@ -272,23 +320,23 @@ export class VagabondSpellSequencer {
       }
 
       case 'touch':
-        // Cast anim on caster, then beam + impact per target
+        // Beam from caster to each target, then impact at each target
         for (const target of targetTokens) {
           seq.effect()
             .file(cfg.file)
-            .atLocation(casterToken)
-            .stretchTo(target)
+            .atLocation(center(casterToken))
+            .stretchTo(center(target))
             .duration(cfg.duration);
           seq.effect()
             .file(cfg.file)
-            .atLocation(target)
+            .atLocation(center(target))
             .scale(scale)
             .duration(cfg.duration);
         }
         break;
 
       case 'imbue':
-        // Enchant glow on each target
+        // Glow/fixed on each target (use scaleMode 'chain' or 'multiray' for beam behavior)
         for (const target of targetTokens) {
           seq.effect()
             .file(cfg.file)

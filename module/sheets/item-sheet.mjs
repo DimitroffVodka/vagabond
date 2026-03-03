@@ -36,6 +36,8 @@ export class VagabondItemSheet extends api.HandlebarsApplicationMixin(
     classes: ['vagabond', 'item'],
     actions: {
       onEditImage: this._onEditImage,
+      browseItemFxFile: this._onBrowseItemFxFile,
+      browseItemFxSound: this._onBrowseItemFxSound,
       viewDoc: this._viewEffect,
       createDoc: this._createEffect,
       deleteDoc: this._deleteEffect,
@@ -270,6 +272,13 @@ export class VagabondItemSheet extends api.HandlebarsApplicationMixin(
               name: i.name,
               system: { quantity: i.system.quantity }
             }));
+        }
+        // Sequencer FX availability for per-item animation config
+        context.sequencerAvailable = !!game.modules.get('sequencer')?.active;
+        context.isWeapon = this.item.system.equipmentType === 'weapon';
+        // File validation for locked view indicator (only when relevant)
+        if (context.sequencerAvailable && this.item.system.locked && this.item.system.itemFx?.enabled) {
+          context.itemFxValidation = await VagabondItemSheet._checkFxFiles(this.item.system.itemFx);
         }
         break;
 
@@ -2197,6 +2206,82 @@ export class VagabondItemSheet extends api.HandlebarsApplicationMixin(
       left: this.position.left + 10,
     });
     return fp.browse();
+  }
+
+  /**
+   * Browse for an item FX video file and populate the target input field.
+   *
+   * @this VagabondItemSheet
+   * @param {PointerEvent} event   The originating click event
+   * @param {HTMLElement} target   The capturing HTML element which defined a [data-action]
+   * @protected
+   */
+  static async _onBrowseItemFxFile(event, target) {
+    const fieldName = target.dataset.field;
+    const input = this.element.querySelector(`input[name="${fieldName}"]`);
+    const FP = foundry.applications.apps.FilePicker.implementation ?? foundry.applications.apps.FilePicker;
+    new FP({
+      type: 'video',
+      current: input?.value?.split('|').pop()?.trim() || '',
+      callback: path => {
+        if (!input) return;
+        const existing = input.value.trim();
+        input.value = existing ? `${existing} | ${path}` : path;
+      },
+    }).browse();
+  }
+
+  /**
+   * Opens an audio FilePicker for an item FX sound field.
+   * @this VagabondItemSheet
+   * @param {PointerEvent} event
+   * @param {HTMLElement} target
+   * @protected
+   */
+  static async _onBrowseItemFxSound(event, target) {
+    const fieldName = target.dataset.field;
+    const input = this.element.querySelector(`input[name="${fieldName}"]`);
+    const FP = foundry.applications.apps.FilePicker.implementation ?? foundry.applications.apps.FilePicker;
+    new FP({
+      type: 'audio',
+      current: input?.value?.split('|').pop()?.trim() || '',
+      callback: path => {
+        if (!input) return;
+        const existing = input.value.trim();
+        input.value = existing ? `${existing} | ${path}` : path;
+      },
+    }).browse();
+  }
+
+  /**
+   * Checks whether each FX file path is accessible via HTTP.
+   * Returns per-path booleans (true = exists, false = 404, null = not configured).
+   * Wildcards (*) and pipe-separated paths are treated as valid (can't verify).
+   * @param {Object} itemFx - The item's itemFx system data
+   * @returns {Promise<Object>}
+   */
+  static async _checkFxFiles(itemFx) {
+    const check = async (path) => {
+      if (!path) return null;
+      if (path.includes('*') || path.includes('|')) return true;
+      try {
+        const r = await fetch(path, { method: 'HEAD' });
+        return r.ok;
+      } catch {
+        return false;
+      }
+    };
+    const [hitFile, missFile, hitSound, missSound] = await Promise.all([
+      check(itemFx.hitFile),
+      check(itemFx.missFile),
+      check(itemFx.hitSound),
+      check(itemFx.missSound),
+    ]);
+    return {
+      hitFile, missFile, hitSound, missSound,
+      animInvalid: (itemFx.hitFile && hitFile === false) || (itemFx.missFile && missFile === false),
+      soundInvalid: (itemFx.hitSound && hitSound === false) || (itemFx.missSound && missSound === false),
+    };
   }
 
   /**

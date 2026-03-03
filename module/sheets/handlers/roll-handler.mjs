@@ -1,5 +1,6 @@
 import { TargetHelper } from '../../helpers/target-helper.mjs';
 import { VagabondTextParser } from '../../helpers/text-parser.mjs';
+import { VagabondItemSequencer } from '../../helpers/item-sequencer.mjs';
 
 /**
  * Handler for roll-related functionality.
@@ -199,6 +200,11 @@ export class RollHandler {
           });
         }
 
+        // Play item FX animation (alchemicals always "hit" — no attack roll)
+        const alcCasterToken = this.actor.token?.object ?? this.actor.getActiveTokens(true)[0];
+        const alcTargets = TargetHelper.resolveTargets(targetsAtRollTime);
+        VagabondItemSequencer.play(item, alcCasterToken, alcTargets, true);
+
         // Use createActionCard for consistency with other items
         await VagabondChatCard.createActionCard({
           actor: this.actor,
@@ -250,6 +256,12 @@ export class RollHandler {
       if (this.actor.system.manualCheckBonus !== 0) {
         await this.actor.update({ 'system.manualCheckBonus': 0 });
       }
+
+      // Play item FX animation immediately after attack result (before damage roll)
+      // Placed here so it always fires regardless of whether damage rolling succeeds.
+      const casterToken = this.actor.token?.object ?? this.actor.getActiveTokens(true)[0];
+      const resolvedTargets = TargetHelper.resolveTargets(targetsAtRollTime);
+      VagabondItemSequencer.play(item, casterToken, resolvedTargets, attackResult.isHit);
 
       let damageRoll = null;
       if (VagabondDamageHelper.shouldRollDamage(attackResult.isHit)) {

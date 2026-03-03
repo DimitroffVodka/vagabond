@@ -262,6 +262,25 @@ export default class VagabondEquipment extends VagabondItemBase {
       initial: ''
     });
 
+    // ===== SEQUENCER FX FIELDS =====
+
+    // Per-item animation config (requires Sequencer module)
+    schema.itemFx = new fields.SchemaField({
+      enabled:        new fields.BooleanField({ initial: false }),
+      // 'auto' = derive from weaponSkill (weapons only); 'ranged' = beam; 'melee' = impact
+      animType:       new fields.StringField({ initial: 'auto' }),
+      hitFile:        new fields.StringField({ initial: '' }),
+      hitScale:       new fields.NumberField({ initial: 1.0, min: 0.1 }),
+      hitOffsetX:     new fields.NumberField({ initial: 0, integer: true }),
+      hitDuration:    new fields.NumberField({ initial: 800, min: 100, integer: true }),
+      hitSound:       new fields.StringField({ initial: '' }),
+      missFile:       new fields.StringField({ initial: '' }),
+      missScale:      new fields.NumberField({ initial: 1.0, min: 0.1 }),
+      missDuration:   new fields.NumberField({ initial: 600, min: 100, integer: true }),
+      missSound:      new fields.StringField({ initial: '' }),
+      soundVolume:    new fields.NumberField({ initial: 0.6, min: 0, max: 1 }),
+    });
+
     return schema;
   }
 

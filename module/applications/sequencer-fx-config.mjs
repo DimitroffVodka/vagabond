@@ -65,6 +65,8 @@ export class SequencerFxConfig extends api.HandlebarsApplicationMixin(api.Applic
       { value: 'length',   label: 'Length (cone, line)' },
       { value: 'diameter', label: 'Diameter (cube)' },
       { value: 'fixed',    label: 'Fixed size' },
+      { value: 'chain',    label: 'Chain (A→B→C)' },
+      { value: 'multiray', label: 'Multi-ray (A→B, A→C)' },
     ];
 
     // Build per-school data (skip the '' auto key)
@@ -170,6 +172,23 @@ export class SequencerFxConfig extends api.HandlebarsApplicationMixin(api.Applic
     const dirToken = pool[1] ?? caster;
     const scale    = VagabondSpellSequencer._calcScale(20, nativePx, scaleMode);
 
+    // stretchTo rejects Token placeables in Foundry v13 — always use explicit {x,y}.
+    const center = t => ({ x: t.x + (t.w ?? 0) / 2, y: t.y + (t.h ?? 0) / 2 });
+
+    // Pseudo-cfg for _beamEffect (reads values from live form)
+    const tplGridSize   = parseInt(this.element.querySelector(`input[name="${prefix}.template.gridSize"]`)?.value)   || 0;
+    const tplStartPoint = parseInt(this.element.querySelector(`input[name="${prefix}.template.startPoint"]`)?.value) || 0;
+    const tplEndPoint   = parseInt(this.element.querySelector(`input[name="${prefix}.template.endPoint"]`)?.value)   || 0;
+    const beamCfg = {
+      file,
+      nativePx,
+      scale: parseFloat(this.element.querySelector(`input[name="${prefix}.scale"]`)?.value) || 1,
+      duration,
+      ...(tplGridSize || tplStartPoint || tplEndPoint
+        ? { template: { gridSize: tplGridSize, startPoint: tplStartPoint, endPoint: tplEndPoint } }
+        : {}),
+    };
+
     try {
       const seq = new Sequence();
       if (delivery === 'line') {
@@ -181,11 +200,21 @@ export class SequencerFxConfig extends api.HandlebarsApplicationMixin(api.Applic
         const angle = (dirToken !== caster) ? Math.atan2(tCy - cCy, tCx - cCx) : 0;
         const pxPerFt = canvas.grid.size / (canvas.grid.distance || 5);
         const endpoint = { x: cCx + Math.cos(angle) * 20 * pxPerFt, y: cCy + Math.sin(angle) * 20 * pxPerFt };
-        seq.effect().file(file).atLocation(caster).stretchTo(endpoint).duration(duration);
+        VagabondSpellSequencer._beamEffect(seq, beamCfg, { x: cCx, y: cCy }, endpoint);
       } else if (delivery === 'cone') {
         seq.effect().file(file).atLocation(caster)
           .rotate(-VagabondSpellSequencer._getConeDirection(caster, [dirToken]))
           .scale(scale).anchor({ x: 0, y: 0.5 }).duration(duration);
+      } else if (scaleMode === 'chain') {
+        const nodes = pool.slice(0, 3);
+        for (let i = 0; i < nodes.length - 1; i++) {
+          VagabondSpellSequencer._beamEffect(seq, beamCfg, center(nodes[i]), center(nodes[i + 1]))
+            .waitUntilFinished(-100);
+        }
+      } else if (scaleMode === 'multiray') {
+        for (const t of pool.slice(1)) {
+          VagabondSpellSequencer._beamEffect(seq, beamCfg, center(caster), center(t));
+        }
       } else {
         seq.effect().file(file).atLocation(caster).scale(scale).duration(duration);
       }
@@ -307,6 +336,15 @@ export class SequencerFxConfig extends api.HandlebarsApplicationMixin(api.Applic
       ? formData.object
       : new foundry.applications.ux.FormDataExtended(this.element).object;
     const data = foundry.utils.expandObject(raw);
+
+    // Remove template objects where all fields are 0/empty (disabled)
+    for (const school of Object.values(data.areaAnims ?? {})) {
+      for (const entry of Object.values(school)) {
+        if (entry.template && !entry.template.gridSize && !entry.template.startPoint && !entry.template.endPoint) {
+          delete entry.template;
+        }
+      }
+    }
 
     await game.settings.set('vagabond', 'sequencerFxConfig', data);
     ui.notifications.info(game.i18n.localize('VAGABOND.SequencerFX.Saved'));

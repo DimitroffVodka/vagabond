@@ -103,7 +103,10 @@
       font-size: 1em;
       font-weight: 500;
     }
+
   }
+
+  .fx-icon-invalid { color: #c62828; }
 
   .locked-properties {
     margin-top: 12px;
@@ -166,6 +169,14 @@
       border-left: 3px solid $c-tan;
     }
   }
+}
+
+// FX indicator row — flat rule so it isn't buried under nesting specificity
+.locked-stat--row {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 6px;
+  .stat-label { margin: 0; }
 }
 
 // Adjustments for grid layouts
