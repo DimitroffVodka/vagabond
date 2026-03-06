@@ -100,7 +100,7 @@
       <span class="stat-value">{{armor}}</span>
     </div>
 
-    <div class="member-stat-cell {{#unless mana.isSpellcaster}}non-caster{{/unless}}"
+    <div class="member-stat-cell {{#unless mana.isSpellcaster}}non-caster{{/unless}}{{#if mana.isFocusing}} is-focusing{{/if}}"
       data-tooltip="{{localize 'VAGABOND.Actor.Party.Card.Mana'}} {{mana.current}}/{{mana.max}} | {{localize 'VAGABOND.Actor.Party.Card.ManaCast'}} {{mana.castingMax}}">
       <i class="fas fa-star-christmas stat-icon"></i>
       <span class="stat-value">{{mana.current}}/{{mana.max}}</span>

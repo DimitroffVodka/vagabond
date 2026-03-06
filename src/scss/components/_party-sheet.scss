@@ -65,8 +65,8 @@
 }
 
 .party-portrait {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   object-fit: cover;
   object-position: top center;
   background-color: $c-black;
@@ -115,18 +115,21 @@
 }
 
 .party-speeds {
+    position: relative;
+    bottom: 0;
     display: flex;
     justify-content: space-around;
+    align-content: baseline;
+    background: rgba(0,0,0,0.5);
+    padding: 2px 8px;
     gap: 8px;
-    margin-top: 2px;
+    border: 2px solid $c-yellow;
+    border-radius: 8px;
     text-shadow:
       2px 2px 0 $c-dark-bluey,
       -2px 2px 0 $c-dark-bluey,
       -2px -2px 0 $c-dark-bluey,
       2px -2px 0 $c-dark-bluey;
-    background: $c-tan-lite;
-    padding: 4px 8px;
-    border-radius: 8px;
 }
 
 .party-speed-stat {
@@ -510,6 +513,12 @@
     min-width: 0;
 
     &.non-caster { opacity: 0.35; }
+
+    &.is-focusing .stat-icon {
+      color: #2ac4ff;
+      filter: drop-shadow(0 0 4px rgba(42, 196, 255, 0.7));
+      transition: color 0.3s, filter 0.3s;
+    }
   }
 
   .stat-icon {
@@ -1454,6 +1463,12 @@
     &.compact-fatigue  { opacity: 0.85; }
 
     &.non-caster { opacity: 0.3; cursor: default; }
+
+    &.is-focusing i {
+      color: #2ac4ff;
+      filter: drop-shadow(0 0 4px rgba(42, 196, 255, 0.7));
+      transition: color 0.3s, filter 0.3s;
+    }
 
     // Aside stats (speed + luck next to portrait): slightly smaller
     .compact-portrait-aside & {

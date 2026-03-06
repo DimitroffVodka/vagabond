@@ -202,6 +202,7 @@
       "Dazed": "Dazed",
       "Dead": "Dead",
       "Fatigued": "Fatigued",
+      "Focusing": "Focusing",
       "Frightened": "Frightened",
       "Incapacitated": "Incapacitated",
       "Invisible": "Invisible",
@@ -561,7 +562,10 @@
           "PickMember": "Party Member",
           "Add": "Add",
           "Wealth": "Wealth",
-          "TotalWealth": "Party Total Wealth"
+          "TotalWealth": "Party Total Wealth",
+          "AssignStatusEffects": "Assign Status Effects",
+          "RemoveAllStatuses": "Remove All Statuses",
+          "IsImmune": "{name} is immune to {status}."
         },
         "CompactView": {
           "Open": "Open Compact View",

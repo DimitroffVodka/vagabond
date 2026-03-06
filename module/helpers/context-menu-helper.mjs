@@ -47,8 +47,10 @@ export class ContextMenuHelper {
         item.classList.add('disabled');
       }
 
-      // Build item content
-      const iconHtml = itemConfig.icon ? `<i class="${itemConfig.icon}"></i>` : '';
+      // Build item content — supports FA class string (`icon`) or image URL (`img`)
+      const iconHtml = itemConfig.img
+        ? `<img src="${itemConfig.img}" width="16" height="16" style="object-fit:contain;border:none;flex-shrink:0;">`
+        : itemConfig.icon ? `<i class="${itemConfig.icon}"></i>` : '';
       const labelHtml = `<span>${itemConfig.label}</span>`;
       item.innerHTML = `${iconHtml}${labelHtml}`;
 

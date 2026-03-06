@@ -214,6 +214,7 @@ VAGABOND.statusConditions = {
   'dazed': 'VAGABOND.StatusConditions.Dazed',
   'dead': 'VAGABOND.StatusConditions.Dead',
   'fatigued': 'VAGABOND.StatusConditions.Fatigued',
+  'focusing': 'VAGABOND.StatusConditions.Focusing',
   'frightened': 'VAGABOND.StatusConditions.Frightened',
   'incapacitated': 'VAGABOND.StatusConditions.Incapacitated',
   'invisible': 'VAGABOND.StatusConditions.Invisible',
@@ -239,6 +240,15 @@ VAGABOND.statusConditions = {
  * @type {Array}
  */
 VAGABOND.statusEffectDefinitions = [
+  // AUTO-MANAGED (applied/removed by system code)
+  {
+    id: 'focusing',
+    name: 'VAGABOND.StatusConditions.Focusing',
+    img: 'icons/svg/aura.svg',
+    statuses: ['focusing'],
+    description: 'Currently sustaining one or more spells through Focus.'
+  },
+
   // MANUAL TRACKING (Phase 3 - Future)
   {
     id: 'berserk',

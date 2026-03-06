@@ -6612,13 +6612,16 @@ ol#combat-tracker.directory-list {
 .vagabond-context-menu.inventory-context-menu {
   position: fixed;
   z-index: 10000;
-  background: var(--vagabond-c-faint);
-  border: 2px solid var(--vagabond-c-dark);
+  background: var(--vagabond-c-dark);
+  border: 2px solid var(--vagabond-c-white);
   border-radius: 4px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   min-width: 150px;
   overflow: hidden;
-  color: var(--vagabond-c-dark);
+  color: var(--vagabond-c-white);
+  border-radius: 8px;
+  padding: 8PX;
+  corner-shape: scoop;
 }
 .vagabond .inventory-context-menu .context-menu-item,
 .vagabond-context-menu.inventory-context-menu .context-menu-item {
@@ -6629,12 +6632,11 @@ ol#combat-tracker.directory-list {
   gap: 8px;
   font-size: 13px;
   transition: background 0.15s ease;
-  color: var(--vagabond-c-dark);
+  color: var(--vagabond-c-white);
 }
 .vagabond .inventory-context-menu .context-menu-item:hover,
 .vagabond-context-menu.inventory-context-menu .context-menu-item:hover {
   background: var(--vagabond-c-tan-lite);
-  color: var(--vagabond-c-black);
 }
 .vagabond .inventory-context-menu .context-menu-item i,
 .vagabond-context-menu.inventory-context-menu .context-menu-item i {
@@ -6656,13 +6658,16 @@ ol#combat-tracker.directory-list {
 .vagabond-context-menu.status-context-menu {
   position: fixed;
   z-index: 10000;
-  background: var(--vagabond-c-faint);
-  border: 2px solid var(--vagabond-c-dark);
+  background: var(--vagabond-c-dark);
+  border: 2px solid var(--vagabond-c-white);
   border-radius: 4px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   min-width: 150px;
   overflow: hidden;
-  color: var(--vagabond-c-dark);
+  color: var(--vagabond-c-white);
+  border-radius: 8px;
+  padding: 8PX;
+  corner-shape: scoop;
 }
 .vagabond .status-context-menu .context-menu-item,
 .vagabond-context-menu.status-context-menu .context-menu-item {
@@ -6673,12 +6678,11 @@ ol#combat-tracker.directory-list {
   gap: 8px;
   font-size: 13px;
   transition: background 0.15s ease;
-  color: var(--vagabond-c-dark);
+  color: var(--vagabond-c-white);
 }
 .vagabond .status-context-menu .context-menu-item:hover,
 .vagabond-context-menu.status-context-menu .context-menu-item:hover {
   background: var(--vagabond-c-tan-lite);
-  color: var(--vagabond-c-black);
 }
 .vagabond .status-context-menu .context-menu-item i,
 .vagabond-context-menu.status-context-menu .context-menu-item i {
@@ -6700,13 +6704,16 @@ ol#combat-tracker.directory-list {
 .vagabond-context-menu.party-compact-context-menu {
   position: fixed;
   z-index: 10000;
-  background: var(--vagabond-c-faint);
-  border: 2px solid var(--vagabond-c-dark);
+  background: var(--vagabond-c-dark);
+  border: 2px solid var(--vagabond-c-white);
   border-radius: 4px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   min-width: 150px;
   overflow: hidden;
-  color: var(--vagabond-c-dark);
+  color: var(--vagabond-c-white);
+  border-radius: 8px;
+  padding: 8PX;
+  corner-shape: scoop;
 }
 .vagabond .party-compact-context-menu .context-menu-item,
 .vagabond-context-menu.party-compact-context-menu .context-menu-item {
@@ -6717,12 +6724,11 @@ ol#combat-tracker.directory-list {
   gap: 8px;
   font-size: 13px;
   transition: background 0.15s ease;
-  color: var(--vagabond-c-dark);
+  color: var(--vagabond-c-white);
 }
 .vagabond .party-compact-context-menu .context-menu-item:hover,
 .vagabond-context-menu.party-compact-context-menu .context-menu-item:hover {
   background: var(--vagabond-c-tan-lite);
-  color: var(--vagabond-c-black);
 }
 .vagabond .party-compact-context-menu .context-menu-item i,
 .vagabond-context-menu.party-compact-context-menu .context-menu-item i {
@@ -6737,6 +6743,132 @@ ol#combat-tracker.directory-list {
 .vagabond .party-compact-context-menu .context-menu-item.danger:hover,
 .vagabond-context-menu.party-compact-context-menu .context-menu-item.danger:hover {
   background: rgba(217, 83, 79, 0.1);
+}
+
+/* Party portrait right-click — main menu */
+.vagabond .party-status-context-menu,
+.vagabond-context-menu.party-status-context-menu {
+  position: fixed;
+  z-index: 10000;
+  background: var(--vagabond-c-dark);
+  border: 2px solid var(--vagabond-c-white);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  min-width: 150px;
+  overflow: hidden;
+  color: var(--vagabond-c-white);
+  border-radius: 8px;
+  padding: 8PX;
+  corner-shape: scoop;
+}
+.vagabond .party-status-context-menu .context-menu-item,
+.vagabond-context-menu.party-status-context-menu .context-menu-item {
+  padding: 5px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  transition: background 0.15s ease;
+  color: var(--vagabond-c-white);
+}
+.vagabond .party-status-context-menu .context-menu-item:hover,
+.vagabond-context-menu.party-status-context-menu .context-menu-item:hover {
+  background: var(--vagabond-c-tan-lite);
+}
+.vagabond .party-status-context-menu .context-menu-item i,
+.vagabond-context-menu.party-status-context-menu .context-menu-item i {
+  width: 16px;
+  text-align: center;
+  color: inherit;
+}
+.vagabond .party-status-context-menu .context-menu-item.danger,
+.vagabond-context-menu.party-status-context-menu .context-menu-item.danger {
+  color: var(--vagabond-c-red);
+}
+.vagabond .party-status-context-menu .context-menu-item.danger:hover,
+.vagabond-context-menu.party-status-context-menu .context-menu-item.danger:hover {
+  background: rgba(217, 83, 79, 0.1);
+}
+
+/* Party portrait right-click — status submenu (3-column grid) */
+.vagabond .party-status-submenu,
+.vagabond-context-menu.party-status-submenu {
+  position: fixed;
+  z-index: 10000;
+  background: var(--vagabond-c-dark);
+  border: 2px solid var(--vagabond-c-white);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  min-width: 150px;
+  overflow: hidden;
+  color: var(--vagabond-c-white);
+  border-radius: 8px;
+  padding: 8PX;
+  corner-shape: scoop;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(140px, 1fr));
+  min-width: 440px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.vagabond .party-status-submenu .context-menu-item,
+.vagabond-context-menu.party-status-submenu .context-menu-item {
+  padding: 5px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  transition: background 0.15s ease;
+  color: var(--vagabond-c-white);
+}
+.vagabond .party-status-submenu .context-menu-item:hover,
+.vagabond-context-menu.party-status-submenu .context-menu-item:hover {
+  background: var(--vagabond-c-tan-lite);
+}
+.vagabond .party-status-submenu .context-menu-item i,
+.vagabond-context-menu.party-status-submenu .context-menu-item i {
+  width: 16px;
+  text-align: center;
+  color: inherit;
+}
+.vagabond .party-status-submenu .context-menu-item.danger,
+.vagabond-context-menu.party-status-submenu .context-menu-item.danger {
+  color: var(--vagabond-c-red);
+}
+.vagabond .party-status-submenu .context-menu-item.danger:hover,
+.vagabond-context-menu.party-status-submenu .context-menu-item.danger:hover {
+  background: rgba(217, 83, 79, 0.1);
+}
+.vagabond .party-status-submenu .context-menu-item .status-icon,
+.vagabond-context-menu.party-status-submenu .context-menu-item .status-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  border: none;
+  flex-shrink: 0;
+}
+.vagabond .party-status-submenu .context-menu-item.status-active,
+.vagabond-context-menu.party-status-submenu .context-menu-item.status-active {
+  background: rgba(76, 175, 80, 0.12);
+}
+.vagabond .party-status-submenu .context-menu-item.status-active .status-icon,
+.vagabond-context-menu.party-status-submenu .context-menu-item.status-active .status-icon {
+  filter: drop-shadow(0 0 3px rgba(76, 175, 80, 0.8));
+}
+.vagabond .party-status-submenu .context-menu-item.status-active:hover,
+.vagabond-context-menu.party-status-submenu .context-menu-item.status-active:hover {
+  background: rgba(76, 175, 80, 0.25);
+}
+.vagabond .party-status-submenu .context-menu-item.status-immune,
+.vagabond-context-menu.party-status-submenu .context-menu-item.status-immune {
+  opacity: 0.5;
+  cursor: default;
+}
+.vagabond .party-status-submenu .context-menu-item.status-immune:hover,
+.vagabond-context-menu.party-status-submenu .context-menu-item.status-immune:hover {
+  background: rgba(229, 115, 115, 0.1);
 }
 
 /*
@@ -12704,8 +12836,8 @@ details[open] .vagabond .npc-immunity-toggle i {
   border-bottom: 3px solid var(--vagabond-c-black);
 }
 .vagabond .party-portrait {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   object-fit: cover;
   object-position: top center;
   background-color: var(--vagabond-c-black);
@@ -12747,14 +12879,17 @@ details[open] .vagabond .npc-immunity-toggle i {
   opacity: 0.9;
 }
 .vagabond .party-speeds {
+  position: relative;
+  bottom: 0;
   display: flex;
   justify-content: space-around;
+  align-content: baseline;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 2px 8px;
   gap: 8px;
-  margin-top: 2px;
-  text-shadow: 2px 2px 0 var(--vagabond-c-dark-bluey), -2px 2px 0 var(--vagabond-c-dark-bluey), -2px -2px 0 var(--vagabond-c-dark-bluey), 2px -2px 0 var(--vagabond-c-dark-bluey);
-  background: var(--vagabond-c-tan-lite);
-  padding: 4px 8px;
+  border: 2px solid var(--vagabond-c-chat-yellow);
   border-radius: 8px;
+  text-shadow: 2px 2px 0 var(--vagabond-c-dark-bluey), -2px 2px 0 var(--vagabond-c-dark-bluey), -2px -2px 0 var(--vagabond-c-dark-bluey), 2px -2px 0 var(--vagabond-c-dark-bluey);
 }
 .vagabond .party-speed-stat {
   display: flex;
@@ -13123,6 +13258,11 @@ details[open] .vagabond .npc-immunity-toggle i {
 }
 .vagabond .party-member-card .member-stat-cell.non-caster {
   opacity: 0.35;
+}
+.vagabond .party-member-card .member-stat-cell.is-focusing .stat-icon {
+  color: #2ac4ff;
+  filter: drop-shadow(0 0 4px rgba(42, 196, 255, 0.7));
+  transition: color 0.3s, filter 0.3s;
 }
 .vagabond .party-member-card .stat-icon {
   font-size: 1em;
@@ -13971,6 +14111,11 @@ details[open] .vagabond .npc-immunity-toggle i {
   opacity: 0.3;
   cursor: default;
 }
+.vagabond.party-compact-view .compact-stat.is-focusing i {
+  color: #2ac4ff;
+  filter: drop-shadow(0 0 4px rgba(42, 196, 255, 0.7));
+  transition: color 0.3s, filter 0.3s;
+}
 .compact-portrait-aside .vagabond.party-compact-view .compact-stat {
   font-size: 0.82em;
   padding: 0;
@@ -14145,7 +14290,7 @@ details[open] .vagabond .npc-immunity-toggle i {
   background-size: cover;
 }
 .vagabond .construct-header .construct-portrait {
-  width: 110px;
+  width: 120px;
   height: 110px;
   object-fit: cover;
   object-position: top center;
@@ -14183,14 +14328,17 @@ details[open] .vagabond .npc-immunity-toggle i {
   width: 100%;
 }
 .vagabond .construct-header .construct-speeds {
+  position: relative;
+  bottom: 0;
   display: flex;
   justify-content: space-around;
+  align-content: baseline;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 2px 8px;
   gap: 8px;
-  margin-top: 2px;
-  text-shadow: 2px 2px 0 var(--vagabond-c-dark-bluey), -2px 2px 0 var(--vagabond-c-dark-bluey), -2px -2px 0 var(--vagabond-c-dark-bluey), 2px -2px 0 var(--vagabond-c-dark-bluey);
-  background: var(--vagabond-c-tan-lite);
-  padding: 4px 8px;
+  border: 2px solid var(--vagabond-c-chat-yellow);
   border-radius: 8px;
+  text-shadow: 2px 2px 0 var(--vagabond-c-dark-bluey), -2px 2px 0 var(--vagabond-c-dark-bluey), -2px -2px 0 var(--vagabond-c-dark-bluey), 2px -2px 0 var(--vagabond-c-dark-bluey);
 }
 .vagabond .construct-header .construct-speed-stat {
   display: flex;

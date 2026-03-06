@@ -56,6 +56,45 @@
   @include context-menu-styles;
 }
 
+/* Party portrait right-click — main menu */
+.vagabond .party-status-context-menu,
+.vagabond-context-menu.party-status-context-menu {
+  @include context-menu-styles;
+}
+
+/* Party portrait right-click — status submenu (3-column grid) */
+.vagabond .party-status-submenu,
+.vagabond-context-menu.party-status-submenu {
+  @include context-menu-styles;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(140px, 1fr));
+  min-width: 440px;
+  max-height: 60vh;
+  overflow-y: auto;
+
+  .context-menu-item {
+    .status-icon {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      border: none;
+      flex-shrink: 0;
+    }
+
+    &.status-active {
+      background: rgba(76, 175, 80, 0.12);
+      .status-icon { filter: drop-shadow(0 0 3px rgba(76, 175, 80, 0.8)); }
+      &:hover { background: rgba(76, 175, 80, 0.25); }
+    }
+
+    &.status-immune {
+      opacity: 0.5;
+      cursor: default;
+      &:hover { background: rgba(229, 115, 115, 0.1); }
+    }
+  }
+}
+
 /*
  * Note: Other context menu types (progress-clock-context-menu, countdown-dice-context-menu)
  * currently use custom implementations that don't follow the ContextMenuHelper pattern.

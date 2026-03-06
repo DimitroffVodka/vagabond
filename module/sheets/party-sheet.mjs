@@ -2,6 +2,7 @@ import { VagabondActorSheet } from './actor-sheet.mjs';
 import { prepareActiveEffectCategories } from '../helpers/effects.mjs';
 import { TargetHelper } from '../helpers/target-helper.mjs';
 import { PartyCompactView } from '../applications/party-compact-view.mjs';
+import { PartyStatusHelper } from '../helpers/party-status-helper.mjs';
 
 /**
  * Party actor sheet.
@@ -235,6 +236,7 @@ export class VagabondPartySheet extends VagabondActorSheet {
         castingMax: sys.mana?.castingMax ?? 0,
         pct: manaPct,
         isSpellcaster: sys.attributes?.isSpellcaster ?? false,
+        isFocusing: (sys.focus?.current ?? 0) > 0,
       },
       armor,
       inventory: {
@@ -562,6 +564,7 @@ export class VagabondPartySheet extends VagabondActorSheet {
   /** @override */
   async _onRender(context, options) {
     await super._onRender(context, options);
+    PartyStatusHelper.closeAll();
 
     // Abort previous listeners and create new controller
     this._listenerController?.abort();
@@ -627,6 +630,21 @@ export class VagabondPartySheet extends VagabondActorSheet {
           if (!uuid) return;
           const actor = await fromUuid(uuid);
           actor?.sheet.render(true);
+        }, { signal });
+      });
+
+    // Portrait → right-click: apply/remove status effects
+    this.element
+      .querySelectorAll('[data-action="panToToken"]')
+      .forEach(el => {
+        el.addEventListener('contextmenu', async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const uuid = el.closest('[data-actor-uuid]')?.dataset.actorUuid;
+          if (!uuid) return;
+          const actor = await fromUuid(uuid);
+          if (!actor) return;
+          await PartyStatusHelper.showStatusMenu(actor, e.clientX, e.clientY);
         }, { signal });
       });
 
@@ -1019,6 +1037,7 @@ export class VagabondPartySheet extends VagabondActorSheet {
 
   /** @override */
   async close(options) {
+    PartyStatusHelper.closeAll();
     this._listenerController?.abort();
     this._listenerController = null;
     if (this._actorUpdateHookId) {

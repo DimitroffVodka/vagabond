@@ -1,5 +1,6 @@
 const { api } = foundry.applications;
 import { ContextMenuHelper } from '../helpers/context-menu-helper.mjs';
+import { PartyStatusHelper } from '../helpers/party-status-helper.mjs';
 
 /**
  * Floating compact party overview — frameless, draggable.
@@ -78,6 +79,7 @@ export class PartyCompactView extends api.HandlebarsApplicationMixin(api.Applica
         current: sys.mana?.current ?? 0,
         max: sys.mana?.max ?? 0,
         isSpellcaster: sys.attributes?.isSpellcaster ?? false,
+        isFocusing: (sys.focus?.current ?? 0) > 0,
       },
       speed: sys.speed?.base ?? 6,
       luck: sys.currentLuck ?? 0,
@@ -107,6 +109,7 @@ export class PartyCompactView extends api.HandlebarsApplicationMixin(api.Applica
 
   _onRender(context, options) {
     this.setPosition();
+    PartyStatusHelper.closeAll();
 
     // Rebuild all element-level listeners on every render.
     this.#listenerController?.abort();
@@ -124,7 +127,7 @@ export class PartyCompactView extends api.HandlebarsApplicationMixin(api.Applica
     this._clearHooks();
     this.#listenerController?.abort();
     this.#listenerController = null;
-    ContextMenuHelper.closeAll();
+    PartyStatusHelper.closeAll();
     return super.close(options);
   }
 
@@ -158,6 +161,29 @@ export class PartyCompactView extends api.HandlebarsApplicationMixin(api.Applica
   // ── Stat interactions ───────────────────────────────────────────────────────
 
   _bindStatClicks(signal) {
+    // Portrait → left-click: pan to token / right-click: apply status
+    for (const el of this.element.querySelectorAll('.compact-portrait')) {
+      const uuid = el.closest('[data-actor-uuid]')?.dataset.actorUuid;
+      el.addEventListener('click', async () => {
+        if (!uuid) return;
+        const actor = await fromUuid(uuid);
+        if (!actor) return;
+        const token = canvas.tokens?.placeables.find(
+          t => t.actor?.uuid === uuid || t.document.actorId === actor.id
+        );
+        if (!token) { ui.notifications.warn(`${actor.name} has no token in this scene.`); return; }
+        canvas.animatePan({ x: token.center.x, y: token.center.y });
+      }, { signal });
+      el.addEventListener('contextmenu', async (e) => {
+        e.preventDefault();
+        e.stopPropagation(); // prevent the global compact-view context menu
+        if (!uuid) return;
+        const actor = await fromUuid(uuid);
+        if (!actor) return;
+        await PartyStatusHelper.showStatusMenu(actor, e.clientX, e.clientY);
+      }, { signal });
+    }
+
     // HP: left = −1, right = +1
     for (const el of this.element.querySelectorAll('.compact-hp')) {
       const uuid = el.closest('[data-actor-uuid]')?.dataset.actorUuid;

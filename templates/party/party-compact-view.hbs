@@ -18,10 +18,10 @@
         </div>
       </div>
       <img
-        class="compact-portrait"
+        class="compact-portrait clickable"
         src="{{img}}"
         alt="{{name}}"
-        data-tooltip="{{name}} · {{localize 'VAGABOND.Actor.Party.Card.LevelAbbr'}} {{level}}"
+        data-tooltip="{{name}} · {{localize 'VAGABOND.Actor.Party.Card.LevelAbbr'}} {{level}} · {{localize 'VAGABOND.Actor.Party.Card.PanToToken'}}"
       >
     </div>
 
@@ -47,7 +47,7 @@
           <i class="fas fa-skull"></i>
           <span>{{fatigue}}</span>
         </div>
-        <div class="compact-stat{{#unless mana.isSpellcaster}} non-caster{{/unless}}"
+        <div class="compact-stat{{#unless mana.isSpellcaster}} non-caster{{/unless}}{{#if mana.isFocusing}} is-focusing{{/if}}"
           data-tooltip="{{localize 'VAGABOND.Actor.Party.Card.Mana'}} {{mana.current}}/{{mana.max}}">
           <i class="fas fa-star-christmas"></i>
           <span>{{mana.current}}/{{mana.max}}</span>

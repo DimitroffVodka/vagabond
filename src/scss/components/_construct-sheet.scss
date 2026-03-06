@@ -15,7 +15,7 @@
   background-size: cover;
 
   .construct-portrait {
-    width: 110px;
+    width: 120px;
     height: 110px;
     object-fit: cover;
     object-position: top center;
@@ -61,18 +61,21 @@
   }
 
   .construct-speeds {
+    position: relative;
+    bottom: 0;
     display: flex;
     justify-content: space-around;
+    align-content: baseline;
+    background: rgba(0,0,0,0.5);
+    padding: 2px 8px;
     gap: 8px;
-    margin-top: 2px;
+    border: 2px solid $c-yellow;
+    border-radius: 8px;
     text-shadow:
       2px 2px 0 $c-dark-bluey,
       -2px 2px 0 $c-dark-bluey,
       -2px -2px 0 $c-dark-bluey,
       2px -2px 0 $c-dark-bluey;
-    background: $c-tan-lite;
-    padding: 4px 8px;
-    border-radius: 8px;
   }
 
   .construct-speed-stat {

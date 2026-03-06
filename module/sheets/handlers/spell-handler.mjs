@@ -689,6 +689,14 @@ export class SpellHandler {
     }
 
     await this.actor.update({ 'system.focus.spellIds': next });
+
+    // Sync the "focusing" status effect with focus state
+    const wasFocusing = current.length > 0;
+    const isFocusing  = next.length > 0;
+    if (isFocusing !== wasFocusing) {
+      await this.actor.toggleStatusEffect('focusing', { active: isFocusing });
+    }
+
     ui.combat?.render(false);
   }
 
