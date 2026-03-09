@@ -905,8 +905,10 @@ export default class VagabondCharacter extends VagabondActorBase {
   getRollData() {
     const data = {};
     if (this.stats) {
+      data.stats = {};
       for (let [k, v] of Object.entries(this.stats)) {
         data[k] = foundry.utils.deepClone(v);
+        data.stats[k] = data[k]; // also available as @stats.might.total etc.
       }
     }
     if (this.skills) {

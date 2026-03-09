@@ -73,16 +73,16 @@
  * - **bonus**: Bonus from Active Effects (can be formula or number)
  * - **total**: Calculated value (value + bonus, clamped to 0-12)
  *
- * ## Effect Keys (DataModel Format - NO "system." prefix!)
- * - stats.might.bonus
- * - stats.dexterity.bonus
- * - stats.awareness.bonus
- * - stats.reason.bonus
- * - stats.presence.bonus
- * - stats.luck.bonus
+ * ## Effect Keys (use "system." prefix — Foundry v13 convention)
+ * - system.stats.might.bonus
+ * - system.stats.dexterity.bonus
+ * - system.stats.awareness.bonus
+ * - system.stats.reason.bonus
+ * - system.stats.presence.bonus
+ * - system.stats.luck.bonus
  *
- * **IMPORTANT**: Do NOT include "system." prefix! Foundry v13 DataModels handle this automatically.
- * Using "system.stats.luck.bonus" will NOT work - use "stats.luck.bonus" instead.
+ * **IMPORTANT**: Always include the "system." prefix for all attribute keys in Foundry v13.
+ * Using "stats.luck.bonus" (without "system.") will NOT work.
  *
  * ## What Stats Affect
  * Stat bonuses affect ALL derived calculations:

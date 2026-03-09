@@ -74,12 +74,14 @@ export class VagabondActor extends Actor {
         const parentItem = effect.parent;
         if (!parentItem) return false; // No parent, can't check equipped state
 
-        // Check if item is equipped
-        const equipmentState = parentItem.system?.equipmentState;
-        if (!equipmentState) return true; // No equipment state, assume equipped
-
-        // Item must be in an equipped state (not 'unequipped')
-        return equipmentState !== 'unequipped';
+        // Use system.equipped (boolean) — reliable for ALL equipment types:
+        //   Weapons:      computed in _prepareWeaponData() from equipmentState
+        //   Armor/gear/relics: a direct BooleanField toggled by the user
+        // Do NOT use equipmentState directly — it stays 'unequipped' for armor/gear
+        // even when the item is equipped, which would incorrectly block the effect.
+        const equipped = parentItem.system?.equipped;
+        if (equipped === undefined || equipped === null) return true; // No equipped field → assume applies
+        return equipped === true;
       }
 
       // "permanent" effects always apply (including class effects)
