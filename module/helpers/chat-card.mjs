@@ -286,7 +286,7 @@ export class VagabondChatCard {
     hasDefenses = false, attackType = 'melee', footerActions = [],
     propertyDetails = null, damageFormula = null,
     targetsAtRollTime = [], metadata = [],
-    rerollData = null
+    rerollData = null, brawlIntent = 'damage'
   }) {
       const card = new VagabondChatCard();
       const iconStyle = game.settings.get('vagabond', 'chatCardIconStyle');
@@ -381,22 +381,42 @@ export class VagabondChatCard {
       // 3. Handle Damage & Buttons
       if (damageRoll) {
           const { VagabondDamageHelper } = await import('./damage-helper.mjs');
-          
+
           // Fix: Normalize key for icon lookup
           const rawKey = damageType || 'physical';
           const key = rawKey.toLowerCase();
           const dLabel = game.i18n.localize(CONFIG.VAGABOND.damageTypes[key]) || damageType;
           const isCrit = rollData?.isCritical || false;
-          
+
           card.addDamage(damageRoll, dLabel, isCrit, key);
 
           const isHealing = damageType.toLowerCase() === 'healing';
 
+          // Cleave: half damage to each target when 2+ targets selected
+          const isCleave = item?.system?.properties?.includes('Cleave') && targetsAtRollTime?.length >= 2;
+
           let btns = isHealing
             ? VagabondDamageHelper.createApplyDamageButton(damageRoll.total, dLabel, actor.id, item?.id, targetsAtRollTime)
-            : VagabondDamageHelper.createSaveButtons(damageRoll.total, damageType, damageRoll, actor.id, item?.id, attackType, targetsAtRollTime);
+            : VagabondDamageHelper.createSaveButtons(damageRoll.total, damageType, damageRoll, actor.id, item?.id, attackType, targetsAtRollTime, isCleave);
 
           card.addFooterAction(btns);
+
+          // Bully perk: if this is a Bully weapon (grappled creature used as greatclub),
+          // also deal the same damage to the grappled creature
+          if (item?.flags?.vagabond?.bullyWeapon) {
+              const grappledActorId = item.flags.vagabond.grappledActorId;
+              const grappledActor = game.actors.get(grappledActorId);
+              if (grappledActor) {
+                  const currentHP = grappledActor.system.health?.value || 0;
+                  const newHP = Math.max(0, currentHP - damageRoll.total);
+                  await grappledActor.update({ 'system.health.value': newHP });
+                  card.addFooterAction(`
+                    <div class="brawl-result" style="text-align:center; padding:6px; font-weight:bold;">
+                      <i class="fas fa-hand-back-fist"></i> ${grappledActor.name} also takes <strong>${damageRoll.total}</strong> damage! (HP: ${currentHP} → ${newHP})
+                    </div>
+                  `);
+              }
+          }
 
       } else if (rollData?.isHit && item && !damageRoll) {
            const { VagabondDamageHelper } = await import('./damage-helper.mjs');
@@ -423,7 +443,175 @@ export class VagabondChatCard {
                attackType,
                statKey  // ✅ FIX: Pass statKey for critical damage bonus
            }, targetsAtRollTime);
-           card.addFooterAction(btn);
+           // Brawl: if intent is grapple, apply Restrained and skip damage button
+           if (brawlIntent === 'grapple') {
+               const appliedNames = [];
+               const immuneNames = [];
+               const hasBully = actor.system.hasBully || false;
+
+               // Get Restrained status effect definition for manual AE creation
+               const restrainedDef = CONFIG.statusEffects.find(e => e.id === 'restrained');
+
+               for (const t of targetsAtRollTime) {
+                   const targetActor = game.actors.get(t.actorId);
+                   if (targetActor) {
+                       const immunities = targetActor.system.statusImmunities ?? [];
+                       if (immunities.includes('restrained')) {
+                           immuneNames.push(t.actorName);
+                       } else {
+                           // Create Restrained AE manually so we can track the grappler
+                           await targetActor.createEmbeddedDocuments('ActiveEffect', [{
+                               name: game.i18n.localize(restrainedDef.name),
+                               img: restrainedDef.img,
+                               disabled: false,
+                               statuses: ['restrained'],
+                               changes: restrainedDef.changes || [],
+                               description: restrainedDef.description || '',
+                               flags: {
+                                   vagabond: {
+                                       grappledBy: actor.id
+                                   }
+                               }
+                           }]);
+                           appliedNames.push(t.actorName);
+
+                           // Bully perk: auto-create "Grappled Creature" weapon on the attacker
+                           if (hasBully) {
+                               // Remove any existing Bully weapon for this target first
+                               const existingWeapon = actor.items.find(i =>
+                                   i.flags?.vagabond?.bullyWeapon && i.flags?.vagabond?.grappledActorId === targetActor.id
+                               );
+                               if (existingWeapon) await existingWeapon.delete();
+
+                               await actor.createEmbeddedDocuments('Item', [{
+                                   name: `${t.actorName} (Grappled)`,
+                                   type: 'equipment',
+                                   img: targetActor.img || 'icons/skills/melee/unarmed-punch-fist.webp',
+                                   system: {
+                                       equipmentType: 'weapon',
+                                       weaponSkill: 'brawl',
+                                       range: 'close',
+                                       grip: '2H',
+                                       damageOneHand: 'd8',
+                                       damageTwoHands: 'd8',
+                                       damageTypeOneHand: 'physical',
+                                       damageTypeTwoHands: 'physical',
+                                       equipmentState: 'twoHands',
+                                       equipped: true,
+                                       properties: ['Brawl'],
+                                       quantity: 1,
+                                       baseSlots: 0
+                                   },
+                                   flags: {
+                                       vagabond: {
+                                           bullyWeapon: true,
+                                           grappledActorId: targetActor.id
+                                       }
+                                   }
+                               }]);
+                           }
+                       }
+                   }
+               }
+               let grappleResultHtml = '';
+               if (appliedNames.length > 0) {
+                   grappleResultHtml += `<i class="fas fa-hand-fist"></i> ${appliedNames.join(', ')} ${appliedNames.length === 1 ? 'is' : 'are'} now <em>Restrained</em>!`;
+                   if (hasBully) {
+                       grappleResultHtml += `<br><i class="fas fa-hand-back-fist"></i> ${appliedNames.join(', ')} can be used as a <strong>Greatclub</strong>!`;
+                   }
+               }
+               if (immuneNames.length > 0) {
+                   if (grappleResultHtml) grappleResultHtml += '<br>';
+                   grappleResultHtml += `<i class="fas fa-shield-halved"></i> ${immuneNames.join(', ')} ${immuneNames.length === 1 ? 'is' : 'are'} <strong>immune</strong> to Restrained!`;
+               }
+               card.addFooterAction(`
+                 <div class="brawl-result" style="text-align:center; padding:6px; font-weight:bold;">
+                   ${grappleResultHtml}
+                 </div>
+               `);
+           } else if (brawlIntent === 'shove') {
+               // Shove: show Push 5' / Prone choice buttons
+               const targetIds = targetsAtRollTime.map(t => t.tokenId).join(',');
+               const attackerToken = actor.getActiveTokens()?.[0];
+               const attackerTokenId = attackerToken?.id || '';
+
+               card.addFooterAction(`
+                 <div class="save-buttons-row">
+                   <button class="vagabond-brawl-push-button vagabond-save-button"
+                     data-vagabond-button="true"
+                     data-actor-id="${actor.id}"
+                     data-target-ids="${targetIds}"
+                     data-attacker-token-id="${attackerTokenId}">
+                     <i class="fas fa-arrow-right"></i> Push 5'
+                   </button>
+                   <button class="vagabond-brawl-prone-button vagabond-save-button"
+                     data-vagabond-button="true"
+                     data-actor-id="${actor.id}"
+                     data-target-ids="${targetIds}">
+                     <i class="fas fa-person-falling"></i> Prone
+                   </button>
+                 </div>
+               `);
+           } else {
+               // Normal damage intent
+               card.addFooterAction(btn);
+
+               // Fisticuffs: if actor has fisticuffs + attacker had Favor + hit,
+               // show post-hit Grapple/Shove option (Pugilist feature)
+               // Use attackerFavorHinder (original attacker state, before target modifiers)
+               const attackerHadFavor = rollData.attackerFavorHinder === 'favor' || rollData.favorHinder === 'favor';
+               if (actor.system.fisticuffs && attackerHadFavor && targetsAtRollTime?.length >= 1) {
+                   const sizeOrder = ['small', 'medium', 'large', 'huge', 'giant', 'colossal'];
+                   const attackerSize = actor.system.ancestryData?.size || actor.system.size || 'medium';
+                   const attackerSizeIdx = sizeOrder.indexOf(attackerSize);
+                   const shoveSizeOverride = actor.system.shoveSizeOverride;
+                   const effectiveShoveSizeIdx = Math.max(attackerSizeIdx, shoveSizeOverride ? sizeOrder.indexOf(shoveSizeOverride) : attackerSizeIdx);
+
+                   const grappleTargets = targetsAtRollTime.filter(t => {
+                       const tActor = game.actors.get(t.actorId);
+                       if (!tActor) return false;
+                       const tSize = tActor.system.ancestryData?.size || tActor.system.size || 'medium';
+                       return sizeOrder.indexOf(tSize) <= attackerSizeIdx;
+                   });
+                   const shoveTargets = targetsAtRollTime.filter(t => {
+                       const tActor = game.actors.get(t.actorId);
+                       if (!tActor) return false;
+                       const tSize = tActor.system.ancestryData?.size || tActor.system.size || 'medium';
+                       return sizeOrder.indexOf(tSize) <= effectiveShoveSizeIdx;
+                   });
+
+                   if (grappleTargets.length > 0 || shoveTargets.length > 0) {
+                       const attackerToken = actor.getActiveTokens()?.[0];
+                       const attackerTokenId = attackerToken?.id || '';
+                       let buttonsHtml = '';
+
+                       if (grappleTargets.length > 0) {
+                           const targetIds = grappleTargets.map(t => t.tokenId).join(',');
+                           buttonsHtml += `
+                             <button class="vagabond-brawl-grapple-button vagabond-save-button"
+                               data-vagabond-button="true"
+                               data-actor-id="${actor.id}"
+                               data-target-ids="${targetIds}"
+                               data-attacker-token-id="${attackerTokenId}">
+                               <i class="fas fa-hand-fist"></i> Grapple
+                             </button>`;
+                       }
+                       if (shoveTargets.length > 0) {
+                           const targetIds = shoveTargets.map(t => t.tokenId).join(',');
+                           buttonsHtml += `
+                             <button class="vagabond-brawl-shove-button vagabond-save-button"
+                               data-vagabond-button="true"
+                               data-actor-id="${actor.id}"
+                               data-target-ids="${targetIds}"
+                               data-attacker-token-id="${attackerTokenId}">
+                               <i class="fas fa-hand-back-fist"></i> Shove
+                             </button>`;
+                       }
+
+                       card.addFooterAction(`<div class="save-buttons-row">${buttonsHtml}</div>`);
+                   }
+               }
+           }
       }
 
       if (footerActions.length) footerActions.forEach(a => card.addFooterAction(a));
@@ -620,7 +808,7 @@ export class VagabondChatCard {
     });
   }
 
-  static async weaponAttack(actor, weapon, attackResult, damageRoll, targetsAtRollTime = []) {
+  static async weaponAttack(actor, weapon, attackResult, damageRoll, targetsAtRollTime = [], brawlIntent = 'damage') {
       const { weaponSkill, weaponSkillKey, isHit, isCritical } = attackResult;
 
       // FIX: Auto-roll damage if settings allow or if it's a critical hit
@@ -679,6 +867,18 @@ export class VagabondChatCard {
       // Determine attack type from weapon skill (ranged vs melee)
       const attackType = weaponSkillKey === 'ranged' ? 'ranged' : 'melee';
 
+      // Cleave indicator: show when weapon has Cleave and 2+ targets selected
+      if (weapon.system.properties?.includes('Cleave') && targetsAtRollTime?.length >= 2) {
+        tags.push({ label: 'Cleave (½ dmg each)', icon: 'fas fa-angles-right', cssClass: 'tag-property' });
+      }
+
+      // Brawl indicator: show intent when Brawl property is active
+      // Brawl/Shield Grapple/Shove intent tag
+      if (brawlIntent !== 'damage') {
+        const intentLabel = brawlIntent === 'grapple' ? 'Grapple' : 'Shove';
+        tags.push({ label: intentLabel, icon: 'fas fa-hand-fist', cssClass: 'tag-property' });
+      }
+
       const result = await this.createActionCard({
           actor,
           item: weapon,
@@ -692,6 +892,7 @@ export class VagabondChatCard {
           hasDefenses: true,
           attackType,  // ✅ FIX: Pass attackType for save hinder logic
           targetsAtRollTime,
+          brawlIntent,
           rerollData: {
             type: 'attack',
             itemId: weapon.id,

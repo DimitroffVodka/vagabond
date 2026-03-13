@@ -182,15 +182,16 @@ export default class VagabondPerk extends VagabondItemBase {
       }),
 
       // Active Effect mode (Add, Override, etc.)
-      effectMode: new fields.NumberField({
-        initial: 5, // ADD mode
+      effectMode: new fields.StringField({
+        initial: 'add',
         choices: {
-          0: 'EFFECT.MODE_CUSTOM',
-          1: 'EFFECT.MODE_MULTIPLY',
-          2: 'EFFECT.MODE_OVERRIDE',
-          3: 'EFFECT.MODE_UPGRADE',
-          4: 'EFFECT.MODE_DOWNGRADE',
-          5: 'EFFECT.MODE_ADD'
+          custom: 'EFFECT.MODE_CUSTOM',
+          multiply: 'EFFECT.MODE_MULTIPLY',
+          add: 'EFFECT.MODE_ADD',
+          subtract: 'EFFECT.MODE_SUBTRACT',
+          downgrade: 'EFFECT.MODE_DOWNGRADE',
+          upgrade: 'EFFECT.MODE_UPGRADE',
+          override: 'EFFECT.MODE_OVERRIDE'
         },
         label: 'VAGABOND.Perk.ChoiceEffectMode.Label',
         hint: 'VAGABOND.Perk.ChoiceEffectMode.Hint'
@@ -206,6 +207,18 @@ export default class VagabondPerk extends VagabondItemBase {
     });
 
     return schema;
+  }
+
+  /** @override */
+  static migrateData(source) {
+    // Migrate numeric effectMode values to V14 string types
+    const modeMap = { 0: 'custom', 1: 'multiply', 2: 'override', 3: 'upgrade', 4: 'downgrade', 5: 'add' };
+    for (const config of source.choiceConfigs ?? []) {
+      if (typeof config.effectMode === 'number') {
+        config.effectMode = modeMap[config.effectMode] ?? 'add';
+      }
+    }
+    return super.migrateData(source);
   }
 
   prepareDerivedData() {

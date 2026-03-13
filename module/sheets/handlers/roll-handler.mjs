@@ -243,11 +243,98 @@ export class RollHandler {
       const { VagabondRollBuilder } = await import('../../helpers/roll-builder.mjs');
 
       const systemFavorHinder = this.actor.system.favorHinder || 'none';
-      const favorHinder = VagabondRollBuilder.calculateEffectiveFavorHinder(
+      let favorHinder = VagabondRollBuilder.calculateEffectiveFavorHinder(
         systemFavorHinder,
         event.shiftKey,
         event.ctrlKey
       );
+
+      // Brawl/Shield property: pre-roll intent dialog
+      // Brawl: Damage / Grapple / Shove — Shield: Damage / Shove only
+      let brawlIntent = 'damage'; // default
+      const hasBrawl = item.system?.properties?.includes('Brawl');
+      const hasShield = item.system?.properties?.includes('Shield');
+
+      if ((hasBrawl || hasShield) && targetsAtRollTime?.length >= 1) {
+        // Size check: can only Grapple/Shove beings your size or smaller
+        // Shove may use a different effective size (e.g., Vanguard: Large/Huge for Shoves)
+        const sizeOrder = ['small', 'medium', 'large', 'huge', 'giant', 'colossal'];
+        const attackerSize = this.actor.system.ancestryData?.size || this.actor.system.size || 'medium';
+        const attackerSizeIdx = sizeOrder.indexOf(attackerSize);
+        const shoveSizeOverride = this.actor.system.shoveSizeOverride;
+        const shoveSizeIdx = shoveSizeOverride ? sizeOrder.indexOf(shoveSizeOverride) : attackerSizeIdx;
+        // Use the larger of real size and shove override
+        const effectiveShoveSizeIdx = Math.max(attackerSizeIdx, shoveSizeIdx);
+        const hasGrappleTarget = targetsAtRollTime.some(t => {
+          const targetActor = game.actors.get(t.actorId);
+          if (!targetActor) return false;
+          const targetSize = targetActor.system.ancestryData?.size || targetActor.system.size || 'medium';
+          return sizeOrder.indexOf(targetSize) <= attackerSizeIdx;
+        });
+
+        const hasShoveTarget = targetsAtRollTime.some(t => {
+          const targetActor = game.actors.get(t.actorId);
+          if (!targetActor) return false;
+          const targetSize = targetActor.system.ancestryData?.size || targetActor.system.size || 'medium';
+          return sizeOrder.indexOf(targetSize) <= effectiveShoveSizeIdx;
+        });
+
+        if (hasGrappleTarget || hasShoveTarget) {
+          // Build buttons based on weapon properties and eligible targets
+          const buttons = [
+            { action: 'damage', label: 'Damage', icon: 'fas fa-dice' }
+          ];
+          if (hasBrawl && hasGrappleTarget) {
+            buttons.push({ action: 'grapple', label: 'Grapple', icon: 'fas fa-hand-fist' });
+          }
+          if (hasShoveTarget) {
+            buttons.push({ action: 'shove', label: 'Shove', icon: 'fas fa-hand-back-fist' });
+          }
+
+          const dialogTitle = hasBrawl ? 'Brawl Attack' : 'Shield Attack';
+          const choice = await foundry.applications.api.DialogV2.wait({
+            window: { title: dialogTitle },
+            content: '<p>Choose your attack intent:</p>',
+            buttons
+          });
+
+          if (!choice) return; // dialog cancelled
+          brawlIntent = choice;
+
+          // Apply Favor for Grapple/Shove checks if actor has brawlCheckFavor
+          // (e.g., Orc Beefy trait: "Favor on Checks to Grapple or Shove")
+          if (brawlIntent !== 'damage') {
+            const brawlCheckFavor = this.actor.system.brawlCheckFavor || false;
+            let favorApplied = false;
+            if (brawlCheckFavor) {
+              if (favorHinder === 'hinder') {
+                favorHinder = 'none'; // Favor cancels Hinder
+              } else if (favorHinder === 'none') {
+                favorHinder = 'favor';
+              }
+              // If already 'favor', stays 'favor' (doesn't stack)
+              favorApplied = true;
+            }
+
+            // Bully perk: Favor on Grapple/Shove only when target is STRICTLY SMALLER
+            if (!favorApplied && (this.actor.system.hasBully || false)) {
+              const hasStrictlySmallerTarget = targetsAtRollTime.some(t => {
+                const tActor = game.actors.get(t.actorId);
+                if (!tActor) return false;
+                const tSize = tActor.system.ancestryData?.size || tActor.system.size || 'medium';
+                return sizeOrder.indexOf(tSize) < attackerSizeIdx;
+              });
+              if (hasStrictlySmallerTarget) {
+                if (favorHinder === 'hinder') {
+                  favorHinder = 'none';
+                } else if (favorHinder === 'none') {
+                  favorHinder = 'favor';
+                }
+              }
+            }
+          }
+        }
+      }
 
       const attackResult = await item.rollAttack(this.actor, favorHinder);
       if (!attackResult) return;
@@ -274,7 +361,8 @@ export class RollHandler {
         item,
         attackResult,
         damageRoll,
-        targetsAtRollTime
+        targetsAtRollTime,
+        brawlIntent
       );
       // Handle consumption after successful attack (regardless of hit/miss)
       await item.handleConsumption();

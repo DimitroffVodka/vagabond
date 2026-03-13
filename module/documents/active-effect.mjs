@@ -236,6 +236,13 @@ export class VagabondActiveEffect extends ActiveEffect {
       'system.finesseCritBonus': 'Crit: Finesse Threshold Bonus (-1 for 19-20)',
       'system.spellCritBonus': 'Crit: Spell Threshold Bonus (-1 for 19-20)',
 
+      'system.brawlCheckFavor': 'Brawl: Favor on Grapple/Shove Checks',
+      'system.fisticuffs': 'Brawl: Fisticuffs (Post-Hit Grapple/Shove)',
+      'system.hasBully': 'Perk: Bully (Grapple/Shove Favor + use as weapon)',
+      'system.shoveSizeOverride': 'Shove: Size Override (large, huge, etc.)',
+      'system.incomingAttacksModifier': 'Defender: Incoming Attacks Modifier (All)',
+      'system.incomingMeleeAttacksModifier': 'Defender: Incoming Melee Attacks Modifier',
+      'system.outgoingSavesModifier': 'Defender: Outgoing Saves Modifier',
       'system.bonusLuck': 'Bonus Luck',
       'system.currentLuck': 'Current Luck Pool',
       'system.studiedDice': 'Studied Dice Pool',

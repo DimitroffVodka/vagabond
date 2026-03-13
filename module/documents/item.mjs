@@ -588,7 +588,7 @@ export class VagabondItem extends Item {
     if (targets.length > 0) {
       const targetActor = targets[0].actor;
       if (targetActor) {
-        // Check incoming attacks modifier
+        // Check incoming attacks modifier (applies to ALL attacks)
         const targetModifier = targetActor.system.incomingAttacksModifier || 'none';
 
         // Apply target's modifier using same cancellation logic as saves
@@ -603,6 +603,25 @@ export class VagabondItem extends Item {
             effectiveFavorHinder = 'none';
           } else if (effectiveFavorHinder === 'none') {
             effectiveFavorHinder = 'hinder';
+          }
+        }
+
+        // Check incoming MELEE attacks modifier (e.g., Prone: melee only)
+        const isCloseAttack = this.system.range === 'close';
+        if (isCloseAttack) {
+          const meleeModifier = targetActor.system.incomingMeleeAttacksModifier || 'none';
+          if (meleeModifier === 'favor') {
+            if (effectiveFavorHinder === 'hinder') {
+              effectiveFavorHinder = 'none';
+            } else if (effectiveFavorHinder === 'none') {
+              effectiveFavorHinder = 'favor';
+            }
+          } else if (meleeModifier === 'hinder') {
+            if (effectiveFavorHinder === 'favor') {
+              effectiveFavorHinder = 'none';
+            } else if (effectiveFavorHinder === 'none') {
+              effectiveFavorHinder = 'hinder';
+            }
           }
         }
 
@@ -657,6 +676,7 @@ export class VagabondItem extends Item {
       weaponSkill,
       weaponSkillKey,
       favorHinder: effectiveFavorHinder, // Use modified favor/hinder (includes target's modifier)
+      attackerFavorHinder: favorHinder, // Original attacker's favor/hinder (before target modifiers)
     };
   }
 
@@ -696,6 +716,15 @@ export class VagabondItem extends Item {
       const statValue = actor.system.stats[statKey]?.value || 0;
       if (statValue !== 0) {  // ✅ FIX: Include negative stats too (they reduce damage)
         damageFormula += ` + ${statValue}`;
+      }
+
+      // Brutal property: add 1 extra damage die on crit
+      const properties = this.system.properties || [];
+      if (properties.includes('Brutal')) {
+        const dieMatch = this.system.currentDamage?.match(/d(\d+)/);
+        if (dieMatch) {
+          damageFormula += ` + 1d${dieMatch[1]}`;
+        }
       }
     }
 

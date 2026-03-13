@@ -1138,7 +1138,7 @@ export class VagabondDamageHelper {
   /**
    * Create save buttons (Reflex, Endure, Will, Apply Direct)
    */
-  static createSaveButtons(damageAmount, damageType, damageRoll, actorId, itemId, attackType, targetsAtRollTime = []) {
+  static createSaveButtons(damageAmount, damageType, damageRoll, actorId, itemId, attackType, targetsAtRollTime = [], isCleave = false) {
     // Encode the damage roll terms
     const rollTermsData = JSON.stringify({
       terms: damageRoll.terms.map(t => {
@@ -1166,6 +1166,9 @@ export class VagabondDamageHelper {
     let applyDirectLabel = game.i18n.localize(applyKey);
     if (applyDirectLabel === applyKey) applyDirectLabel = "Apply Direct";
 
+    // Cleave attribute (halve damage when applied)
+    const cleaveAttr = isCleave ? ' data-cleave="true"' : '';
+
     // LAYOUT FIX: Two rows. Top: Apply Direct. Bottom: Saves.
     return `
       <div class="vagabond-save-buttons-container">
@@ -1175,7 +1178,7 @@ export class VagabondDamageHelper {
               data-damage-type="${damageType}"
               data-actor-id="${actorId}"
               data-item-id="${itemId || ''}"
-              data-targets="${targetsJson}">
+              data-targets="${targetsJson}"${cleaveAttr}>
               <i class="fas fa-burst"></i> ${applyDirectLabel}
             </button>
         </div>
@@ -1189,7 +1192,7 @@ export class VagabondDamageHelper {
               data-actor-id="${actorId}"
               data-item-id="${itemId || ''}"
               data-attack-type="${attackType}"
-              data-targets="${targetsJson}">
+              data-targets="${targetsJson}"${cleaveAttr}>
               <i class="fas fa-running"></i> ${reflexLabel}
             </button>
             <button class="vagabond-save-button save-endure"
@@ -1200,7 +1203,7 @@ export class VagabondDamageHelper {
               data-actor-id="${actorId}"
               data-item-id="${itemId || ''}"
               data-attack-type="${attackType}"
-              data-targets="${targetsJson}">
+              data-targets="${targetsJson}"${cleaveAttr}>
               <i class="fas fa-shield-alt"></i> ${endureLabel}
             </button>
             <button class="vagabond-save-button save-will"
@@ -1211,7 +1214,7 @@ export class VagabondDamageHelper {
               data-actor-id="${actorId}"
               data-item-id="${itemId || ''}"
               data-attack-type="${attackType}"
-              data-targets="${targetsJson}">
+              data-targets="${targetsJson}"${cleaveAttr}>
               <i class="fas fa-brain"></i> ${willLabel}
             </button>
         </div>
@@ -1272,6 +1275,18 @@ export class VagabondDamageHelper {
       actorsToRoll = targetTokens.map(t => t.actor).filter(a => a);
     }
 
+    // Cleave: pre-calculate per-actor damage shares from raw damage
+    const isCleave = button.dataset.cleave === 'true';
+    const cleaveShares = new Map();
+    if (isCleave && actorsToRoll.length >= 2) {
+      // Build a pseudo-token list for _distributeCleave (needs .actor property)
+      const pseudoTokens = actorsToRoll.map(a => ({ actor: a }));
+      const shares = this._distributeCleave(damageAmount, pseudoTokens);
+      for (const { target, share } of shares) {
+        cleaveShares.set(target.actor, share);
+      }
+    }
+
     // Roll save for each actor
     for (const targetActor of actorsToRoll) {
       if (!targetActor) continue;
@@ -1287,6 +1302,9 @@ export class VagabondDamageHelper {
         ui.notifications.warn(game.i18n.localize('VAGABOND.Saves.NPCNoSaves'));
         continue;
       }
+
+      // Use cleave share or full damage
+      const effectiveDamage = cleaveShares.get(targetActor) ?? damageAmount;
 
       // Determine if save is Hindered by conditions (heavy armor, ranged attack, etc.)
       const isHindered = this._isSaveHindered(saveType, attackType, targetActor);
@@ -1314,12 +1332,14 @@ export class VagabondDamageHelper {
       const isCritical = VagabondChatCard.isRollCritical(saveRoll, critNumber);
 
       // Calculate damage breakdown for display
-      let damageAfterSave = damageAmount;
+      let damageAfterSave = effectiveDamage;
       let saveReduction = 0;
       if (isSuccess) {
         // Remove highest damage die from original roll
         damageAfterSave = this._removeHighestDie(rollTermsData);
-        saveReduction = damageAmount - damageAfterSave;
+        // For cleave, cap save-reduced damage at the cleave share
+        if (isCleave) damageAfterSave = Math.min(damageAfterSave, effectiveDamage);
+        saveReduction = effectiveDamage - damageAfterSave;
       }
 
       // Apply armor/immune/weak modifiers and track armor reduction
@@ -1345,7 +1365,7 @@ export class VagabondDamageHelper {
         isSuccess,
         isCritical,
         isHindered,
-        damageAmount,
+        effectiveDamage,
         saveReduction,
         armorReduction,
         finalDamage,
@@ -1581,6 +1601,39 @@ export class VagabondDamageHelper {
    * @returns {number} New damage total with highest die removed
    * @private
    */
+
+  /**
+   * Distribute cleave damage across targets using smart split.
+   * Ceil half goes to the lower-HP target, floor half to the other.
+   * The lower-HP target's share is capped at their current HP so damage isn't wasted;
+   * any excess is given to the other target, preserving total damage.
+   * @param {number} totalDamage - Raw damage to split (pre-armor)
+   * @param {Array} targets - Array of objects with .actor property
+   * @returns {Array<{target, share}>} Each target with its damage share
+   * @private
+   */
+  static _distributeCleave(totalDamage, targets) {
+    if (targets.length < 2) {
+      return targets.map(t => ({ target: t, share: totalDamage }));
+    }
+
+    // Sort by current HP ascending (lower HP first); ties keep original order
+    const sorted = [...targets].map((t, i) => ({ target: t, hp: t.actor?.system.health?.value || 0, idx: i }));
+    sorted.sort((a, b) => a.hp - b.hp || a.idx - b.idx);
+
+    const lowerEntry = sorted[0];
+    const higherEntry = sorted[1];
+
+    // Ceil to lower-HP target, but cap at their current HP
+    let lowerShare = Math.min(Math.ceil(totalDamage / 2), lowerEntry.hp);
+    let higherShare = totalDamage - lowerShare;
+
+    return [
+      { target: lowerEntry.target, share: lowerShare },
+      { target: higherEntry.target, share: higherShare },
+    ];
+  }
+
   static _removeHighestDie(rollTermsData) {
     let total = rollTermsData.total;
     let highestDieValue = 0;
@@ -1951,25 +2004,40 @@ export class VagabondDamageHelper {
       return;
     }
 
-    // Apply damage to each resolved target
-    for (const target of targetedTokens) {
-      const targetActor = target.actor;
-      if (!targetActor) continue;
+    // Cleave: smart damage distribution across targets
+    const isCleave = button.dataset.cleave === 'true';
 
-      // Check permissions
-      if (!targetActor.isOwner && !game.user.isGM) {
-        ui.notifications.warn(`You don't have permission to modify ${targetActor.name}.`);
-        continue;
+    if (isCleave && targetedTokens.length >= 2) {
+      // Distribute raw damage using smart split, then apply armor per-target
+      const shares = this._distributeCleave(damageAmount, targetedTokens);
+      for (const { target, share } of shares) {
+        const targetActor = target.actor;
+        if (!targetActor) continue;
+        if (!targetActor.isOwner && !game.user.isGM) {
+          ui.notifications.warn(`You don't have permission to modify ${targetActor.name}.`);
+          continue;
+        }
+        const finalDamage = this.calculateFinalDamage(targetActor, share, damageType, sourceItem);
+        const currentHP = targetActor.system.health?.value || 0;
+        const newHP = Math.max(0, currentHP - finalDamage);
+        await targetActor.update({ 'system.health.value': newHP });
+        ui.notifications.info(`Applied ${finalDamage} (Cleave) damage to ${targetActor.name}`);
       }
-
-      // Calculate final damage (armor/immune/weak)
-      const finalDamage = this.calculateFinalDamage(targetActor, damageAmount, damageType, sourceItem);
-
-      const currentHP = targetActor.system.health?.value || 0;
-      const newHP = Math.max(0, currentHP - finalDamage);
-      await targetActor.update({ 'system.health.value': newHP });
-
-      ui.notifications.info(`Applied ${finalDamage} damage to ${targetActor.name}`);
+    } else {
+      // Normal (non-cleave) damage application
+      for (const target of targetedTokens) {
+        const targetActor = target.actor;
+        if (!targetActor) continue;
+        if (!targetActor.isOwner && !game.user.isGM) {
+          ui.notifications.warn(`You don't have permission to modify ${targetActor.name}.`);
+          continue;
+        }
+        const finalDamage = this.calculateFinalDamage(targetActor, damageAmount, damageType, sourceItem);
+        const currentHP = targetActor.system.health?.value || 0;
+        const newHP = Math.max(0, currentHP - finalDamage);
+        await targetActor.update({ 'system.health.value': newHP });
+        ui.notifications.info(`Applied ${finalDamage} damage to ${targetActor.name}`);
+      }
     }
 
     // Button remains active so damage can be applied to different tokens

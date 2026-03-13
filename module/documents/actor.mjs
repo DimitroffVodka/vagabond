@@ -93,8 +93,11 @@ export class VagabondActor extends Actor {
 
   /** @override */
   prepareBaseData() {
-    // Data modifications in this step occur before processing embedded
-    // documents or derived data.
+    // V14: super.prepareBaseData() calls _clearData() which resets
+    // _completedActiveEffectPhases, overrides, statuses, etc.
+    // Without this call, repeated prepareData() cycles (e.g. preview
+    // actors in the character builder) fail with "phase already completed".
+    super.prepareBaseData();
   }
 
   /**
@@ -157,7 +160,7 @@ export class VagabondActor extends Actor {
     // Apply each effect's changes
     for (const effect of itemEffects) {
       for (const change of effect.changes) {
-        let { key, mode, value } = change;
+        let { key, type, value } = change;
 
         // IMPORTANT: Active Effect keys are document paths (e.g., "system.critNumber")
         // But rollData is flattened (e.g., "critNumber" at top level)
@@ -181,21 +184,24 @@ export class VagabondActor extends Actor {
         const finalKey = parts[parts.length - 1];
         const currentValue = target[finalKey] ?? 0;
 
-        // Apply the change based on mode
-        switch (mode) {
-          case CONST.ACTIVE_EFFECT_MODES.ADD:
+        // Apply the change based on type (V14: "type" replaces numeric "mode")
+        switch (type) {
+          case "add":
             target[finalKey] = currentValue + Number(value);
             break;
-          case CONST.ACTIVE_EFFECT_MODES.MULTIPLY:
+          case "subtract":
+            target[finalKey] = currentValue - Number(value);
+            break;
+          case "multiply":
             target[finalKey] = currentValue * Number(value);
             break;
-          case CONST.ACTIVE_EFFECT_MODES.OVERRIDE:
+          case "override":
             target[finalKey] = Number(value);
             break;
-          case CONST.ACTIVE_EFFECT_MODES.DOWNGRADE:
+          case "downgrade":
             target[finalKey] = Math.min(currentValue, Number(value));
             break;
-          case CONST.ACTIVE_EFFECT_MODES.UPGRADE:
+          case "upgrade":
             target[finalKey] = Math.max(currentValue, Number(value));
             break;
         }
