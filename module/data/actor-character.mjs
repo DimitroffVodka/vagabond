@@ -476,6 +476,30 @@ export default class VagabondCharacter extends VagabondActorBase {
       label: "Bully Perk"
     });
 
+    // Rogue — Sneak Attack: number of bonus d4s on first Favored attack per round
+    schema.sneakAttackDice = new fields.NumberField({
+      ...requiredInteger, initial: 0, min: 0,
+      label: "Sneak Attack Dice (d4s)"
+    });
+
+    // Rogue — Lethal Weapon: Sneak Attack applies to ALL Favored attacks, not just first
+    schema.hasLethalWeapon = new fields.BooleanField({
+      initial: false,
+      label: "Lethal Weapon"
+    });
+
+    // Rogue — Unflinching Luck: die face for refund check (0=none, 12=d12, 10=d10)
+    schema.unflinchingLuckDie = new fields.NumberField({
+      ...requiredInteger, initial: 0, min: 0,
+      label: "Unflinching Luck Die"
+    });
+
+    // Rogue — Evasive: ignore Hinder on Reflex Saves, drop 2 dice on Dodge instead of 1
+    schema.hasEvasive = new fields.BooleanField({
+      initial: false,
+      label: "Evasive"
+    });
+
     // Defender status modifiers (affects attackers targeting this actor)
     schema.defenderStatusModifiers = new fields.SchemaField({
       // Invisible: attackers are treated as Blinded
@@ -946,6 +970,27 @@ export default class VagabondCharacter extends VagabondActorBase {
         }
         if (desc.includes('considered huge for shoves')) {
           this.shoveSizeOverride = 'huge';
+        }
+
+        // Rogue — Sneak Attack: scales 1d4 at L1, +1d4 every 3 levels
+        if (name === 'sneak attack') {
+          this.sneakAttackDice = 1 + Math.floor((actorLevel - 1) / 3);
+        }
+
+        // Rogue — Unflinching Luck: d12 at L2, d10 at L8
+        // Feature name may include die size suffix e.g. "Unflinching Luck (d12)"
+        if (name.startsWith('unflinching luck')) {
+          this.unflinchingLuckDie = actorLevel >= 8 ? 10 : 12;
+        }
+
+        // Rogue — Evasive: ignore Hinder on Reflex, drop 2 dice on Dodge
+        if (name === 'evasive') {
+          this.hasEvasive = true;
+        }
+
+        // Rogue — Lethal Weapon: Sneak Attack on all Favored attacks
+        if (name === 'lethal weapon') {
+          this.hasLethalWeapon = true;
         }
       }
     }

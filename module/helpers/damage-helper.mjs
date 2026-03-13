@@ -301,9 +301,32 @@ export class VagabondDamageHelper {
       finalFormula += ` + ${universalDiceBonus}`;
     }
 
+    // Sneak Attack: add extra d4s on Favored attacks (deferred damage path)
+    let sneakAttackApplied = 0;
+    const sneakDice = actor.system.sneakAttackDice || 0;
+    const isFavored = (context.favorHinder || 'none') === 'favor';
+    if (sneakDice > 0 && isFavored) {
+      const hasLethal = actor.system.hasLethalWeapon || false;
+      const combat = game.combat;
+      const currentRound = combat?.round || 0;
+      const lastSneakRound = actor.getFlag('vagabond', 'lastSneakAttackRound') || 0;
+      const noCombatActive = !combat || currentRound === 0;
+
+      if (hasLethal || noCombatActive || lastSneakRound !== currentRound) {
+        finalFormula += ` + ${sneakDice}d4`;
+        sneakAttackApplied = sneakDice;
+        if (!hasLethal && !noCombatActive) {
+          await actor.setFlag('vagabond', 'lastSneakAttackRound', currentRound);
+        }
+      }
+    }
+
     // Roll damage (without explosion modifiers in formula)
     const damageRoll = new Roll(finalFormula, actor.getRollData());
     await damageRoll.evaluate();
+
+    // Attach sneak attack info to the roll for downstream use
+    damageRoll.sneakAttackDice = sneakAttackApplied;
 
     // Apply manual explosions if item supports it
     if (item) {
@@ -1000,13 +1023,13 @@ export class VagabondDamageHelper {
    * @param {Item} attackingWeapon - The weapon used (optional, for material weakness checks)
    * @returns {number} Final damage amount
    */
-  static calculateFinalDamage(actor, damage, damageType, attackingWeapon = null) {
+  static calculateFinalDamage(actor, damage, damageType, attackingWeapon = null, sneakDice = 0) {
     // Normalize damage type for lookup
     const normalizedType = damageType.toLowerCase();
 
     // Handle typeless damage ("-") - just apply armor, skip immunities/weaknesses
     if (normalizedType === '-') {
-      const armorRating = actor.system.armor || 0;
+      const armorRating = Math.max(0, (actor.system.armor || 0) - sneakDice);
       return Math.max(0, damage - armorRating);
     }
 
@@ -1058,7 +1081,9 @@ export class VagabondDamageHelper {
 
     // RAW: Armor - Subtracted from ALL incoming damage
     // Armor always reduces damage unless target is immune or weak
-    const armorRating = actor.system.armor || 0;
+    // Sneak Attack: pierces armor equal to number of sneak dice
+    const baseArmor = actor.system.armor || 0;
+    const armorRating = Math.max(0, baseArmor - sneakDice);
     finalDamage = Math.max(0, finalDamage - armorRating);
 
     return finalDamage;
@@ -1138,7 +1163,7 @@ export class VagabondDamageHelper {
   /**
    * Create save buttons (Reflex, Endure, Will, Apply Direct)
    */
-  static createSaveButtons(damageAmount, damageType, damageRoll, actorId, itemId, attackType, targetsAtRollTime = [], isCleave = false) {
+  static createSaveButtons(damageAmount, damageType, damageRoll, actorId, itemId, attackType, targetsAtRollTime = [], isCleave = false, sneakDice = 0) {
     // Encode the damage roll terms
     const rollTermsData = JSON.stringify({
       terms: damageRoll.terms.map(t => {
@@ -1168,6 +1193,8 @@ export class VagabondDamageHelper {
 
     // Cleave attribute (halve damage when applied)
     const cleaveAttr = isCleave ? ' data-cleave="true"' : '';
+    // Sneak Attack armor pierce attribute
+    const sneakAttr = sneakDice > 0 ? ` data-sneak-dice="${sneakDice}"` : '';
 
     // LAYOUT FIX: Two rows. Top: Apply Direct. Bottom: Saves.
     return `
@@ -1178,7 +1205,7 @@ export class VagabondDamageHelper {
               data-damage-type="${damageType}"
               data-actor-id="${actorId}"
               data-item-id="${itemId || ''}"
-              data-targets="${targetsJson}"${cleaveAttr}>
+              data-targets="${targetsJson}"${cleaveAttr}${sneakAttr}>
               <i class="fas fa-burst"></i> ${applyDirectLabel}
             </button>
         </div>
@@ -1192,7 +1219,7 @@ export class VagabondDamageHelper {
               data-actor-id="${actorId}"
               data-item-id="${itemId || ''}"
               data-attack-type="${attackType}"
-              data-targets="${targetsJson}"${cleaveAttr}>
+              data-targets="${targetsJson}"${cleaveAttr}${sneakAttr}>
               <i class="fas fa-running"></i> ${reflexLabel}
             </button>
             <button class="vagabond-save-button save-endure"
@@ -1203,7 +1230,7 @@ export class VagabondDamageHelper {
               data-actor-id="${actorId}"
               data-item-id="${itemId || ''}"
               data-attack-type="${attackType}"
-              data-targets="${targetsJson}"${cleaveAttr}>
+              data-targets="${targetsJson}"${cleaveAttr}${sneakAttr}>
               <i class="fas fa-shield-alt"></i> ${endureLabel}
             </button>
             <button class="vagabond-save-button save-will"
@@ -1214,7 +1241,7 @@ export class VagabondDamageHelper {
               data-actor-id="${actorId}"
               data-item-id="${itemId || ''}"
               data-attack-type="${attackType}"
-              data-targets="${targetsJson}"${cleaveAttr}>
+              data-targets="${targetsJson}"${cleaveAttr}${sneakAttr}>
               <i class="fas fa-brain"></i> ${willLabel}
             </button>
         </div>
@@ -1235,6 +1262,7 @@ export class VagabondDamageHelper {
     const attackType = button.dataset.attackType; // 'melee' or 'ranged' or 'cast'
     const actorId = button.dataset.actorId;
     const itemId = button.dataset.itemId;
+    const sneakDice = parseInt(button.dataset.sneakDice) || 0;
 
     // Get targets with fallback
     const storedTargets = this._getTargetsFromButton(button);
@@ -1335,8 +1363,11 @@ export class VagabondDamageHelper {
       let damageAfterSave = effectiveDamage;
       let saveReduction = 0;
       if (isSuccess) {
-        // Remove highest damage die from original roll
-        damageAfterSave = this._removeHighestDie(rollTermsData);
+        // Evasive: remove TWO highest dice on Dodge (Reflex) saves instead of one
+        const isEvasiveDodge = saveType === 'reflex' && targetActor.system.hasEvasive;
+        damageAfterSave = isEvasiveDodge
+          ? this._removeHighestDice(rollTermsData, 2)
+          : this._removeHighestDie(rollTermsData);
         // For cleave, cap save-reduced damage at the cleave share
         if (isCleave) damageAfterSave = Math.min(damageAfterSave, effectiveDamage);
         saveReduction = effectiveDamage - damageAfterSave;
@@ -1345,7 +1376,7 @@ export class VagabondDamageHelper {
       // Apply armor/immune/weak modifiers and track armor reduction
       // sourceActor already declared above for outgoingSavesModifier check
       const sourceItem = sourceActor?.items.get(itemId);
-      const finalDamage = this.calculateFinalDamage(targetActor, damageAfterSave, damageType, sourceItem);
+      const finalDamage = this.calculateFinalDamage(targetActor, damageAfterSave, damageType, sourceItem, sneakDice);
       const armorReduction = damageAfterSave - finalDamage;
 
       // Auto-apply damage if setting enabled
@@ -1525,8 +1556,9 @@ export class VagabondDamageHelper {
       return true;
     }
 
-    // Dodge (Reflex): Hindered if Heavy Armor
+    // Dodge (Reflex): Hindered if Heavy Armor (Evasive bypasses this)
     if (saveType === 'reflex') {
+      if (actor.system.hasEvasive) return false;
       const equippedArmor = actor.items.find(item => {
         const isArmor = (item.type === 'armor') ||
                        (item.type === 'equipment' && item.system.equipmentType === 'armor');
@@ -1658,6 +1690,43 @@ export class VagabondDamageHelper {
 
     // Subtract highest die
     return Math.max(0, total - highestDieValue);
+  }
+
+  /**
+   * Remove the N highest individual die results from the roll total.
+   * Used by Evasive to ignore TWO highest dice on a successful Dodge save.
+   * If total dice count <= count, damage is fully negated.
+   * @param {object} rollTermsData - Parsed roll terms data with .total and .terms
+   * @param {number} count - Number of highest dice to remove
+   * @returns {number} Damage after removing N highest dice
+   * @private
+   */
+  static _removeHighestDice(rollTermsData, count = 2) {
+    let total = rollTermsData.total;
+    const allDieResults = [];
+
+    // Collect all individual die results
+    for (const term of rollTermsData.terms) {
+      if (term.type === 'Die' && term.results) {
+        for (const result of term.results) {
+          allDieResults.push(result.result);
+        }
+      }
+    }
+
+    // If dice count <= removal count, save completely negates damage
+    if (allDieResults.length <= count) {
+      return 0;
+    }
+
+    // Sort descending and sum the top N
+    allDieResults.sort((a, b) => b - a);
+    let removedSum = 0;
+    for (let i = 0; i < count; i++) {
+      removedSum += allDieResults[i];
+    }
+
+    return Math.max(0, total - removedSum);
   }
 
   /**
@@ -1983,6 +2052,7 @@ export class VagabondDamageHelper {
     const damageType = button.dataset.damageType;
     const actorId = button.dataset.actorId;
     const itemId = button.dataset.itemId;
+    const sneakDice = parseInt(button.dataset.sneakDice) || 0;
 
     // Get weapon data for material weakness checks
     const sourceActor = game.actors.get(actorId);
@@ -2017,7 +2087,7 @@ export class VagabondDamageHelper {
           ui.notifications.warn(`You don't have permission to modify ${targetActor.name}.`);
           continue;
         }
-        const finalDamage = this.calculateFinalDamage(targetActor, share, damageType, sourceItem);
+        const finalDamage = this.calculateFinalDamage(targetActor, share, damageType, sourceItem, sneakDice);
         const currentHP = targetActor.system.health?.value || 0;
         const newHP = Math.max(0, currentHP - finalDamage);
         await targetActor.update({ 'system.health.value': newHP });
@@ -2032,7 +2102,7 @@ export class VagabondDamageHelper {
           ui.notifications.warn(`You don't have permission to modify ${targetActor.name}.`);
           continue;
         }
-        const finalDamage = this.calculateFinalDamage(targetActor, damageAmount, damageType, sourceItem);
+        const finalDamage = this.calculateFinalDamage(targetActor, damageAmount, damageType, sourceItem, sneakDice);
         const currentHP = targetActor.system.health?.value || 0;
         const newHP = Math.max(0, currentHP - finalDamage);
         await targetActor.update({ 'system.health.value': newHP });

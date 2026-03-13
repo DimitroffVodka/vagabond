@@ -395,9 +395,10 @@ export class VagabondChatCard {
           // Cleave: half damage to each target when 2+ targets selected
           const isCleave = item?.system?.properties?.includes('Cleave') && targetsAtRollTime?.length >= 2;
 
+          const sneakDice = damageRoll.sneakAttackDice || 0;
           let btns = isHealing
             ? VagabondDamageHelper.createApplyDamageButton(damageRoll.total, dLabel, actor.id, item?.id, targetsAtRollTime)
-            : VagabondDamageHelper.createSaveButtons(damageRoll.total, damageType, damageRoll, actor.id, item?.id, attackType, targetsAtRollTime, isCleave);
+            : VagabondDamageHelper.createSaveButtons(damageRoll.total, damageType, damageRoll, actor.id, item?.id, attackType, targetsAtRollTime, isCleave, sneakDice);
 
           card.addFooterAction(btns);
 
@@ -441,7 +442,8 @@ export class VagabondChatCard {
                isCritical: rollData.isCritical,
                damageType,
                attackType,
-               statKey  // ✅ FIX: Pass statKey for critical damage bonus
+               statKey,  // ✅ FIX: Pass statKey for critical damage bonus
+               favorHinder: rollData.favorHinder || 'none'  // For Sneak Attack on deferred damage
            }, targetsAtRollTime);
            // Brawl: if intent is grapple, apply Restrained and skip damage button
            if (brawlIntent === 'grapple') {
@@ -870,6 +872,12 @@ export class VagabondChatCard {
       // Cleave indicator: show when weapon has Cleave and 2+ targets selected
       if (weapon.system.properties?.includes('Cleave') && targetsAtRollTime?.length >= 2) {
         tags.push({ label: 'Cleave (½ dmg each)', icon: 'fas fa-angles-right', cssClass: 'tag-property' });
+      }
+
+      // Sneak Attack indicator: show when sneak attack dice were applied
+      const sneakDiceCount = actor.system.sneakAttackDice || 0;
+      if (sneakDiceCount > 0 && attackResult?.favorHinder === 'favor') {
+        tags.push({ label: `Sneak Attack (${sneakDiceCount}d4)`, icon: 'fas fa-eye-slash', cssClass: 'tag-property' });
       }
 
       // Brawl indicator: show intent when Brawl property is active

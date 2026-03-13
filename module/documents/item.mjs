@@ -687,7 +687,7 @@ export class VagabondItem extends Item {
    * @param {string} statKey - The stat used for the attack (for crit bonus)
    * @returns {Promise<Roll>} The damage roll
    */
-  async rollDamage(actor, isCritical = false, statKey = null) {
+  async rollDamage(actor, isCritical = false, statKey = null, favorHinder = 'none') {
     // Check if this is a weapon (legacy weapon item OR equipment with equipmentType='weapon')
     const isWeapon = (this.type === 'weapon') ||
                     (this.type === 'equipment' && this.system.equipmentType === 'weapon');
@@ -728,6 +728,28 @@ export class VagabondItem extends Item {
       }
     }
 
+    // Sneak Attack: add extra d4s on Favored attacks
+    let sneakAttackApplied = 0;
+    const sneakDice = actor.system.sneakAttackDice || 0;
+    const isFavored = favorHinder === 'favor';
+    if (sneakDice > 0 && isFavored) {
+      const hasLethal = actor.system.hasLethalWeapon || false;
+      const combat = game.combat;
+      const currentRound = combat?.round || 0;
+      const lastSneakRound = actor.getFlag('vagabond', 'lastSneakAttackRound') || 0;
+      const noCombatActive = !combat || currentRound === 0;
+
+      // Apply if: Lethal Weapon (always), no combat active, or first attack this round
+      if (hasLethal || noCombatActive || lastSneakRound !== currentRound) {
+        damageFormula += ` + ${sneakDice}d4`;
+        sneakAttackApplied = sneakDice;
+        // Track round usage (only when not Lethal Weapon and in active combat)
+        if (!hasLethal && !noCombatActive) {
+          await actor.setFlag('vagabond', 'lastSneakAttackRound', currentRound);
+        }
+      }
+    }
+
     // Add weapon-specific universal damage bonuses
     const weaponFlatBonus = actor.system.universalWeaponDamageBonus || 0;
     const weaponDiceBonus = actor.system.universalWeaponDamageDice || '';
@@ -760,6 +782,8 @@ export class VagabondItem extends Item {
       await VagabondDamageHelper._manuallyExplodeDice(roll, explodeValues);
     }
 
+    // Attach sneak attack info to the roll for downstream use
+    roll.sneakAttackDice = sneakAttackApplied;
     return roll;
   }
 }

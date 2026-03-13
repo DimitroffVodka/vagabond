@@ -63,6 +63,22 @@
 - **Dual damage**: When the Bully weapon hits a target, the same damage roll is also applied to the grappled creature's HP, with a chat message showing the dual damage.
 - **Auto-cleanup**: `deleteActiveEffect` hook detects when Restrained with `grappledBy` flag is removed, and auto-deletes the matching Bully weapon from the grappler's inventory.
 
+### Rogue Class Features (actor-character.mjs, roll-handler.mjs, item.mjs, damage-helper.mjs, chat-card.mjs, active-effect.mjs)
+- **Sneak Attack (L1)**: Favored attacks add extra d4s to damage (1d4 at L1, 2d4 at L4, 3d4 at L7, 4d4 at L10). Tracked per round via `game.combat.round` — only first Favored attack per round applies (unless Lethal Weapon). Outside combat, always applies. Sneak Attack dice also pierce armor equal to the number of dice rolled.
+- **Lethal Weapon (L6)**: Removes the once-per-round restriction on Sneak Attack — all Favored attacks get the extra dice.
+- **Unflinching Luck (L2/L8)**: After spending Luck for Favor, auto-rolls d12 (d10 at L8). If result < remaining Luck, the Luck point is refunded. Chat message shows the roll and outcome.
+- **Evasive (L4)**: Ignores Hinder on Reflex Saves (even in heavy armor). On a successful Dodge save, removes TWO highest damage dice instead of one.
+- **Pre-roll Luck spending dialog**: Weapon attacks without Favor show a "Spend 1 Luck for Favor?" dialog when the actor has Luck available. Spending Luck upgrades the roll (hinder→none, none→favor). Closing the dialog cancels the attack.
+- **Schema fields**: `sneakAttackDice`, `hasLethalWeapon`, `unflinchingLuckDie`, `hasEvasive` — auto-detected from class feature names in `_detectTraitAndFeatureFlags()`.
+- **Damage chain**: Sneak dice count threaded through `roll.sneakAttackDice` → `createSaveButtons(sneakDice)` → `data-sneak-dice` HTML attribute → `calculateFinalDamage(sneakDice)` for armor pierce.
+- **Chat card**: Sneak Attack tag with eye-slash icon shown on Favored attacks when sneak dice are available.
+- **AE choices**: All four Rogue fields added to Active Effect attribute list.
+- **Luck prompt setting**: Client-scoped "Prompt Luck Spending" setting (default on) lets each player toggle the pre-attack Luck dialog on/off.
+- **Bug fixes**: Fixed Unflinching Luck detection (feature name includes `(d12)`/`(d10)` suffix — changed to `startsWith` match). Fixed Sneak Attack not firing outside combat (round tracking `0 !== 0` was always false). Fixed Sneak Attack not applying when using deferred "Roll Damage" button path — `favorHinder` now passed through button context.
+
+### V14 ContextMenu Deprecation Fix (vagabond.mjs, combat-tracker.mjs)
+- Replaced deprecated `condition` property with `visible` on all ContextMenuEntry definitions (Fluke Reroll, Force Critical, combat tracker entries) to resolve V14 deprecation warnings.
+
 ## Compendium Updates
 
 ### Weapon Damage Types (packs/items/weapons)

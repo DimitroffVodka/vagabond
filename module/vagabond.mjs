@@ -91,6 +91,17 @@ function registerGameSettings() {
     requiresReload: false,
   });
 
+  // Setting: Prompt to spend Luck for Favor before weapon attacks
+  game.settings.register('vagabond', 'promptLuckSpend', {
+    name: 'Prompt Luck Spending',
+    hint: 'Show a dialog before weapon attacks offering to spend 1 Luck for Favor. Disable if you prefer to manage Luck manually.',
+    scope: 'client',
+    config: true,
+    type: Boolean,
+    default: true,
+    requiresReload: false,
+  });
+
   // Setting 4: Default clock position
   game.settings.register('vagabond', 'defaultClockPosition', {
     name: 'VAGABOND.Settings.defaultClockPosition.name',
@@ -1012,7 +1023,7 @@ const FLUKE_REROLL_ENTRY = {
   name: 'Luck Reroll (Fluke)',
   icon: '<i class="fas fa-clover"></i>',
   classes: '',
-  condition: function (li) {
+  visible: function (li) {
     const messageId = li.dataset.messageId;
     const message = game.messages.get(messageId);
     if (!message?.flags?.vagabond?.rerollData) return false;
@@ -1135,7 +1146,7 @@ const FLUKE_REROLL_ENTRY = {
 const FORCE_CRIT_ENTRY = {
   name: 'Force Critical',
   icon: '<i class="fas fa-star"></i>',
-  condition: (li) => {
+  visible: (li) => {
     if (!game.user.isGM) return false;
     const message = game.messages.get(li.dataset.messageId);
     return !!message?.flags?.vagabond?.rerollData;

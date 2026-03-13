@@ -336,6 +336,41 @@ export class RollHandler {
         }
       }
 
+      // Luck spending: offer to spend 1 Luck for Favor if not already Favored
+      const promptLuck = game.settings.get('vagabond', 'promptLuckSpend');
+      if (promptLuck && favorHinder !== 'favor' && this.actor.system.currentLuck > 0 && this.actor.system.hasLuckPool) {
+        const spendLuck = await foundry.applications.api.DialogV2.wait({
+          window: { title: 'Spend Luck?' },
+          content: `<p>Spend 1 Luck for Favor? (${this.actor.system.currentLuck}/${this.actor.system.maxLuck} remaining)</p>`,
+          buttons: [
+            { action: 'yes', label: 'Spend Luck', icon: 'fas fa-clover' },
+            { action: 'no', label: 'No', icon: 'fas fa-times' }
+          ]
+        });
+        if (spendLuck === 'yes') {
+          const newLuck = this.actor.system.currentLuck - 1;
+          await this.actor.update({ 'system.currentLuck': newLuck });
+          favorHinder = favorHinder === 'hinder' ? 'none' : 'favor';
+
+          // Unflinching Luck: roll refund die, if result < remaining Luck, refund
+          const unflinchingDie = this.actor.system.unflinchingLuckDie || 0;
+          if (unflinchingDie > 0) {
+            const refundRoll = new Roll(`1d${unflinchingDie}`);
+            await refundRoll.evaluate();
+            const refunded = refundRoll.total < newLuck;
+            await refundRoll.toMessage({
+              speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+              flavor: `<i class="fas fa-clover"></i> Unflinching Luck (d${unflinchingDie}) — rolled ${refundRoll.total} vs ${newLuck} remaining: ${refunded ? '<strong>Luck refunded!</strong>' : 'Luck spent.'}`
+            });
+            if (refunded) {
+              await this.actor.update({ 'system.currentLuck': newLuck + 1 });
+            }
+          }
+        } else if (!spendLuck) {
+          return; // Dialog closed/cancelled
+        }
+      }
+
       const attackResult = await item.rollAttack(this.actor, favorHinder);
       if (!attackResult) return;
 
@@ -353,7 +388,7 @@ export class RollHandler {
       let damageRoll = null;
       if (VagabondDamageHelper.shouldRollDamage(attackResult.isHit)) {
         const statKey = attackResult.weaponSkill?.stat || null;
-        damageRoll = await item.rollDamage(this.actor, attackResult.isCritical, statKey);
+        damageRoll = await item.rollDamage(this.actor, attackResult.isCritical, statKey, attackResult.favorHinder);
       }
 
       await VagabondChatCard.weaponAttack(
