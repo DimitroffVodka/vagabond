@@ -49,7 +49,7 @@ Then paste the output JSON into Foundry.
 | `Long` | Extended reach |
 | `Near` | Hits Near range without penalty |
 | `Ranged` | Ranged attack weapon |
-| `Shield` | Provides armor bonus |
+| `Shield` | Ignores Hinder from Blocking Ranged Attacks. Can Shove. |
 | `Thrown` | Can be thrown (Near range) |
 
 ---

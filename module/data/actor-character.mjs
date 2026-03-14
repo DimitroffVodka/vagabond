@@ -500,6 +500,54 @@ export default class VagabondCharacter extends VagabondActorBase {
       label: "Evasive"
     });
 
+    // Barbarian — Rage: die upsizing + explode + damage reduction while Berserk
+    schema.hasRage = new fields.BooleanField({
+      initial: false,
+      label: "Rage"
+    });
+
+    // Barbarian — Rage Damage Reduction per incoming die (1 at L1, 2 at L10 with Rip and Tear)
+    schema.rageDamageReduction = new fields.NumberField({
+      ...requiredInteger, initial: 0, min: 0,
+      label: "Rage Damage Reduction per Die"
+    });
+
+    // Barbarian — Rip and Tear: upgraded Rage (+1 per damage die dealt, DR 2 per die)
+    schema.hasRipAndTear = new fields.BooleanField({
+      initial: false,
+      label: "Rip and Tear"
+    });
+
+    // Barbarian — Aggressor: +10 speed in first round of combat
+    schema.hasAggressor = new fields.BooleanField({
+      initial: false,
+      label: "Aggressor"
+    });
+
+    // Barbarian — Fearmonger: frighten nearby weaker enemies on kill
+    schema.hasFearmonger = new fields.BooleanField({
+      initial: false,
+      label: "Fearmonger"
+    });
+
+    // Barbarian — Mindless Rancor: immune to Charmed and Confused
+    schema.hasMindlessRancor = new fields.BooleanField({
+      initial: false,
+      label: "Mindless Rancor"
+    });
+
+    // Barbarian — Bloodthirsty: Favor on attacks vs wounded targets
+    schema.hasBloodthirsty = new fields.BooleanField({
+      initial: false,
+      label: "Bloodthirsty"
+    });
+
+    // Status Immunities for player characters (mirrors NPC statusImmunities)
+    schema.statusImmunities = new fields.ArrayField(
+      new fields.StringField({ required: true }),
+      { required: true, initial: [] }
+    );
+
     // Defender status modifiers (affects attackers targeting this actor)
     schema.defenderStatusModifiers = new fields.SchemaField({
       // Invisible: attackers are treated as Blinded
@@ -819,6 +867,10 @@ export default class VagabondCharacter extends VagabondActorBase {
     // ------------------------------------------------------------------
     // 1. Calculate derived values that depend on Embedded Items/Effects
     // ------------------------------------------------------------------
+
+    // Detect class feature flags FIRST so combat/speed calculations can use them (e.g. Aggressor +10 speed)
+    this._detectTraitAndFeatureFlags();
+
     this._calculateManaValues(rollData);
 
     // NOTE: Check your _calculateCombatValues function!
@@ -842,7 +894,7 @@ export default class VagabondCharacter extends VagabondActorBase {
     this._calculateAncestryData();
     // this._calculateClassData(); // Simplified: We just grab ID/Name now.
     this._prepareClassDisplayData();
-    this._detectTraitAndFeatureFlags();
+    // _detectTraitAndFeatureFlags() is called earlier (before _calculateCombatValues) so Aggressor speed works
     this._calculateXPRequirements();
 
     // Process Saves (dynamically from homebrew config)
@@ -992,6 +1044,39 @@ export default class VagabondCharacter extends VagabondActorBase {
         if (name === 'lethal weapon') {
           this.hasLethalWeapon = true;
         }
+
+        // Barbarian — Rage: die upsizing + explode + damage reduction while Berserk
+        // Note: compendium stores L1 as "Rage, Wrath" — use includes() for combined names
+        if (name.includes('rage')) {
+          this.hasRage = true;
+          this.rageDamageReduction = 1; // base: reduce 1 per incoming damage die
+        }
+
+        // Barbarian — Aggressor: +10 speed in first round of combat
+        if (name.includes('aggressor')) {
+          this.hasAggressor = true;
+        }
+
+        // Barbarian — Fearmonger: frighten nearby weaker enemies on kill
+        if (name.includes('fearmonger')) {
+          this.hasFearmonger = true;
+        }
+
+        // Barbarian — Mindless Rancor: immune to Charmed and Confused
+        if (name.includes('mindless rancor')) {
+          this.hasMindlessRancor = true;
+        }
+
+        // Barbarian — Bloodthirsty: Favor vs wounded targets
+        if (name.includes('bloodthirsty')) {
+          this.hasBloodthirsty = true;
+        }
+
+        // Barbarian — Rip and Tear: upgrades Rage (2 per die reduction, +1 per die dealt)
+        if (name.includes('rip and tear')) {
+          this.hasRipAndTear = true;
+          this.rageDamageReduction = 2; // upgraded: reduce 2 per incoming damage die
+        }
       }
     }
 
@@ -1001,6 +1086,16 @@ export default class VagabondCharacter extends VagabondActorBase {
       const name = (perk.name || '').toLowerCase();
       if (name === 'bully') {
         this.hasBully = true;
+      }
+    }
+
+    // --- Auto-populate Status Immunities ---
+    // Mindless Rancor: immune to Charmed and Confused
+    if (this.hasMindlessRancor) {
+      for (const s of ['charmed', 'confused']) {
+        if (!this.statusImmunities.includes(s)) {
+          this.statusImmunities.push(s);
+        }
       }
     }
   }
@@ -1109,7 +1204,15 @@ export default class VagabondCharacter extends VagabondActorBase {
     // 2. Evaluate base speed from homebrew derivation formula
     const speedFormula = CONFIG.VAGABOND?.homebrew?.derivations?.speed
       ?? '25 + floor(max(0, @dexterity.total - 2) / 2) * 5';
-    const baseSpeed = Math.max(0, this._evaluateSingleFormula(speedFormula, rollData) + speedBonus);
+    let baseSpeed = Math.max(0, this._evaluateSingleFormula(speedFormula, rollData) + speedBonus);
+
+    // Aggressor: +10 speed in first round of combat
+    if (this.hasAggressor) {
+      const combat = game.combat;
+      if (combat?.started && combat.round === 1) {
+        baseSpeed += 10;
+      }
+    }
 
     // 3. Evaluate crawl/travel formulas — @speed.base is available via augmented rollData
     const speedRollData = { ...rollData, speed: { base: baseSpeed } };

@@ -255,7 +255,7 @@ VAGABOND.statusEffectDefinitions = [
     name: 'VAGABOND.StatusConditions.Berserk',
     img: 'icons/svg/terror.svg',
     statuses: ['berserk'],
-    description: 'Can\'t take Cast Action or Focus. Doesn\'t make Morale Checks. Can\'t be Frightened. [MANUAL TRACKING]'
+    description: 'Can\'t take Cast Action or Focus. Doesn\'t make Morale Checks. Can\'t be Frightened. Barbarian Rage: dice upsize, explode, and damage reduction while active. [PARTIALLY AUTOMATED]'
   },
   {
     id: 'burning',

@@ -1978,6 +1978,73 @@ Hooks.on('renderChatMessageHTML', (message, html) => {
       });
     });
   });
+
+  // ---------------------------------------------------------
+  // Dice Hover Tooltips — show roll breakdown on hover
+  // (Ported from vagabond-crawler module)
+  // ---------------------------------------------------------
+
+  // Damage dice tooltips: "2d6 → [4, 2]"
+  const diceLists = html.querySelectorAll('.damage-dice-list');
+  for (const list of diceLists) {
+    const wrappers = list.querySelectorAll('.vb-die-wrapper');
+    if (!wrappers.length) continue;
+    const diceByFaces = new Map();
+    for (const w of wrappers) {
+      const faces = w.dataset.faces;
+      if (!faces) continue;
+      const val = w.querySelector('.vb-die-val')?.textContent?.trim();
+      if (!val) continue;
+      if (!diceByFaces.has(faces)) diceByFaces.set(faces, []);
+      diceByFaces.get(faces).push(val);
+    }
+    const parts = [];
+    for (const [faces, results] of diceByFaces) {
+      parts.push(`${results.length}d${faces} \u2192 [${results.join(', ')}]`);
+    }
+    const tooltip = parts.join('  +  ');
+    for (const w of wrappers) {
+      w.title = tooltip;
+      w.style.cursor = 'help';
+    }
+  }
+
+  // Roll dice tooltips (d20 + favor/hinder): full formula + breakdown + total
+  const rollContainers = html.querySelectorAll('.roll-dice-container');
+  for (const container of rollContainers) {
+    const parts = [];
+    for (const child of container.children) {
+      if (child.classList.contains('roll-operator')) {
+        parts.push(child.textContent.trim());
+      } else if (child.classList.contains('roll-modifier')) {
+        parts.push(child.textContent.trim());
+      } else if (child.classList.contains('vb-die-wrapper')) {
+        const faces = child.dataset.faces;
+        const val = child.querySelector('.vb-die-val')?.textContent?.trim();
+        if (faces && val) parts.push(`d${faces} \u2192 [${val}]`);
+      }
+    }
+    if (!parts.length) continue;
+
+    let formulaLine = '';
+    if (message?.rolls?.length) {
+      const roll = message.rolls[0];
+      if (roll?.formula) formulaLine = roll.formula;
+    }
+
+    const breakdown = parts.join('  ');
+    let tooltip = '';
+    if (formulaLine) tooltip += formulaLine + '\n';
+    tooltip += breakdown;
+    if (message?.rolls?.[0]) tooltip += '\n= ' + message.rolls[0].total;
+
+    container.title = tooltip;
+    container.style.cursor = 'help';
+    for (const w of container.querySelectorAll('.vb-die-wrapper')) {
+      w.title = tooltip;
+      w.style.cursor = 'help';
+    }
+  }
 });
 
 
@@ -2005,6 +2072,92 @@ Hooks.on('deleteActiveEffect', async (effect) => {
   if (bullyWeapon) {
     await bullyWeapon.delete();
     ui.notifications.info(`${bullyWeapon.name} removed from ${grappler.name}'s inventory.`);
+  }
+});
+
+// ---------------------------------------------------------
+// Fearmonger — Auto-expire Frightened effects from Fearmonger at round change
+// ---------------------------------------------------------
+Hooks.on('updateCombat', async (combat, changed) => {
+  // Only trigger on round changes
+  if (!('round' in changed)) return;
+  if (!game.user.isGM) return; // Only GM processes this
+
+  const currentRound = combat.round;
+
+  // Scan all combatants for Frightened effects with fearmonger expiry
+  for (const combatant of combat.combatants) {
+    const actor = combatant.actor;
+    if (!actor) continue;
+
+    const effectsToRemove = [];
+    for (const effect of actor.effects) {
+      if (!effect.statuses?.has('frightened')) continue;
+      const expireRound = effect.flags?.vagabond?.fearmongerExpireRound;
+      if (expireRound != null && currentRound > expireRound) {
+        effectsToRemove.push(effect.id);
+      }
+    }
+
+    if (effectsToRemove.length > 0) {
+      await actor.deleteEmbeddedDocuments('ActiveEffect', effectsToRemove);
+      ui.notifications.info(`Fearmonger Frightened expired on ${actor.name}`);
+    }
+  }
+});
+
+// ---------------------------------------------------------
+// Aggressor — Force actor data re-prepare on combat round/start change so speed updates
+// ---------------------------------------------------------
+Hooks.on('updateCombat', async (combat, changed) => {
+  if (!('round' in changed)) return;
+  for (const combatant of combat.combatants) {
+    const actor = combatant.actor;
+    if (!actor || actor.type !== 'character') continue;
+    // Check if actor has Aggressor from class features
+    const classItem = actor.items.find(i => i.type === 'class');
+    const actorLevel = actor.system.attributes?.level?.value || 1;
+    const hasAggressor = classItem ? (classItem.system.levelFeatures || []).some(f =>
+      (f.level || 99) <= actorLevel && (f.name || '').toLowerCase().includes('aggressor')
+    ) : false;
+    if (hasAggressor) {
+      actor.prepareData();
+      if (actor.sheet?.rendered) actor.sheet.render(false);
+    }
+  }
+});
+
+// Also refresh when combat starts
+Hooks.on('combatStart', async (combat) => {
+  for (const combatant of combat.combatants) {
+    const actor = combatant.actor;
+    if (!actor || actor.type !== 'character') continue;
+    const classItem = actor.items.find(i => i.type === 'class');
+    const actorLevel = actor.system.attributes?.level?.value || 1;
+    const hasAggressor = classItem ? (classItem.system.levelFeatures || []).some(f =>
+      (f.level || 99) <= actorLevel && (f.name || '').toLowerCase().includes('aggressor')
+    ) : false;
+    if (hasAggressor) {
+      actor.prepareData();
+      if (actor.sheet?.rendered) actor.sheet.render(false);
+    }
+  }
+});
+
+// ---------------------------------------------------------
+// Rage — Auto-remove Berserk status when combat ends
+// ---------------------------------------------------------
+Hooks.on('deleteCombat', async (combat) => {
+  if (!game.user.isGM) return;
+
+  for (const combatant of combat.combatants) {
+    const actor = combatant.actor;
+    if (!actor) continue;
+    if (!actor.statuses?.has('berserk')) continue;
+
+    // Remove Berserk status
+    await actor.toggleStatusEffect('berserk');
+    ui.notifications.info(`${actor.name}'s Rage (Berserk) ended with combat.`);
   }
 });
 

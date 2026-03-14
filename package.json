@@ -14,7 +14,8 @@
   "license": "MIT",
   "private": true,
   "devDependencies": {
-    "sass": "^1.53.0",
-    "js-yaml": "^4.1.0"
+    "classic-level": "^3.0.0",
+    "js-yaml": "^4.1.0",
+    "sass": "^1.53.0"
   }
 }

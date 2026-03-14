@@ -242,6 +242,28 @@ export class RollHandler {
       const { VagabondDamageHelper } = await import('../../helpers/damage-helper.mjs');
       const { VagabondRollBuilder } = await import('../../helpers/roll-builder.mjs');
 
+      // Rage: prompt to go Berserk if Barbarian has Rage and isn't already Berserk
+      const _classItem = this.actor.items.find(i => i.type === 'class');
+      const _actorLevel = this.actor.system.attributes?.level?.value || 1;
+      const _hasRage = _classItem ? (_classItem.system.levelFeatures || []).some(f =>
+        (f.level || 99) <= _actorLevel && (f.name || '').toLowerCase().includes('rage')
+      ) : false;
+      if (_hasRage && !this.actor.statuses?.has('berserk')) {
+        const goBerserk = await foundry.applications.api.DialogV2.wait({
+          window: { title: 'Go Berserk?' },
+          content: '<p>Activate Rage and go Berserk? (die upsize, explode, damage reduction)</p>',
+          buttons: [
+            { action: 'yes', label: 'Go Berserk!', icon: 'fas fa-fire-flame-curved' },
+            { action: 'no', label: 'No', icon: 'fas fa-times' }
+          ]
+        });
+        if (goBerserk === 'yes') {
+          await this.actor.toggleStatusEffect('berserk');
+        } else if (!goBerserk) {
+          return; // Dialog closed/cancelled
+        }
+      }
+
       const systemFavorHinder = this.actor.system.favorHinder || 'none';
       let favorHinder = VagabondRollBuilder.calculateEffectiveFavorHinder(
         systemFavorHinder,
@@ -333,6 +355,25 @@ export class RollHandler {
               }
             }
           }
+        }
+      }
+
+      // Bloodthirsty: Favor on attacks against targets missing any HP
+      const _hasBloodthirsty = _classItem ? (_classItem.system.levelFeatures || []).some(f =>
+        (f.level || 99) <= _actorLevel && (f.name || '').toLowerCase().includes('bloodthirsty')
+      ) : false;
+      if (favorHinder !== 'favor' && _hasBloodthirsty) {
+        const hasWoundedTarget = targetsAtRollTime.some(t => {
+          // Resolve via token first (handles unlinked NPC tokens), fall back to world actor
+          const token = canvas.tokens?.get(t.tokenId);
+          const tActor = token?.actor || game.actors.get(t.actorId);
+          if (!tActor) return false;
+          const hp = tActor.system.health;
+          return hp && hp.value < hp.max;
+        });
+        if (hasWoundedTarget) {
+          if (favorHinder === 'hinder') { favorHinder = 'none'; }
+          else if (favorHinder === 'none') { favorHinder = 'favor'; }
         }
       }
 

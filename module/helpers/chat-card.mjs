@@ -880,6 +880,17 @@ export class VagabondChatCard {
         tags.push({ label: `Sneak Attack (${sneakDiceCount}d4)`, icon: 'fas fa-eye-slash', cssClass: 'tag-property' });
       }
 
+      // Rage indicator: show when Berserk + Rage is active
+      if (actor.statuses?.has('berserk') && (actor.system.hasRage || false)) {
+        const rageLabel = actor.system.hasRipAndTear ? 'Rip and Tear' : 'Rage';
+        tags.push({ label: rageLabel, icon: 'fas fa-fire-flame-curved', cssClass: 'tag-property' });
+      }
+
+      // Bloodthirsty indicator: show when Favor was granted by Bloodthirsty
+      if (actor.system.hasBloodthirsty && attackResult?.favorHinder === 'favor') {
+        tags.push({ label: 'Bloodthirsty', icon: 'fas fa-droplet', cssClass: 'tag-property' });
+      }
+
       // Brawl indicator: show intent when Brawl property is active
       // Brawl/Shield Grapple/Shove intent tag
       if (brawlIntent !== 'damage') {
