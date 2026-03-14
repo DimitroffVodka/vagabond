@@ -193,6 +193,21 @@
 - **Frightened (Fearmonger)**: Added `duration: { rounds: 1, startRound: currentRound }` to the Frightened effect applied by Barbarian Fearmonger in `damage-helper.mjs`.
 - **Restrained (Grapple in chat-card.mjs)**: Added duration to the Restrained effect created via chat card grapple handler.
 
+### Weapon Property Range & Targeting Distance (target-helper.mjs, roll-handler.mjs, chat-card.mjs, _chat-cards.scss)
+- **Distance measurement**: `TargetHelper.distanceFt(tokenA, tokenB)` — edge-to-edge Chebyshev distance in feet, supports multi-square tokens. Uses `(gap + 1) * gridDist` formula to match Foundry's ruler (adjacent = 5ft, 1 gap = 10ft, etc.).
+- **Range bands**: `TargetHelper.getDistanceBand(distFt)` — classifies distance as Close (≤5ft), Near (5–30ft), or Far (>30ft).
+- **Pre-attack range validation**: `TargetHelper.validateWeaponRange()` checks weapon range + properties against target distance before the attack roll:
+  - **Melee** (`range=close`): blocked if target > 5ft. With **Long** property: blocked if target > 10ft.
+  - **Thrown** property: melee weapon can attack up to Near normally, Far with automatic Hinder.
+  - **Ranged** property: automatic Hinder when target is Close (≤5ft).
+  - **Near** property / `range=near`: blocked if target is Far (>30ft).
+  - **Far** (`range=far`): no restriction.
+- **Range Hinder integration**: Range-based Hinder applied to favor/hinder calculation before the roll — cancels Favor or applies Hinder as appropriate.
+- **Chat card tag**: Shows Close/Near/Far range band on attack cards with contextual icon (fist/walking/binoculars). Hindered attacks show "(Hindered)" in red.
+- **Out-of-range blocking**: Warns and cancels the attack if target is beyond weapon reach.
+- **No-target fallback**: Attacks without targets skip range validation (for GMs who don't use targeting).
+- **Distance formula fix**: Fixed edge-to-edge distance calculation in both `target-helper.mjs` and `flanking-helper.mjs` — was off by 5ft (adjacent tokens returned 0ft instead of 5ft). Flanking threshold updated from `> 0` to `> 5` to match.
+
 ### System V14-Only Declaration (system.json)
 - Updated `compatibility.minimum` from `"13"` to `"14"` — the system uses V14-only APIs throughout (DialogV2, ApplicationV2, string-based AE types, `foundry.dice.terms.DiceTerm`, `renderFlags.set()`, `roll.evaluate()` without `{async: true}`).
 
@@ -205,19 +220,20 @@
 | `module/helpers/config.mjs` | All AE mode constants → strings |
 | `module/helpers/chat-card.mjs` | Cleave detection/tag, Brawl/Shield Grapple/Shove, Fisticuffs, Restrained duration fix |
 | `module/helpers/damage-helper.mjs` | Cleave data attribute, damage halving, Fearmonger Frightened duration fix |
-| `module/helpers/flanking-helper.mjs` | **New** — Automated flanking detection and Vulnerable application |
+| `module/helpers/flanking-helper.mjs` | **New** — Automated flanking detection and Vulnerable application; distance formula fix |
 | `module/helpers/morale-helper.mjs` | **New** — Automated NPC morale checks |
 | `module/helpers/light-tracker.mjs` | **New** — Light source burn tracking, canvas drop/pickup, GM tracker panel |
 | `module/sheets/item-sheet.mjs` | Lock toggle submit fix |
 | `module/applications/level-up-dialog.mjs` | AE mode constant → string |
 | `module/data/item-perk.mjs` | effectMode field type + migration |
 | `module/vagabond.mjs` | Push/Prone/Grapple/Shove handlers, Bully cleanup, Flanking/Morale/Light init, auto-defeat hook, scene controls, Restrained duration fix |
-| `module/sheets/handlers/roll-handler.mjs` | Pre-roll Brawl/Shield intent dialog, Bully conditional Favor |
+| `module/helpers/target-helper.mjs` | Distance measurement, range band classification, weapon range validation |
+| `module/sheets/handlers/roll-handler.mjs` | Pre-roll Brawl/Shield intent dialog, Bully conditional Favor, weapon range validation + Hinder |
 | `module/data/actor-character.mjs` | `brawlCheckFavor`, `fisticuffs`, `hasBully`, `shoveSizeOverride`, `incomingMeleeAttacksModifier` fields, perk detection |
 | `module/documents/active-effect.mjs` | AE attribute choices for brawl/bully fields |
 | `module/documents/item.mjs` | Melee-only incoming attacks modifier, `attackerFavorHinder` tracking |
 | `packs/items/weapons/` | Damage types (LevelDB) |
 | `templates/apps/light-tracker.hbs` | **New** — Light Tracker GM panel template |
 | `src/scss/apps/_light-tracker.scss` | **New** — Light Tracker styles |
-| `src/scss/components/_chat-cards.scss` | Morale check chat card styles |
+| `src/scss/components/_chat-cards.scss` | Morale check chat card styles, range hinder tag style |
 | `system.json` | `compatibility.minimum` → `"14"` |

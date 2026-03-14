@@ -1,4 +1,11 @@
 /**
+ * Range band thresholds (in feet, edge-to-edge)
+ * Close: ≤5ft  |  Near: 5–30ft  |  Far: >30ft
+ */
+const RANGE_CLOSE_MAX = 5;   // ft
+const RANGE_NEAR_MAX  = 30;  // ft
+
+/**
  * Helper class for managing target capture and resolution
  * Consolidates repeated target handling patterns across the system
  */
@@ -235,5 +242,130 @@ export class TargetHelper {
     }
 
     return targets.some(target => target.sceneId !== game.scenes.current.id);
+  }
+
+  // ── Distance & Range Band Utilities ──────────────────────────────────────
+
+  /**
+   * Edge-to-edge Chebyshev distance between two tokens in feet.
+   * Supports multi-square tokens (Large 2×2, Huge 3×3, etc.).
+   * @param {Token} tokenA - First token (canvas object)
+   * @param {Token} tokenB - Second token (canvas object)
+   * @returns {number} Distance in feet (Infinity if no canvas)
+   */
+  static distanceFt(tokenA, tokenB) {
+    const scene = canvas.scene;
+    if (!scene) return Infinity;
+    const gridSize = scene.grid?.size ?? 100;
+    const gridDist = scene.grid?.distance ?? 5;
+
+    const ax = Math.round(tokenA.document.x / gridSize);
+    const ay = Math.round(tokenA.document.y / gridSize);
+    const aw = tokenA.document.width;
+    const ah = tokenA.document.height;
+
+    const bx = Math.round(tokenB.document.x / gridSize);
+    const by = Math.round(tokenB.document.y / gridSize);
+    const bw = tokenB.document.width;
+    const bh = tokenB.document.height;
+
+    const gapX = Math.max(0, Math.max(ax, bx) - Math.min(ax + aw, bx + bw));
+    const gapY = Math.max(0, Math.max(ay, by) - Math.min(ay + ah, by + bh));
+
+    // +1 converts gap squares to Foundry-standard distance:
+    // adjacent (gap 0) = 5ft, 1 gap = 10ft, etc.
+    const gap = Math.max(gapX, gapY);
+    return (gap + 1) * gridDist;
+  }
+
+  /**
+   * Classify a distance in feet into a range band.
+   * @param {number} distFt - Distance in feet
+   * @returns {'close'|'near'|'far'}
+   */
+  static getDistanceBand(distFt) {
+    if (distFt <= RANGE_CLOSE_MAX) return 'close';
+    if (distFt <= RANGE_NEAR_MAX) return 'near';
+    return 'far';
+  }
+
+  /**
+   * Get the distance band label for display.
+   * @param {'close'|'near'|'far'} band
+   * @returns {string}
+   */
+  static bandLabel(band) {
+    const labels = { close: 'Close (≤5ft)', near: 'Near (5–30ft)', far: 'Far (>30ft)' };
+    return labels[band] ?? band;
+  }
+
+  /**
+   * Validate weapon range against target distance, applying weapon property rules.
+   *
+   * Rules:
+   * - Melee (range=close): can attack Close only (≤5ft). Long extends to 10ft.
+   * - Near weapons (range=near or Near property): max range Near (≤30ft)
+   * - Far weapons (range=far): no max range
+   * - Ranged property: Hinder if target is Close (≤5ft)
+   * - Thrown property: melee weapon can also attack Near, or Far with Hinder
+   *
+   * @param {Object} weapon - The weapon item
+   * @param {Token} attackerToken - Attacker's canvas token
+   * @param {Token} targetToken - Target's canvas token
+   * @returns {{allowed: boolean, hinder: boolean, reason: string|null, distFt: number, band: string}}
+   */
+  static validateWeaponRange(weapon, attackerToken, targetToken) {
+    const distFt = this.distanceFt(attackerToken, targetToken);
+    const band = this.getDistanceBand(distFt);
+    const range = weapon.system.range || 'close';
+    const props = (weapon.system.properties || []).map(p => p.toLowerCase());
+
+    const hasRanged = props.includes('ranged');
+    const hasLong   = props.includes('long');
+    const hasThrown = props.includes('thrown');
+    const hasNear   = props.includes('near');
+
+    let allowed = true;
+    let hinder  = false;
+    let reason  = null;
+
+    // ── Melee weapons (range = close) ──────────────────────────────────
+    if (range === 'close') {
+      const meleeReach = hasLong ? 10 : 5;
+
+      if (hasThrown) {
+        // Thrown: melee at Close, throw at Near, throw at Far with Hinder
+        if (distFt > RANGE_NEAR_MAX) {
+          // Far range
+          hinder = true;
+          reason = `Thrown at Far range — Hindered`;
+        }
+        // Close and Near are fine
+      } else {
+        // Pure melee
+        if (distFt > meleeReach) {
+          allowed = false;
+          reason = hasLong
+            ? `Target is ${band} (${distFt}ft) — Long melee reach is 10ft`
+            : `Target is ${band} (${distFt}ft) — melee reach is 5ft`;
+        }
+      }
+    }
+
+    // ── Near-range weapons ─────────────────────────────────────────────
+    if (range === 'near' || hasNear) {
+      if (distFt > RANGE_NEAR_MAX) {
+        allowed = false;
+        reason = `Target is Far (${distFt}ft) — weapon range is Near (≤30ft)`;
+      }
+    }
+
+    // ── Ranged property: Hinder at Close ───────────────────────────────
+    if (hasRanged && band === 'close') {
+      hinder = true;
+      reason = `Ranged weapon at Close range — Hindered`;
+    }
+
+    return { allowed, hinder, reason, distFt, band };
   }
 }

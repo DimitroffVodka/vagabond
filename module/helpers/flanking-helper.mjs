@@ -56,7 +56,10 @@ function _distanceFt(tokenA, tokenB) {
   const gapX = Math.max(0, Math.max(ax, bx) - Math.min(ax + aw, bx + bw));
   const gapY = Math.max(0, Math.max(ay, by) - Math.min(ay + ah, by + bh));
 
-  return Math.max(gapX, gapY) * gridDist;
+  // +1 converts gap squares to Foundry-standard distance:
+  // adjacent (gap 0) = 5ft, 1 gap = 10ft, etc.
+  const gap = Math.max(gapX, gapY);
+  return (gap + 1) * gridDist;
 }
 
 // ── Flanking Helper ─────────────────────────────────────────────────────────
@@ -147,8 +150,8 @@ export const FlankingHelper = {
         if (other.id === target.id) continue;
         // Must be opposed disposition
         if (other.document.disposition === targetDisp) continue;
-        // Must be Close (adjacent — bounding boxes touching or overlapping)
-        if (_distanceFt(target, other) > 0) continue;
+        // Must be Close (≤5ft — adjacent on grid)
+        if (_distanceFt(target, other) > 5) continue;
 
         closeEnemyCount++;
         const otherSize = _getSizeValue(other.actor);

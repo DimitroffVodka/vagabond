@@ -899,6 +899,13 @@ li.chat-message:has(.vagabond-chat-card-v2) .message-header .message-metadata {
   font-size: 14px;
 }
 .vagabond-chat-card-v2 .card-header .header-info .metadata-tags-row {
+  /* Range Hinder indicator */
+}
+.vagabond-chat-card-v2 .card-header .header-info .metadata-tags-row .tag-hinder {
+  color: #c03030;
+  font-style: italic;
+}
+.vagabond-chat-card-v2 .card-header .header-info .metadata-tags-row {
   /* The Properties Group (Clickable) */
 }
 .vagabond-chat-card-v2 .card-header .header-info .metadata-tags-row .tag-property-group {

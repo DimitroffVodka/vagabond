@@ -192,6 +192,31 @@ export class RollHandler {
     if (confirmed === null) return;
     targetsAtRollTime = confirmed;
 
+    // ── Range Validation ──────────────────────────────────────────────────
+    // Check weapon range vs distance to targets and apply Hinder/block as needed
+    let rangeHinder = false;
+    let rangeBand = null;
+    if (isWeapon && targetsAtRollTime.length > 0) {
+      const attackerToken = this.actor.token?.object ?? this.actor.getActiveTokens(true)[0];
+      if (attackerToken) {
+        // Check the first (primary) target for range
+        const targetTokenObj = canvas.tokens?.get(targetsAtRollTime[0].tokenId);
+        if (targetTokenObj) {
+          const rangeResult = TargetHelper.validateWeaponRange(item, attackerToken, targetTokenObj);
+          rangeBand = rangeResult.band;
+
+          if (!rangeResult.allowed) {
+            ui.notifications.warn(`${item.name}: ${rangeResult.reason}`);
+            return;
+          }
+          if (rangeResult.hinder) {
+            rangeHinder = true;
+            ui.notifications.info(`${item.name}: ${rangeResult.reason}`);
+          }
+        }
+      }
+    }
+
     try {
       /* PATH A: ALCHEMICAL */
       if (isAlchemical) {
@@ -298,6 +323,13 @@ export class RollHandler {
         event.shiftKey,
         event.ctrlKey
       );
+
+      // Apply range-based Hinder (Ranged at Close, Thrown at Far)
+      if (rangeHinder) {
+        if (favorHinder === 'favor') favorHinder = 'none';
+        else if (favorHinder === 'none') favorHinder = 'hinder';
+        // Already hinder stays hinder
+      }
 
       // Brawl/Shield property: pre-roll intent dialog
       // Brawl: Damage / Grapple / Shove — Shield: Damage / Shove only
@@ -465,6 +497,10 @@ export class RollHandler {
         const statKey = attackResult.weaponSkill?.stat || null;
         damageRoll = await item.rollDamage(this.actor, attackResult.isCritical, statKey, attackResult.favorHinder);
       }
+
+      // Attach range info to attack result for chat card display
+      if (rangeBand) attackResult.rangeBand = rangeBand;
+      if (rangeHinder) attackResult.rangeHinder = true;
 
       await VagabondChatCard.weaponAttack(
         this.actor,

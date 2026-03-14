@@ -291,12 +291,13 @@ export const LightTracker = {
 
   _intervalId: null,
   _tickAccum:  0,
-  _TICK_FLUSH: 6,
+  _TICK_FLUSH: 20,   // flush accumulated seconds to world time every 20s
 
   startRealTime() {
     if (!game.user.isGM || this._intervalId) return;
     this._tickAccum  = 0;
     this._intervalId = setInterval(() => this._tick(), 1000);
+    console.log('Vagabond | Light Tracker: real-time tick started (flush every 20s)');
   },
 
   stopRealTime() {
@@ -304,6 +305,7 @@ export const LightTracker = {
     clearInterval(this._intervalId);
     this._intervalId = null;
     if (this._tickAccum > 0) { game.time.advance(this._tickAccum); this._tickAccum = 0; }
+    console.log('Vagabond | Light Tracker: real-time tick stopped');
   },
 
   _tick() {
@@ -313,6 +315,17 @@ export const LightTracker = {
       game.time.advance(this._tickAccum);
       this._tickAccum = 0;
     }
+  },
+
+  /** Check if any lights are lit and start/stop real-time tick accordingly. */
+  _checkAutoTick() {
+    if (!game.user.isGM) return;
+    const hasLit = _getActiveActors().some(a => {
+      if (a.getFlag(SYSTEM_ID, VLT_LIGHT_ACTOR_FLAG)) return !!a.getFlag(SYSTEM_ID, "lit");
+      return a.items.some(i => !!i.getFlag(SYSTEM_ID, "lit"));
+    });
+    if (hasLit && !this._intervalId) this.startRealTime();
+    else if (!hasLit && this._intervalId) this.stopRealTime();
   },
 
   init() {
@@ -367,6 +380,9 @@ export const LightTracker = {
     });
 
     Hooks.on("updateItem", () => { if (this._trackerApp?.rendered) this._trackerApp.render(); });
+
+    // Auto-start real-time tick if any lights are already burning
+    this._checkAutoTick();
 
     console.log('Vagabond | Light Tracker initialized');
   },
@@ -466,6 +482,7 @@ export const LightTracker = {
       }
     }
     ui.notifications.info(`${litItem.name} lit. ${this._formatTime(remaining)} remaining.`);
+    this._checkAutoTick();
   },
 
   async _douseLight(item) {
@@ -477,6 +494,7 @@ export const LightTracker = {
       }
     }
     ui.notifications.info(`${item.name} doused.`);
+    this._checkAutoTick();
   },
 
   async _burnOut(item, actor) {
@@ -509,6 +527,7 @@ export const LightTracker = {
         speaker: { alias: "Light Tracker" },
       });
     }
+    this._checkAutoTick();
   },
 
   _formatTime(secs) {
@@ -578,15 +597,22 @@ class LightTrackerApp extends HbsMixin(AppV2) {
     const _doTimePasses = async (multiplier) => {
       const mins = parseInt(minsInput?.value ?? TIME_PASSES_DEFAULT_MINS);
       if (!(mins > 0)) return;
-      const adjusted = mins * multiplier;
-      // Advance world time directly (no CrawlState dependency)
-      await game.time.advance(adjusted * 60);
-      // advanceTime(secs) subtracts secs from remaining, so negate: adding mins means negative secs
-      await LightTracker.advanceTime(-adjusted * 60);
+      const secs = mins * 60;
+
+      if (multiplier < 0) {
+        // "Time Passes" — burn light sources by advancing world time.
+        // The updateWorldTime hook will deduct burn time automatically.
+        await game.time.advance(secs);
+      } else {
+        // "Add Time" — refuel / add time to light sources (no world time change).
+        // Negative secs to advanceTime = adds remaining time.
+        await LightTracker.advanceTime(-secs);
+      }
+
       const label = multiplier > 0 ? "Time Added" : "Time Passes";
       const icon  = multiplier > 0 ? "fa-hourglass-start" : "fa-hourglass-half";
       await ChatMessage.create({
-        content: `<div class="vagabond-chat"><i class="fas ${icon}"></i> <strong>${label}</strong> — ${Math.abs(adjusted)} minutes.</div>`,
+        content: `<div class="vagabond-chat"><i class="fas ${icon}"></i> <strong>${label}</strong> — ${mins} minutes.</div>`,
         speaker: { alias: "Light Tracker" },
         whisper: game.users.filter(u => u.isGM).map(u => u.id),
       });

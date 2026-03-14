@@ -181,6 +181,12 @@ li.chat-message:has(.vagabond-chat-card-v2) {
                     i {font-size: 14px;}
                 }
 
+                /* Range Hinder indicator */
+                .tag-hinder {
+                    color: #c03030;
+                    font-style: italic;
+                }
+
                 /* The Properties Group (Clickable) */
                 .tag-property-group {
                     cursor: pointer;

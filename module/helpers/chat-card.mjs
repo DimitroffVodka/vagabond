@@ -897,6 +897,18 @@ export class VagabondChatCard {
         tags.push({ label: 'Bloodthirsty', icon: 'fas fa-droplet', cssClass: 'tag-property' });
       }
 
+      // Range band tag: show target distance band when range was validated
+      if (attackResult.rangeBand) {
+        const bandIcons = { close: 'fas fa-hand-fist', near: 'fas fa-person-walking', far: 'fas fa-binoculars' };
+        const bandLabels = { close: 'Close', near: 'Near', far: 'Far' };
+        const bandTag = { label: bandLabels[attackResult.rangeBand], icon: bandIcons[attackResult.rangeBand], cssClass: 'tag-range' };
+        if (attackResult.rangeHinder) {
+          bandTag.label += ' (Hindered)';
+          bandTag.cssClass = 'tag-range tag-hinder';
+        }
+        tags.push(bandTag);
+      }
+
       // Brawl indicator: show intent when Brawl property is active
       // Brawl/Shield Grapple/Shove intent tag
       if (brawlIntent !== 'damage') {
