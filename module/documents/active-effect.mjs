@@ -239,6 +239,7 @@ export class VagabondActiveEffect extends ActiveEffect {
       'system.brawlCheckFavor': 'Brawl: Favor on Grapple/Shove Checks',
       'system.fisticuffs': 'Brawl: Fisticuffs (Post-Hit Grapple/Shove)',
       'system.hasBully': 'Perk: Bully (Grapple/Shove Favor + use as weapon)',
+      'system.hasBriarHealer': 'Perk: Briar Healer (Life focus +1 Armor + d6 thorns)',
       'system.sneakAttackDice': 'Rogue: Sneak Attack Dice (number of d4s)',
       'system.hasLethalWeapon': 'Rogue: Lethal Weapon (all Favored attacks get Sneak Attack)',
       'system.unflinchingLuckDie': 'Rogue: Unflinching Luck Die (12 or 10)',
@@ -250,6 +251,20 @@ export class VagabondActiveEffect extends ActiveEffect {
       'system.hasFearmonger': 'Barbarian: Fearmonger (frighten on kill)',
       'system.hasMindlessRancor': 'Barbarian: Mindless Rancor (Charmed/Confused immunity)',
       'system.hasBloodthirsty': 'Barbarian: Bloodthirsty (Favor vs wounded)',
+
+      // -- Bard --
+      'system.hasVirtuoso': 'Bard: Virtuoso (Performance → Group buff)',
+      'system.hasSongOfRest': 'Bard: Song of Rest (Breather bonus)',
+      'system.hasStarstruck': 'Bard: Starstruck (debuff enemies)',
+      'system.hasBravado': 'Bard: Bravado (Will Save Hinder immunity)',
+      'system.hasClimax': 'Bard: Climax (granted dice Explode)',
+      'system.hasStarstruckEnhancement': 'Bard: Starstruck Enhancement (all Near Enemies)',
+      'system.bardLevel': 'Bard: Bard Level (for Song of Rest)',
+      'system.virtuosoSavesFavor': 'Bard: Virtuoso Resolve (Favor on Saves)',
+      'system.virtuosoAttacksFavor': 'Bard: Virtuoso Valor (Favor on Attacks/Casts)',
+      'system.virtuosoHealingBonus': 'Bard: Virtuoso Inspiration (d6 Healing bonus)',
+      'system.grantedDiceCanExplode': 'Bard: Climax (granted dice Explode)',
+
       'system.statusImmunities': 'Character: Status Immunities (Array)',
       'system.shoveSizeOverride': 'Shove: Size Override (large, huge, etc.)',
       'system.incomingAttacksModifier': 'Defender: Incoming Attacks Modifier (All)',

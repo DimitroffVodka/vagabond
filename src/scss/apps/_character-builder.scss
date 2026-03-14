@@ -448,6 +448,20 @@
               font-size: 0.75rem;
             }
           }
+
+          .prereq-waived {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            color: #8e6bbf;
+            font-style: italic;
+            margin-top: 2px;
+
+            i {
+              font-size: 0.75rem;
+            }
+          }
         }
       }
     }

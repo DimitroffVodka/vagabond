@@ -68,11 +68,22 @@ export class RollHandler {
 
       // Apply favor/hinder based on system state and keyboard modifiers
       const systemFavorHinder = this.actor.system.favorHinder || 'none';
-      const favorHinder = VagabondRollBuilder.calculateEffectiveFavorHinder(
+      let favorHinder = VagabondRollBuilder.calculateEffectiveFavorHinder(
         systemFavorHinder,
         event.shiftKey,
         event.ctrlKey
       );
+
+      // Bravado: Will Saves can't be Hindered while not Incapacitated
+      if (rollType === 'save' && rollKey === 'will' && (this.actor.system.hasBravado || false) && !this.actor.statuses?.has('incapacitated')) {
+        if (favorHinder === 'hinder') { favorHinder = 'none'; }
+      }
+
+      // Virtuoso Resolve: Favor on Saves (granted by Bard's Virtuoso performance)
+      if (rollType === 'save' && (this.actor.system.virtuosoSavesFavor || false)) {
+        if (favorHinder === 'hinder') { favorHinder = 'none'; }
+        else if (favorHinder === 'none') { favorHinder = 'favor'; }
+      }
 
       const roll = await VagabondRollBuilder.buildAndEvaluateD20(
         this.actor,
@@ -162,7 +173,24 @@ export class RollHandler {
     }
 
     // Capture targeted tokens at roll time
-    const targetsAtRollTime = TargetHelper.captureCurrentTargets();
+    let targetsAtRollTime = TargetHelper.captureCurrentTargets();
+
+    // Bard — Virtuoso: intercept weapon items using Performance skill when actor has Virtuoso
+    if (isWeapon && item.system.weaponSkill === 'performance' && (this.actor.system.hasVirtuoso || false)) {
+      const { performVirtuoso } = await import('../../helpers/bard-helper.mjs');
+      await performVirtuoso(this.actor, targetsAtRollTime);
+      return;
+    }
+
+    // Target confirmation dialog
+    const actionType = TargetHelper.classifyActionType(item.system.damageType);
+    const confirmed = await TargetHelper.confirmTargets(targetsAtRollTime, {
+      actionType,
+      actionName: item.name,
+      requireTargets: false,
+    });
+    if (confirmed === null) return;
+    targetsAtRollTime = confirmed;
 
     try {
       /* PATH A: ALCHEMICAL */
@@ -375,6 +403,12 @@ export class RollHandler {
           if (favorHinder === 'hinder') { favorHinder = 'none'; }
           else if (favorHinder === 'none') { favorHinder = 'favor'; }
         }
+      }
+
+      // Virtuoso Valor: Favor on Attack and Cast Checks
+      if (favorHinder !== 'favor' && (this.actor.system.virtuosoAttacksFavor || false)) {
+        if (favorHinder === 'hinder') { favorHinder = 'none'; }
+        else if (favorHinder === 'none') { favorHinder = 'favor'; }
       }
 
       // Luck spending: offer to spend 1 Luck for Favor if not already Favored

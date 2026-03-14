@@ -542,6 +542,78 @@ export default class VagabondCharacter extends VagabondActorBase {
       label: "Bloodthirsty"
     });
 
+    // Bard — Virtuoso: Performance Check → Group buff (Inspiration/Resolve/Valor)
+    schema.hasVirtuoso = new fields.BooleanField({
+      initial: false,
+      label: "Virtuoso"
+    });
+
+    // Bard — Song of Rest: Breather bonus (HP + Studied Die)
+    schema.hasSongOfRest = new fields.BooleanField({
+      initial: false,
+      label: "Song of Rest"
+    });
+
+    // Bard — Starstruck: debuff enemies on Virtuoso performance
+    schema.hasStarstruck = new fields.BooleanField({
+      initial: false,
+      label: "Starstruck"
+    });
+
+    // Bard — Bravado: Will Saves can't be Hindered while not Incapacitated
+    schema.hasBravado = new fields.BooleanField({
+      initial: false,
+      label: "Bravado"
+    });
+
+    // Bard — Climax: Favor and bonus dice granted by Bard can Explode
+    schema.hasClimax = new fields.BooleanField({
+      initial: false,
+      label: "Climax"
+    });
+
+    // Bard — Starstruck Enhancement (L10): Starstruck affects all Near Enemies
+    schema.hasStarstruckEnhancement = new fields.BooleanField({
+      initial: false,
+      label: "Starstruck Enhancement"
+    });
+
+    // Bard Level (for Song of Rest HP formula: Presence + Bard Level)
+    schema.bardLevel = new fields.NumberField({
+      ...requiredInteger, initial: 0, min: 0,
+      label: "Bard Level"
+    });
+
+    // Bard — Virtuoso Resolve: Favor on Saves (contextual, not universal)
+    schema.virtuosoSavesFavor = new fields.BooleanField({
+      initial: false,
+      label: "Virtuoso Resolve (Favor on Saves)"
+    });
+
+    // Bard — Virtuoso Valor: Favor on Attack and Cast Checks (contextual, not universal)
+    schema.virtuosoAttacksFavor = new fields.BooleanField({
+      initial: false,
+      label: "Virtuoso Valor (Favor on Attacks)"
+    });
+
+    // Bard — Virtuoso Inspiration: d6 bonus to Healing rolls
+    schema.virtuosoHealingBonus = new fields.NumberField({
+      ...requiredInteger, initial: 0, min: 0,
+      label: "Virtuoso Inspiration (Healing Bonus d6s)"
+    });
+
+    // Bard — Climax: granted dice can Explode (set on allies by Virtuoso when Bard has Climax)
+    schema.grantedDiceCanExplode = new fields.BooleanField({
+      initial: false,
+      label: "Granted Dice Can Explode"
+    });
+
+    // Perk — Briar Healer: Life spell focus gives target +1 Armor and d6 thorn damage
+    schema.hasBriarHealer = new fields.BooleanField({
+      initial: false,
+      label: "Briar Healer"
+    });
+
     // Status Immunities for player characters (mirrors NPC statusImmunities)
     schema.statusImmunities = new fields.ArrayField(
       new fields.StringField({ required: true }),
@@ -1077,6 +1149,51 @@ export default class VagabondCharacter extends VagabondActorBase {
           this.hasRipAndTear = true;
           this.rageDamageReduction = 2; // upgraded: reduce 2 per incoming damage die
         }
+
+        // Bard — Virtuoso: Performance Check → Group buff
+        if (name === 'virtuoso' || name.includes('virtuoso')) {
+          this.hasVirtuoso = true;
+        }
+
+        // Bard — Song of Rest: Breather bonus (HP + Studied Die)
+        if (name === 'song of rest' || name.includes('song of rest')) {
+          this.hasSongOfRest = true;
+        }
+
+        // Bard — Starstruck: debuff enemies on Virtuoso performance
+        if (name.includes('starstruck')) {
+          this.hasStarstruck = true;
+          // Starstruck Enhancement: L10 upgrade (affects all Near Enemies)
+          if (name.includes('enhancement') || actorLevel >= 10) {
+            this.hasStarstruckEnhancement = true;
+          }
+        }
+
+        // Bard — Bravado: Will Saves can't be Hindered
+        if (name.includes('bravado')) {
+          this.hasBravado = true;
+        }
+
+        // Bard — Climax: Favor and bonus dice you grant can Explode
+        // Also detect legacy compendium name "Awe-Inspiring"
+        if (name.includes('climax') || name.includes('awe-inspiring')) {
+          this.hasClimax = true;
+        }
+
+        // Bard — Encore (legacy compendium name for Starstruck Enhancement at L10)
+        if (name.includes('encore')) {
+          this.hasStarstruckEnhancement = true;
+        }
+      }
+
+      // Track Bard level for Song of Rest HP formula (Presence + Bard Level)
+      if (classItem.name?.toLowerCase() === 'bard') {
+        this.bardLevel = actorLevel;
+        // Starstruck Enhancement is the L10 upgrade to Starstruck
+        // If they have Starstruck and are L10+, they get the enhancement
+        if (this.hasStarstruck && actorLevel >= 10) {
+          this.hasStarstruckEnhancement = true;
+        }
       }
     }
 
@@ -1086,6 +1203,9 @@ export default class VagabondCharacter extends VagabondActorBase {
       const name = (perk.name || '').toLowerCase();
       if (name === 'bully') {
         this.hasBully = true;
+      }
+      if (name === 'briar healer' || name.includes('briar healer')) {
+        this.hasBriarHealer = true;
       }
     }
 
@@ -1175,6 +1295,9 @@ export default class VagabondCharacter extends VagabondActorBase {
     data.brawlCritBonus = this.brawlCritBonus || 0;
     data.finesseCritBonus = this.finesseCritBonus || 0;
     data.spellCritBonus = this.spellCritBonus || 0;
+
+    // Bard Climax: granted dice can explode (Virtuoso buff)
+    data.grantedDiceCanExplode = this.grantedDiceCanExplode || false;
 
     return data;
   }

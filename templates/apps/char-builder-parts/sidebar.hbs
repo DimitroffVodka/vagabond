@@ -16,10 +16,12 @@
             {{/each}}
         </div>
         {{/if}}
+        {{#unless hasWellVersed}}
         <label class="show-all-checkbox">
             <input type="checkbox" data-action="toggleShowAllPerks" {{checked showAllPerks}}>
             {{localize 'VAGABOND.CharBuilder.ShowAll'}}
         </label>
+        {{/unless}}
         {{/if}}
     </div>
     <div class="directory-list custom-scroll">
@@ -66,14 +68,21 @@
                     <img src="{{opt.img}}" width="32" height="32">
                     <div class="item-info">
                         <div class="name">{{opt.name}}</div>
-                        {{#unless opt.prerequisitesMet}}
-                            {{#unless opt.isGrantAllowed}}
-                            <div class="prereq-warning">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                {{localize 'VAGABOND.CharBuilder.PrerequisitesNotMet'}}
+                        {{#if opt.prerequisitesWaived}}
+                            <div class="prereq-waived">
+                                <i class="fas fa-music"></i>
+                                Prerequisite waived
                             </div>
+                        {{else}}
+                            {{#unless opt.prerequisitesMet}}
+                                {{#unless opt.isGrantAllowed}}
+                                <div class="prereq-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    {{localize 'VAGABOND.CharBuilder.PrerequisitesNotMet'}}
+                                </div>
+                                {{/unless}}
                             {{/unless}}
-                        {{/unless}}
+                        {{/if}}
                     </div>
                 </li>
                 {{/if}}

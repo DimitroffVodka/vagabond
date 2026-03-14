@@ -147,6 +147,11 @@
             <li class='feature accordion-item collapsed' data-feature-level='{{feature.level}}' data-feature-index='{{feature.index}}' data-source-type='class' data-accordion-id='feature-{{feature.index}}'>
               <div class='feature-header accordion-header clickable' data-action='toggleFeature' data-feature-id='{{feature._id}}'>
                 <h5 class='feature-name'>{{feature.name}}</h5>
+                {{#if feature.isVirtuoso}}
+                  <button class='feature-action-btn virtuoso-btn' data-action='performVirtuoso' data-tooltip='Use Virtuoso'>
+                    <i class='fas fa-music'></i>
+                  </button>
+                {{/if}}
               </div>
               {{#if feature.enrichedDescription}}
                 <div class='feature-description accordion-content' data-feature-id='{{feature._id}}'>{{{feature.enrichedDescription}}}</div>

@@ -633,6 +633,28 @@ VAGABOND.statusEffectDefinitions = [
       }
     ]
   }
+,
+  {
+    id: 'virtuoso-inspiration',
+    name: 'Virtuoso: Inspiration',
+    img: 'icons/svg/heal.svg',
+    statuses: ['virtuoso-inspiration'],
+    description: 'Virtuoso Inspiration — d6 bonus to Healing rolls this round.'
+  },
+  {
+    id: 'virtuoso-resolve',
+    name: 'Virtuoso: Resolve',
+    img: 'icons/svg/holy-shield.svg',
+    statuses: ['virtuoso-resolve'],
+    description: 'Virtuoso Resolve — Favor on Saves this round.'
+  },
+  {
+    id: 'virtuoso-valor',
+    name: 'Virtuoso: Valor',
+    img: 'icons/svg/sword.svg',
+    statuses: ['virtuoso-valor'],
+    description: 'Virtuoso Valor — Favor on Attack and Cast Checks this round.'
+  }
 ];
 
 /**

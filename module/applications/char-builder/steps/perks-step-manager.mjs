@@ -53,6 +53,18 @@ export class PerksStepManager extends BaseStepManager {
       state.classPerks = updatedClassPerks;
     }
 
+    // Detect Well-Versed for UI (hide Show All checkbox, etc.)
+    let hasWellVersed = false;
+    if (state.selectedClass) {
+      try {
+        const classItem = await fromUuid(state.selectedClass);
+        const levelFeatures = classItem?.system?.levelFeatures || [];
+        hasWellVersed = levelFeatures.some(f =>
+          f.level === 1 && f.name?.toLowerCase().includes('well-versed')
+        );
+      } catch (e) { /* ignore */ }
+    }
+
     // Collect all spells (mandatory + selected) for prerequisite checking
     const mandatorySpells = await this._collectRequiredSpells(state);
     const allKnownSpells = [...new Set([...(state.spells || []), ...mandatorySpells])];
@@ -127,8 +139,9 @@ export class PerksStepManager extends BaseStepManager {
             ...item.toObject(),
             uuid: previewUuid,
             enrichedDescription: enrichedDescription,
-            hasPrerequisites: hasPrerequisites,
+            hasPrerequisites: hasPrerequisites || prereqCheck.wellVersed,
             prerequisitesMet: prereqCheck.met,
+            prerequisitesWaived: prereqCheck.wellVersed || false,
             prerequisitesCompactHTML: prerequisitesHTML
           };
         }
@@ -165,6 +178,7 @@ export class PerksStepManager extends BaseStepManager {
       trayData: trayData,
       useTripleColumn: true,
       showAllPerks: this.showAllPerks,
+      hasWellVersed: hasWellVersed,
       originReferences: originReferences,
       grants: grantDisplay,
       activeGrant: activeGrant,
@@ -450,6 +464,7 @@ export class PerksStepManager extends BaseStepManager {
           type: 'perk',
           selected: isSelected,
           prerequisitesMet: prereqCheck.met,
+          prerequisitesWaived: prereqCheck.wellVersed || false,
           isGrantAllowed: isGrantAllowed,
           isClassPerk: classPerks.includes(perk.uuid),
           isGhosted: isGhosted
@@ -615,6 +630,19 @@ export class PerksStepManager extends BaseStepManager {
       return { met: true, missing: [] };
     }
 
+    // Well-Versed (Bard L1): Detect if class has Well-Versed
+    let hasWellVersed = false;
+    const selectedClass = this.stateManager?.builderData?.selectedClass;
+    if (selectedClass) {
+      try {
+        const classItem = await fromUuid(selectedClass);
+        const levelFeatures = classItem?.system?.levelFeatures || [];
+        hasWellVersed = levelFeatures.some(f =>
+          f.level === 1 && f.name?.toLowerCase().includes('well-versed')
+        );
+      } catch (e) { /* ignore */ }
+    }
+
     // Check stat prerequisites (AND)
     if (prereqs.stats?.length > 0) {
       for (const statReq of prereqs.stats) {
@@ -725,8 +753,19 @@ export class PerksStepManager extends BaseStepManager {
        }
     }
 
+    const normallyMet = missing.length === 0;
+
+    // Well-Versed: override met to true, flag as waived only if prereqs would have failed
+    if (hasWellVersed) {
+      return {
+        met: true,
+        missing: missing,
+        wellVersed: !normallyMet  // Only flag waived when they'd actually fail
+      };
+    }
+
     return {
-      met: missing.length === 0,
+      met: normallyMet,
       missing: missing
     };
   }
@@ -738,6 +777,19 @@ export class PerksStepManager extends BaseStepManager {
   async _formatPrerequisites(perkItem, actor, knownSpellUuids = []) {
     const prereqs = perkItem.system.prerequisites || {};
     const parts = [];
+
+    // Well-Versed: Detect if class has Well-Versed for waived display
+    let hasWellVersed = false;
+    const selectedClass = this.stateManager?.builderData?.selectedClass;
+    if (selectedClass) {
+      try {
+        const classItem = await fromUuid(selectedClass);
+        const levelFeatures = classItem?.system?.levelFeatures || [];
+        hasWellVersed = levelFeatures.some(f =>
+          f.level === 1 && f.name?.toLowerCase().includes('well-versed')
+        );
+      } catch (e) { /* ignore */ }
+    }
 
     // Stat prerequisites
     if (prereqs.stats?.length > 0) {
@@ -792,7 +844,14 @@ export class PerksStepManager extends BaseStepManager {
       }
     }
 
-    return parts.join('<br>');
+    let result = parts.join('<br>');
+
+    // Well-Versed: append waived note if there are unmet prereqs
+    if (hasWellVersed && parts.some(p => p.includes('prereq-not-met'))) {
+      result += '<br><em style="color: #8e6bbf;"><i class="fas fa-music"></i> Well-Versed: Prerequisite waived</em>';
+    }
+
+    return result;
   }
 
   /**

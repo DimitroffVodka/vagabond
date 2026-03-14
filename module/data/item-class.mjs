@@ -159,6 +159,21 @@ export default class VagabondClass extends VagabondItemBase {
   static migrateData(source) {
     if (Array.isArray(source.levelFeatures)) {
       source.levelFeatures = source.levelFeatures.filter(f => f != null);
+
+      // Fix Bard compendium: "Awe-Inspiring" (L8) should be "Climax"
+      // and "Encore" (L10) should be "Starstruck Enhancement"
+      for (const feature of source.levelFeatures) {
+        if (!feature) continue;
+        const fname = (feature.name || '').toLowerCase().trim();
+        if (fname === 'awe-inspiring') {
+          feature.name = 'Climax';
+          feature.description = '<p>Favor and bonus dice you grant can Explode.</p>';
+        }
+        if (fname === 'encore') {
+          feature.name = 'Starstruck Enhancement';
+          feature.description = '<p>Your Starstruck Feature can now affect all Near Enemies.</p>';
+        }
+      }
     }
     if (Array.isArray(source.levelSpells)) {
       source.levelSpells = source.levelSpells.filter(f => f != null);

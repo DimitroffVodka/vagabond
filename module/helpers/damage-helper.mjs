@@ -186,6 +186,21 @@ export class VagabondDamageHelper {
     const contextJson = JSON.stringify(context).replace(/"/g, '&quot;');
     const targetsJson = JSON.stringify(targetsAtRollTime).replace(/"/g, '&quot;');
 
+    // Determine button label based on damage type
+    const dtype = (context.damageType || '').toLowerCase();
+    let buttonLabel = 'Roll Damage';
+    let buttonIcon = 'fas fa-dice';
+    if (dtype === 'healing') {
+      buttonLabel = 'Roll Healing';
+      buttonIcon = 'fas fa-heart-pulse';
+    } else if (dtype === 'recover') {
+      buttonLabel = 'Roll Recovery';
+      buttonIcon = 'fas fa-arrows-rotate';
+    } else if (dtype === 'recharge') {
+      buttonLabel = 'Roll Recharge';
+      buttonIcon = 'fas fa-bolt';
+    }
+
     return `
       <button
         class="vagabond-damage-button"
@@ -196,7 +211,7 @@ export class VagabondDamageHelper {
         data-context="${contextJson}"
         data-targets="${targetsJson}"
       >
-        <i class="fas fa-dice"></i> Roll Damage
+        <i class="${buttonIcon}"></i> ${buttonLabel}
       </button>
     `;
   }
@@ -232,73 +247,87 @@ export class VagabondDamageHelper {
     // Get roll data WITH item effects applied (important for on-use effects)
     const rollData = item ? actor.getRollDataWithItemEffects(item) : actor.getRollData();
 
+    // Check if this is a healing/restorative roll
+    const isHealing = ['healing', 'recover', 'recharge'].includes(context.damageType?.toLowerCase());
+
     // Add stat bonus on critical hit (positive or negative)
     let finalFormula = damageFormula;
     if (context.isCritical && context.statKey) {
       // Use roll data (includes item effects) instead of actor.system directly
       const statValue = rollData.stats?.[context.statKey]?.value || 0;
-      if (statValue !== 0) {  // ✅ FIX: Include negative stats too (they reduce damage)
+      if (statValue !== 0) {
         finalFormula += ` + ${statValue}`;
       }
     }
 
-    // Determine item type and apply appropriate separated bonuses
-    let equipmentType = null;
-    if (item) {
-      // For equipment items, check equipmentType field
-      if (item.system.equipmentType) {
-        equipmentType = item.system.equipmentType;
+    // Virtuoso Inspiration: add bonus d6 dice to healing rolls
+    if (isHealing) {
+      const virtuosoHealingBonus = actor.system.virtuosoHealingBonus || 0;
+      if (virtuosoHealingBonus > 0) {
+        finalFormula += ` + ${virtuosoHealingBonus}d6`;
       }
-      // For spell items
-      else if (item.type === 'spell') {
-        equipmentType = 'spell';
+    }
+
+    // Damage bonuses only apply to offensive rolls, not healing
+    if (!isHealing) {
+      // Determine item type and apply appropriate separated bonuses
+      let equipmentType = null;
+      if (item) {
+        // For equipment items, check equipmentType field
+        if (item.system.equipmentType) {
+          equipmentType = item.system.equipmentType;
+        }
+        // For spell items
+        else if (item.type === 'spell') {
+          equipmentType = 'spell';
+        }
+      } else if (context.type) {
+        // Fallback to context type if item not available
+        equipmentType = context.type;
       }
-    } else if (context.type) {
-      // Fallback to context type if item not available
-      equipmentType = context.type;
-    }
 
-    // Apply type-specific universal damage bonuses
-    let typeFlatBonus = 0;
-    let typeDiceBonus = '';
+      // Apply type-specific universal damage bonuses
+      let typeFlatBonus = 0;
+      let typeDiceBonus = '';
 
-    if (equipmentType === 'weapon') {
-      typeFlatBonus = actor.system.universalWeaponDamageBonus || 0;
-      typeDiceBonus = actor.system.universalWeaponDamageDice || '';
-    } else if (equipmentType === 'spell') {
-      typeFlatBonus = actor.system.universalSpellDamageBonus || 0;
-      typeDiceBonus = actor.system.universalSpellDamageDice || '';
-    } else if (equipmentType === 'alchemical') {
-      typeFlatBonus = actor.system.universalAlchemicalDamageBonus || 0;
-      typeDiceBonus = actor.system.universalAlchemicalDamageDice || '';
-    }
+      if (equipmentType === 'weapon') {
+        typeFlatBonus = actor.system.universalWeaponDamageBonus || 0;
+        typeDiceBonus = actor.system.universalWeaponDamageDice || '';
+      } else if (equipmentType === 'spell') {
+        typeFlatBonus = actor.system.universalSpellDamageBonus || 0;
+        typeDiceBonus = actor.system.universalSpellDamageDice || '';
+      } else if (equipmentType === 'alchemical') {
+        typeFlatBonus = actor.system.universalAlchemicalDamageBonus || 0;
+        typeDiceBonus = actor.system.universalAlchemicalDamageDice || '';
+      }
 
-    // Safety check: ensure it's a string
-    if (Array.isArray(typeDiceBonus)) {
-      typeDiceBonus = typeDiceBonus.filter(d => !!d).join(' + ');
-    }
+      // Safety check: ensure it's a string
+      if (Array.isArray(typeDiceBonus)) {
+        typeDiceBonus = typeDiceBonus.filter(d => !!d).join(' + ');
+      }
 
-    if (typeFlatBonus !== 0) {
-      finalFormula += ` + ${typeFlatBonus}`;
-    }
-    if (typeof typeDiceBonus === 'string' && typeDiceBonus.trim() !== '') {
-      finalFormula += ` + ${typeDiceBonus}`;
-    }
+      if (typeFlatBonus !== 0) {
+        finalFormula += ` + ${typeFlatBonus}`;
+      }
+      if (typeof typeDiceBonus === 'string' && typeDiceBonus.trim() !== '') {
+        finalFormula += ` + ${typeDiceBonus}`;
+      }
 
-    // Add legacy universal damage bonuses (backward compatibility)
-    const universalFlatBonus = actor.system.universalDamageBonus || 0;
-    let universalDiceBonus = actor.system.universalDamageDice || '';
+      // Add legacy universal damage bonuses (backward compatibility)
+      const universalFlatBonus = actor.system.universalDamageBonus || 0;
+      let universalDiceBonus = actor.system.universalDamageDice || '';
 
-    // Safety check: ensure it's a string
-    if (Array.isArray(universalDiceBonus)) {
-      universalDiceBonus = universalDiceBonus.filter(d => !!d).join(' + ');
-    }
+      // Safety check: ensure it's a string
+      if (Array.isArray(universalDiceBonus)) {
+        universalDiceBonus = universalDiceBonus.filter(d => !!d).join(' + ');
+      }
 
-    if (universalFlatBonus !== 0) {
-      finalFormula += ` + ${universalFlatBonus}`;
-    }
-    if (typeof universalDiceBonus === 'string' && universalDiceBonus.trim() !== '') {
-      finalFormula += ` + ${universalDiceBonus}`;
+      if (universalFlatBonus !== 0) {
+        finalFormula += ` + ${universalFlatBonus}`;
+      }
+      if (typeof universalDiceBonus === 'string' && universalDiceBonus.trim() !== '') {
+        finalFormula += ` + ${universalDiceBonus}`;
+      }
     }
 
     // Rage: while Berserk + Light/No Armor, upsize damage dice and enable exploding (deferred path)
@@ -372,6 +401,14 @@ export class VagabondDamageHelper {
       if (explodeValues) {
         await this._manuallyExplodeDice(damageRoll, explodeValues);
         itemExploded = true;
+      }
+    }
+
+    // Climax: Virtuoso-granted bonus healing dice can explode on max (d6 explodes on 6)
+    if (isHealing && (actor.system.grantedDiceCanExplode || false)) {
+      const virtuosoHealingBonus = actor.system.virtuosoHealingBonus || 0;
+      if (virtuosoHealingBonus > 0) {
+        await this._manuallyExplodeDice(damageRoll, [6]);
       }
     }
 
@@ -543,60 +580,76 @@ export class VagabondDamageHelper {
     // Allow typeless damage ("-") - only skip if there are no damage dice at all
     if (!spellState.damageDice || spellState.damageDice <= 0) return null;
 
+    const isHealing = ['healing', 'recover', 'recharge'].includes(spell.system.damageType);
+
     // Determine die size: base (spell override or default 6) + actor bonus, clamped to die ladder
+    // Healing spells skip spell damage die size bonus (that's for offensive spells)
     const baseDieSize = spell.system.damageDieSize || 6;
-    const spellDieSizeBonus = actor.system.spellDamageDieSizeBonus || 0;
-    const spellDieLadder = [4, 6, 8, 10, 12];
     let dieSize = baseDieSize;
-    if (spellDieSizeBonus !== 0) {
-      const spellLadderIdx = spellDieLadder.indexOf(baseDieSize);
-      if (spellLadderIdx >= 0) {
-        const newIdx = Math.max(0, Math.min(spellDieLadder.length - 1, spellLadderIdx + spellDieSizeBonus));
-        dieSize = spellDieLadder[newIdx];
-      } else {
-        dieSize = Math.max(4, baseDieSize + (spellDieSizeBonus * 2));
+    if (!isHealing) {
+      const spellDieSizeBonus = actor.system.spellDamageDieSizeBonus || 0;
+      const spellDieLadder = [4, 6, 8, 10, 12];
+      if (spellDieSizeBonus !== 0) {
+        const spellLadderIdx = spellDieLadder.indexOf(baseDieSize);
+        if (spellLadderIdx >= 0) {
+          const newIdx = Math.max(0, Math.min(spellDieLadder.length - 1, spellLadderIdx + spellDieSizeBonus));
+          dieSize = spellDieLadder[newIdx];
+        } else {
+          dieSize = Math.max(4, baseDieSize + (spellDieSizeBonus * 2));
+        }
       }
     }
     let damageFormula = `${spellState.damageDice}d${dieSize}`;
 
+    // Virtuoso Inspiration: add bonus d6 dice to healing rolls
+    if (isHealing) {
+      const virtuosoHealingBonus = actor.system.virtuosoHealingBonus || 0;
+      if (virtuosoHealingBonus > 0) {
+        damageFormula += ` + ${virtuosoHealingBonus}d6`;
+      }
+    }
+
     // Add stat bonus on critical hit (positive or negative)
     if (isCritical && statKey) {
       const statValue = actor.system.stats[statKey]?.value || 0;
-      if (statValue !== 0) {  // ✅ FIX: Include negative stats too (they reduce damage)
+      if (statValue !== 0) {
         damageFormula += ` + ${statValue}`;
       }
     }
 
-    // Add spell-specific universal damage bonuses (new separated system)
-    const spellFlatBonus = actor.system.universalSpellDamageBonus || 0;
-    let spellDiceBonus = actor.system.universalSpellDamageDice || '';
-    
-    // Safety check: ensure it's a string (may be array if derived data failed to join)
-    if (Array.isArray(spellDiceBonus)) {
-      spellDiceBonus = spellDiceBonus.filter(d => !!d).join(' + ');
-    }
+    // Damage bonuses only apply to offensive spells, not healing
+    if (!isHealing) {
+      // Add spell-specific universal damage bonuses (new separated system)
+      const spellFlatBonus = actor.system.universalSpellDamageBonus || 0;
+      let spellDiceBonus = actor.system.universalSpellDamageDice || '';
 
-    if (spellFlatBonus !== 0) {
-      damageFormula += ` + ${spellFlatBonus}`;
-    }
-    if (typeof spellDiceBonus === 'string' && spellDiceBonus.trim() !== '') {
-      damageFormula += ` + ${spellDiceBonus}`;
-    }
+      // Safety check: ensure it's a string (may be array if derived data failed to join)
+      if (Array.isArray(spellDiceBonus)) {
+        spellDiceBonus = spellDiceBonus.filter(d => !!d).join(' + ');
+      }
 
-    // Add legacy universal damage bonuses (backward compatibility)
-    const universalFlatBonus = actor.system.universalDamageBonus || 0;
-    let universalDiceBonus = actor.system.universalDamageDice || '';
+      if (spellFlatBonus !== 0) {
+        damageFormula += ` + ${spellFlatBonus}`;
+      }
+      if (typeof spellDiceBonus === 'string' && spellDiceBonus.trim() !== '') {
+        damageFormula += ` + ${spellDiceBonus}`;
+      }
 
-    // Safety check: ensure it's a string
-    if (Array.isArray(universalDiceBonus)) {
-      universalDiceBonus = universalDiceBonus.filter(d => !!d).join(' + ');
-    }
+      // Add legacy universal damage bonuses (backward compatibility)
+      const universalFlatBonus = actor.system.universalDamageBonus || 0;
+      let universalDiceBonus = actor.system.universalDamageDice || '';
 
-    if (universalFlatBonus !== 0) {
-      damageFormula += ` + ${universalFlatBonus}`;
-    }
-    if (typeof universalDiceBonus === 'string' && universalDiceBonus.trim() !== '') {
-      damageFormula += ` + ${universalDiceBonus}`;
+      // Safety check: ensure it's a string
+      if (Array.isArray(universalDiceBonus)) {
+        universalDiceBonus = universalDiceBonus.filter(d => !!d).join(' + ');
+      }
+
+      if (universalFlatBonus !== 0) {
+        damageFormula += ` + ${universalFlatBonus}`;
+      }
+      if (typeof universalDiceBonus === 'string' && universalDiceBonus.trim() !== '') {
+        damageFormula += ` + ${universalDiceBonus}`;
+      }
     }
 
     // Roll damage (without explosion modifiers in formula)
@@ -607,6 +660,14 @@ export class VagabondDamageHelper {
     const explodeValues = this._getExplodeValues(spell, actor);
     if (explodeValues) {
       await this._manuallyExplodeDice(roll, explodeValues);
+    }
+
+    // Climax: Virtuoso-granted bonus healing dice can explode on max (d6 explodes on 6)
+    if (isHealing && (actor.system.grantedDiceCanExplode || false)) {
+      const virtuosoHealingBonus = actor.system.virtuosoHealingBonus || 0;
+      if (virtuosoHealingBonus > 0) {
+        await this._manuallyExplodeDice(roll, [6]);
+      }
     }
 
     return roll;
@@ -1311,6 +1372,7 @@ export class VagabondDamageHelper {
               data-damage-type="${damageType}"
               data-actor-id="${actorId}"
               data-item-id="${itemId || ''}"
+              data-attack-type="${attackType}"
               data-targets="${targetsJson}"${cleaveAttr}${sneakAttr}${diceCountAttr}>
               <i class="fas fa-burst"></i> ${applyDirectLabel}
             </button>
@@ -1524,6 +1586,8 @@ export class VagabondDamageHelper {
         await targetActor.update({ 'system.health.value': newHP });
         // Fearmonger: frighten nearby weaker enemies on kill
         if (newHP <= 0 && sourceActor) await this.checkFearmonger(targetActor, sourceActor);
+        // Briar Healer: thorn damage on melee hits
+        if (finalDamage > 0 && sourceActor) await this.checkBriarHealer(targetActor, sourceActor, attackType);
       }
 
       // Post save result to chat
@@ -1754,6 +1818,20 @@ export class VagabondDamageHelper {
         effectiveFavorHinder = 'hinder';
       }
       // If already hindered, stays hindered (no double-hinder)
+    }
+
+    // Bravado: Will Saves can't be Hindered while not Incapacitated
+    if (saveType === 'will' && (actor.system.hasBravado || false) && !actor.statuses?.has('incapacitated')) {
+      if (effectiveFavorHinder === 'hinder') {
+        effectiveFavorHinder = 'none';
+      }
+      isHindered = false; // Also override conditional hinder
+    }
+
+    // Virtuoso Resolve: Favor on Saves (granted by Bard's Virtuoso performance)
+    if (actor.system.virtuosoSavesFavor || false) {
+      if (effectiveFavorHinder === 'hinder') { effectiveFavorHinder = 'none'; }
+      else if (effectiveFavorHinder === 'none') { effectiveFavorHinder = 'favor'; }
     }
 
     // Build and evaluate roll with conditional hinder support
@@ -2202,6 +2280,7 @@ export class VagabondDamageHelper {
     const damageType = button.dataset.damageType;
     const actorId = button.dataset.actorId;
     const itemId = button.dataset.itemId;
+    const attackType = button.dataset.attackType || 'melee';
     const sneakDice = parseInt(button.dataset.sneakDice) || 0;
     const diceCount = parseInt(button.dataset.diceCount) || 0;
 
@@ -2270,6 +2349,8 @@ export class VagabondDamageHelper {
         ui.notifications.info(`Applied ${finalDamage} (Cleave) damage to ${targetActor.name}`);
         // Fearmonger: frighten nearby weaker enemies on kill
         if (newHP <= 0 && sourceActor) await this.checkFearmonger(targetActor, sourceActor);
+        // Briar Healer: thorn damage on melee hits
+        if (finalDamage > 0 && sourceActor) await this.checkBriarHealer(targetActor, sourceActor, attackType);
       }
     } else {
       // Normal (non-cleave) damage application
@@ -2287,6 +2368,8 @@ export class VagabondDamageHelper {
         ui.notifications.info(`Applied ${finalDamage} damage to ${targetActor.name}`);
         // Fearmonger: frighten nearby weaker enemies on kill
         if (newHP <= 0 && sourceActor) await this.checkFearmonger(targetActor, sourceActor);
+        // Briar Healer: thorn damage on melee hits
+        if (finalDamage > 0 && sourceActor) await this.checkBriarHealer(targetActor, sourceActor, attackType);
       }
     }
 
@@ -2406,5 +2489,48 @@ export class VagabondDamageHelper {
     }
 
     ui.notifications.info(`Fearmonger: ${frightenedTokens.length} enemy(s) Frightened!`);
+  }
+
+  /**
+   * Briar Healer: When a target with Briar Healer thorns is damaged by a melee attack,
+   * roll d6 and deal that damage back to the attacker.
+   * @param {Actor} targetActor - The actor that was damaged
+   * @param {Actor} sourceActor - The actor that dealt the damage
+   * @param {string} attackType - 'melee', 'ranged', or 'cast'
+   */
+  static async checkBriarHealer(targetActor, sourceActor, attackType) {
+    if (attackType !== 'melee') return;
+    if (!sourceActor) return;
+
+    const briarEffect = targetActor.effects.find(e => e.flags?.vagabond?.briarHealer);
+    if (!briarEffect) return;
+
+    // Roll d6 thorn damage
+    const thornRoll = new Roll('1d6');
+    await thornRoll.evaluate();
+    const thornDamage = thornRoll.total;
+
+    // Apply damage to the attacker
+    const attackerHP = sourceActor.system.health?.value ?? sourceActor.system.hp?.value ?? 0;
+    const newHP = Math.max(0, attackerHP - thornDamage);
+    if (sourceActor.system.health) {
+      await sourceActor.update({ 'system.health.value': newHP });
+    } else if (sourceActor.system.hp) {
+      await sourceActor.update({ 'system.hp.value': newHP });
+    }
+
+    // Post thorn damage to chat
+    const { VagabondChatCard } = await import('./chat-card.mjs');
+    const card = new VagabondChatCard()
+      .setType('generic')
+      .setActor(targetActor)
+      .setTitle('Briar Healer')
+      .setSubtitle(targetActor.name)
+      .setDescription(`
+        <p><i class="fas fa-leaf"></i> <strong>Ethereal thorns lash out!</strong></p>
+        <p><strong>${sourceActor.name}</strong> takes <strong>${thornDamage}</strong> damage from Briar Healer thorns! (${attackerHP} → ${newHP} HP)</p>
+        <p><em>(d6 roll: ${thornRoll.total})</em></p>
+      `);
+    await card.send();
   }
 }

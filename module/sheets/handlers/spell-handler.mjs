@@ -1,4 +1,5 @@
 import { VagabondSpellSequencer } from '../../helpers/spell-sequencer.mjs';
+import { TargetHelper } from '../../helpers/target-helper.mjs';
 
 /**
  * Handler for spell-related functionality in the character sheet.
@@ -48,9 +49,12 @@ export class SpellHandler {
     if (!this.spellStates[spellId]) {
       const spell = this.actor.items.get(spellId);
       const defaultUseFx = spell?.system?.damageType === '-';
+      // Healing spells default to 0 dice (base effect only, no mana cost for healing)
+      const isHealing = ['healing', 'recover', 'recharge'].includes(spell?.system?.damageType);
+      const defaultDice = isHealing ? 0 : 1;
 
       this.spellStates[spellId] = {
-        damageDice: 1,
+        damageDice: defaultDice,
         deliveryType: null,
         deliveryIncrease: 0,
         useFx: defaultUseFx,
@@ -76,8 +80,12 @@ export class SpellHandler {
     if (!spell) return { damageCost: 0, fxCost: 0, deliveryBaseCost: 0, deliveryIncreaseCost: 0, totalCost: 0 };
 
     // Damage cost: 0 for 1d6, +1 per extra die, 0 dice = no damage cost
+    // Healing spells: 1 mana per die (d6 HP per Mana spent)
+    const isHealing = ['healing', 'recover', 'recharge'].includes(spell.system.damageType);
     const hasDamage = spell.system.damageType !== '-' && state.damageDice >= 1;
-    const damageCost = hasDamage && state.damageDice > 1 ? state.damageDice - 1 : 0;
+    const damageCost = hasDamage
+      ? (isHealing ? state.damageDice : (state.damageDice > 1 ? state.damageDice - 1 : 0))
+      : 0;
 
     // Fx cost: +1 mana ONLY when using both damage AND effects
     // 0 dice = effect-only cast, Fx is free (no combo surcharge)
@@ -447,13 +455,17 @@ export class SpellHandler {
     }
 
     // Capture targeted tokens at cast time
-    const targetsAtRollTime = Array.from(game.user.targets).map((token) => ({
-      tokenId: token.id,
-      sceneId: token.scene.id,
-      actorId: token.actor?.id,
-      actorName: token.name,
-      actorImg: token.document.texture.src,
-    }));
+    let targetsAtRollTime = TargetHelper.captureCurrentTargets();
+
+    // Target confirmation dialog
+    const spellActionType = TargetHelper.classifyActionType(spell.system.damageType);
+    const confirmedTargets = await TargetHelper.confirmTargets(targetsAtRollTime, {
+      actionType: spellActionType,
+      actionName: spell.name,
+      requireTargets: false,
+    });
+    if (confirmedTargets === null) return;
+    targetsAtRollTime = confirmedTargets;
 
     // Get mana skill
     const manaSkill = this.actor.system.classData?.manaSkill;
@@ -508,11 +520,17 @@ export class SpellHandler {
 
       // Apply favor/hinder with keyboard modifiers
       const systemFavorHinder = this.actor.system.favorHinder || 'none';
-      const favorHinder = VagabondRollBuilder.calculateEffectiveFavorHinder(
+      let favorHinder = VagabondRollBuilder.calculateEffectiveFavorHinder(
         systemFavorHinder,
         event.shiftKey,
         event.ctrlKey
       );
+
+      // Virtuoso Valor: Favor on Cast Checks
+      if (favorHinder !== 'favor' && (this.actor.system.virtuosoAttacksFavor || false)) {
+        if (favorHinder === 'hinder') { favorHinder = 'none'; }
+        else if (favorHinder === 'none') { favorHinder = 'favor'; }
+      }
 
       roll = await VagabondRollBuilder.buildAndEvaluateD20WithRollData(rollData, favorHinder);
 
@@ -535,6 +553,11 @@ export class SpellHandler {
     // Failed - no mana cost (chat card will show failure)
     // Note: Bypass spells always succeed, so mana is always deducted
 
+    // Life spell revive: 0 dice = revive dead target (1 HP + 1 Fatigue)
+    if (isSuccess && spell.system.damageType === 'healing' && state.damageDice === 0) {
+      await this._handleLifeRevive(spell, targetsAtRollTime);
+    }
+
     // Create chat message
     await this._createSpellChatCard(
       spell,
@@ -556,8 +579,9 @@ export class SpellHandler {
 
     // Reset spell state (keep deliveryType, reset useFx to default)
     const defaultUseFx = spell?.system?.damageType === '-';
+    const isHealingSpell = ['healing', 'recover', 'recharge'].includes(spell?.system?.damageType);
     this.spellStates[spellId] = {
-      damageDice: 1,
+      damageDice: isHealingSpell ? 0 : 1,
       deliveryType: state.deliveryType, // Keep last selected delivery
       deliveryIncrease: 0,
       useFx: defaultUseFx, // Reset to default based on spell type
@@ -677,11 +701,13 @@ export class SpellHandler {
   async toggleSpellFocus(event, target) {
     event.preventDefault();
     const spellId = target.dataset.spellId;
+    const spell = this.actor.items.get(spellId);
     const current = this.actor.system.focus?.spellIds || [];
     const focusMax = this.actor.system.focus?.max ?? 5;
 
+    const wasFocused = current.includes(spellId);
     let next;
-    if (current.includes(spellId)) {
+    if (wasFocused) {
       next = current.filter(id => id !== spellId);
     } else {
       if (current.length >= focusMax) return;
@@ -697,7 +723,134 @@ export class SpellHandler {
       await this.actor.toggleStatusEffect('focusing', { active: isFocusing });
     }
 
+    // Briar Healer: apply/remove +1 Armor and thorns AE on target when focusing Life
+    if (this.actor.system.hasBriarHealer && spell?.name?.toLowerCase() === 'life') {
+      await this._handleBriarHealer(wasFocused);
+    }
+
     ui.combat?.render(false);
+  }
+
+  /**
+   * Handle Briar Healer perk — apply/remove thorns AE on target when focusing Life
+   * @param {boolean} wasActive - Whether the focus was previously active (toggling off)
+   * @private
+   */
+  async _handleBriarHealer(wasActive) {
+    if (wasActive) {
+      // Un-focusing: remove Briar Healer AE from all actors
+      for (const actor of game.actors) {
+        const briarEffect = actor.effects.find(e => e.flags?.vagabond?.briarHealer);
+        if (briarEffect) {
+          await actor.deleteEmbeddedDocuments('ActiveEffect', [briarEffect.id]);
+          ui.notifications.info(`Briar Healer thorns faded from ${actor.name}.`);
+        }
+      }
+    } else {
+      // Focusing: apply to currently targeted token
+      const targets = Array.from(game.user.targets);
+      if (targets.length === 0) {
+        ui.notifications.warn('Target a token to apply Briar Healer thorns.');
+        return;
+      }
+
+      for (const token of targets) {
+        const targetActor = token.actor;
+        if (!targetActor) continue;
+
+        // Check if already has Briar Healer effect
+        if (targetActor.effects.find(e => e.flags?.vagabond?.briarHealer)) continue;
+
+        await targetActor.createEmbeddedDocuments('ActiveEffect', [{
+          name: 'Briar Healer',
+          img: 'icons/svg/heal.svg',
+          disabled: false,
+          changes: [{
+            key: 'system.armorBonus',
+            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            value: '1'
+          }],
+          description: 'Briar Healer: +1 Armor. Any Being that damages this target with a Melee Attack takes d6 damage.',
+          flags: {
+            vagabond: {
+              briarHealer: true,
+              briarHealerCasterId: this.actor.id
+            }
+          }
+        }]);
+        ui.notifications.info(`Briar Healer thorns surround ${targetActor.name}! (+1 Armor, d6 melee retaliation)`);
+      }
+    }
+  }
+
+  /**
+   * Handle Life spell revive — restore a dead target to 1 HP and give 1 Fatigue.
+   * Only works when the target has the Dead status condition.
+   * @param {Item} spell - The spell being cast
+   * @param {Array} targetsAtRollTime - Targets captured at cast time
+   * @private
+   */
+  async _handleLifeRevive(spell, targetsAtRollTime) {
+    // Resolve targets to actual tokens
+    const { VagabondDamageHelper } = await import('../../helpers/damage-helper.mjs');
+    const targetTokens = VagabondDamageHelper._resolveStoredTargets(targetsAtRollTime);
+
+    if (targetTokens.length === 0) {
+      // Fallback to live targets
+      const liveTargets = Array.from(game.user.targets);
+      for (const token of liveTargets) {
+        targetTokens.push(token);
+      }
+    }
+
+    if (targetTokens.length === 0) {
+      ui.notifications.warn('No target selected for Life spell.');
+      return;
+    }
+
+    const { VagabondChatCard } = await import('../../helpers/chat-card.mjs');
+    const revivedNames = [];
+
+    for (const token of targetTokens) {
+      const targetActor = token.actor;
+      if (!targetActor) continue;
+
+      // Only revive targets with Dead status
+      if (!targetActor.statuses?.has('dead')) {
+        ui.notifications.info(`${targetActor.name} is not dead — no effect.`);
+        continue;
+      }
+
+      // Set HP to 1
+      await targetActor.update({ 'system.health.value': 1 });
+
+      // Remove Dead status (and Unconscious if present)
+      if (targetActor.statuses.has('dead')) {
+        await targetActor.toggleStatusEffect('dead', { active: false });
+      }
+      if (targetActor.statuses.has('unconscious')) {
+        await targetActor.toggleStatusEffect('unconscious', { active: false });
+      }
+
+      // Add 1 Fatigue
+      const currentFatigue = targetActor.system.fatigue ?? 0;
+      await targetActor.update({ 'system.fatigue': currentFatigue + 1 });
+
+      revivedNames.push(targetActor.name);
+    }
+
+    if (revivedNames.length > 0) {
+      const card = new VagabondChatCard()
+        .setType('generic')
+        .setActor(this.actor)
+        .setTitle('Life — Revive')
+        .setSubtitle(this.actor.name)
+        .setDescription(`
+          <p><i class="fas fa-heart-pulse"></i> <strong>${revivedNames.join(', ')}</strong> ${revivedNames.length === 1 ? 'has' : 'have'} been revived!</p>
+          <p>Restored to <strong>1 HP</strong> and gained <strong>1 Fatigue</strong>.</p>
+        `);
+      await card.send();
+    }
   }
 
   /**

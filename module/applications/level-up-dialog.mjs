@@ -549,6 +549,7 @@ export class LevelUpDialog extends HandlebarsApplicationMixin(ApplicationV2) {
           name: perk.name,
           img: perk.img,
           prerequisitesMet: prereqCheck.met,
+          prerequisitesWaived: prereqCheck.wellVersed || false,
           missingPrereqs: prereqCheck.missing,
           isOwned,
           ownedCount,
@@ -762,6 +763,16 @@ export class LevelUpDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     const prereqs = perkItem.system.prerequisites || {};
     const missing = [];
 
+    // Well-Versed (Bard L1): Detect for prerequisite waiving
+    let hasWellVersed = false;
+    const classItem = this.actor.items.find(i => i.type === 'class');
+    if (classItem) {
+      const actorLevel = this.actor.system.attributes?.level?.value || 1;
+      hasWellVersed = (classItem.system.levelFeatures || []).some(f =>
+        (f.level || 99) <= actorLevel && f.name?.toLowerCase().includes('well-versed')
+      );
+    }
+
     const hasAnyPrereqs =
       (prereqs.stats?.length > 0) ||
       (prereqs.statOrGroups?.length > 0) ||
@@ -901,7 +912,14 @@ export class LevelUpDialog extends HandlebarsApplicationMixin(ApplicationV2) {
       }
     }
 
-    return { met: missing.length === 0, missing };
+    const normallyMet = missing.length === 0;
+
+    // Well-Versed: override met to true, flag as waived only if prereqs would have failed
+    if (hasWellVersed) {
+      return { met: true, missing, wellVersed: !normallyMet };
+    }
+
+    return { met: normallyMet, missing };
   }
 
   /** Build a formatted list of ALL prerequisites for display (regardless of met/not met). */
@@ -909,6 +927,16 @@ export class LevelUpDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     const prereqs = perkItem.system.prerequisites || {};
     const list = [];
     const sys = this.actor.system;
+
+    // Well-Versed: Detect for waived display
+    let hasWellVersed = false;
+    const classItem = this.actor.items.find(i => i.type === 'class');
+    if (classItem) {
+      const actorLevel = this.actor.system.attributes?.level?.value || 1;
+      hasWellVersed = (classItem.system.levelFeatures || []).some(f =>
+        (f.level || 99) <= actorLevel && f.name?.toLowerCase().includes('well-versed')
+      );
+    }
 
     // Stat requirements
     if (prereqs.stats?.length > 0) {
@@ -1024,6 +1052,11 @@ export class LevelUpDialog extends HandlebarsApplicationMixin(ApplicationV2) {
         }
         list.push({ text: labels.join(' or '), met: groupMet });
       }
+    }
+
+    // Well-Versed: if there are unmet prereqs, add waived note
+    if (hasWellVersed && list.some(l => !l.met)) {
+      list.push({ text: '♪ Well-Versed: Prerequisite waived', met: true });
     }
 
     return list;

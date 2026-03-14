@@ -154,20 +154,59 @@ export class DowntimeApp extends api.HandlebarsApplicationMixin(api.ApplicationV
     const newHP = Math.min(maxHP, currentHP + mightValue);
     const actualRecovery = newHP - currentHP;
 
+    // Song of Rest: check if any PC in the world has Song of Rest
+    const allPCs = game.actors.filter(a => a.type === 'character');
+    const songOfRestBard = allPCs.find(a => a.system.hasSongOfRest);
+
+    let songBonus = 0;
+    let songBardName = '';
+    let finalHP = newHP;
+
+    if (songOfRestBard) {
+      const bardPresence = songOfRestBard.system.stats?.presence?.value || 0;
+      const bardLevel = songOfRestBard.system.bardLevel || 0;
+      songBonus = bardPresence + bardLevel;
+      songBardName = songOfRestBard.name;
+      finalHP = Math.min(maxHP, newHP + songBonus);
+    }
+
+    const totalRecovery = finalHP - currentHP;
+
     // Update HP
-    await this.#actor.update({ 'system.health.value': newHP });
+    await this.#actor.update({ 'system.health.value': finalHP });
+
+    // Song of Rest: also grant a Studied Die
+    let studiedDieGained = false;
+    if (songOfRestBard) {
+      const currentStudied = this.#actor.system.studiedDice || 0;
+      await this.#actor.update({ 'system.studiedDice': currentStudied + 1 });
+      studiedDieGained = true;
+    }
 
     // Create chat card
+    let descriptionHTML = `
+      <p><i class="fas fa-heart"></i> <strong>${this.#actor.name}</strong> takes a breather.</p>
+      <p><strong>HP Recovery:</strong> ${totalRecovery} (${currentHP} → ${finalHP})</p>
+      <p><em>Recovered HP equal to Might (${mightValue}).</em></p>
+    `;
+
+    if (songOfRestBard) {
+      descriptionHTML += `
+        <p><i class="fas fa-music"></i> <strong>Song of Rest</strong> (${songBardName}): +${songBonus} HP (Presence ${songOfRestBard.system.stats?.presence?.value || 0} + Bard Level ${songOfRestBard.system.bardLevel || 0})</p>
+      `;
+      if (studiedDieGained) {
+        descriptionHTML += `
+          <p><i class="fas fa-book-open"></i> Gained a <strong>Studied Die</strong>!</p>
+        `;
+      }
+    }
+
     const card = new VagabondChatCard()
       .setType('generic')
       .setActor(this.#actor)
       .setTitle('Breather')
       .setSubtitle(this.#actor.name)
-      .setDescription(`
-        <p><i class="fas fa-heart"></i> <strong>${this.#actor.name}</strong> takes a breather.</p>
-        <p><strong>HP Recovery:</strong> ${actualRecovery} (${currentHP} → ${newHP})</p>
-        <p><em>Recovered HP equal to Might (${mightValue}).</em></p>
-      `);
+      .setDescription(descriptionHTML);
 
     await card.send();
   }

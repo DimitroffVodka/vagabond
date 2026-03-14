@@ -102,6 +102,17 @@ function registerGameSettings() {
     requiresReload: false,
   });
 
+  // Setting: Target Confirmation Dialog
+  game.settings.register('vagabond', 'targetConfirmation', {
+    name: 'Target Confirmation Dialog',
+    hint: 'Show a confirmation dialog with target portraits before attacks and spells proceed. Warns about friendly fire and missing targets.',
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: true,
+    requiresReload: false,
+  });
+
   // Setting 4: Default clock position
   game.settings.register('vagabond', 'defaultClockPosition', {
     name: 'VAGABOND.Settings.defaultClockPosition.name',
@@ -937,12 +948,55 @@ Hooks.on('updateJournalEntry', async (journal, changes, options, userId) => {
  * Foundry V13 scenarios, journal.flags may be stripped before the hook fires.
  * Both removeClock() and removeDice() are no-ops if no element exists.
  */
-Hooks.on('deleteJournalEntry', (journal, options, userId) => {
+
+// Cache Starstruck link data before deletion, in case flags are stripped by the time
+// the deleteJournalEntry hook fires (Foundry V13/V14 edge case).
+const _starstruckLinkCache = new Map();
+Hooks.on('preDeleteJournalEntry', (journal) => {
+  const starstruckLink = journal.flags?.vagabond?.starstruckLink;
+  if (starstruckLink) {
+    _starstruckLinkCache.set(journal.id, starstruckLink);
+  }
+});
+
+Hooks.on('deleteJournalEntry', async (journal, options, userId) => {
   if (clockOverlay) {
     clockOverlay.removeClock(journal.id);
   }
   if (diceOverlay) {
     diceOverlay.removeDice(journal.id);
+  }
+
+  // Starstruck auto-cleanup (fallback): remove linked status effects when countdown die expires.
+  // Primary cleanup happens in countdown-dice-overlay._cleanupLinkedEffects() before delete.
+  // This hook serves as a safety net in case the overlay path is bypassed.
+  if (game.user.isGM) {
+    const starstruckLink = journal.flags?.vagabond?.starstruckLink
+      || _starstruckLinkCache.get(journal.id);
+    _starstruckLinkCache.delete(journal.id);
+
+    if (starstruckLink) {
+      const { status, tokenIds, sceneId } = starstruckLink;
+      if (status && tokenIds?.length && sceneId) {
+        const scene = game.scenes.get(sceneId);
+        if (scene) {
+          const clearedNames = [];
+          for (const tokenId of tokenIds) {
+            const tokenDoc = scene.tokens.get(tokenId);
+            const actor = tokenDoc?.actor;
+            if (!actor) continue;
+            if (actor.statuses?.has(status)) {
+              await actor.toggleStatusEffect(status);
+              clearedNames.push(actor.name);
+            }
+          }
+          if (clearedNames.length > 0) {
+            const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+            ui.notifications.info(`Starstruck expired — ${statusLabel} removed from ${clearedNames.join(', ')}.`);
+          }
+        }
+      }
+    }
   }
 });
 
@@ -2159,6 +2213,54 @@ Hooks.on('deleteCombat', async (combat) => {
     await actor.toggleStatusEffect('berserk');
     ui.notifications.info(`${actor.name}'s Rage (Berserk) ended with combat.`);
   }
+});
+
+// ---------------------------------------------------------
+// Bard — Virtuoso: /virtuoso chat command (backup — primary trigger is via inventory item)
+// ---------------------------------------------------------
+Hooks.on('chatMessage', async (_chatLog, message, _chatData) => {
+  const trimmed = message.trim().toLowerCase();
+  if (!trimmed.startsWith('/virtuoso')) return;
+
+  // Find the player's owned character with Virtuoso
+  const actor = canvas.tokens?.controlled?.[0]?.actor
+    || game.actors.find(a => a.type === 'character' && a.isOwner && a.system.hasVirtuoso);
+
+  if (!actor) {
+    ui.notifications.warn('No character with the Virtuoso feature found.');
+    return false;
+  }
+
+  if (!actor.system.hasVirtuoso) {
+    ui.notifications.warn(`${actor.name} does not have the Virtuoso feature.`);
+    return false;
+  }
+
+  const { performVirtuoso } = await import('./helpers/bard-helper.mjs');
+  await performVirtuoso(actor);
+  return false;
+});
+
+// ---------------------------------------------------------
+// Bard — Virtuoso: Auto-expire buffs at round change
+// Starstruck duration is tracked via Cd4 countdown die (manual)
+// ---------------------------------------------------------
+Hooks.on('updateCombat', async (combat, changed) => {
+  if (!('round' in changed)) return;
+  if (!game.user.isGM) return;
+
+  const { expireVirtuosoBuffsByRound } = await import('./helpers/bard-helper.mjs');
+  await expireVirtuosoBuffsByRound(combat.round);
+});
+
+// ---------------------------------------------------------
+// Bard — Virtuoso: Clear buffs when combat ends
+// ---------------------------------------------------------
+Hooks.on('deleteCombat', async (combat) => {
+  if (!game.user.isGM) return;
+
+  const { expireVirtuosoBuffs } = await import('./helpers/bard-helper.mjs');
+  await expireVirtuosoBuffs();
 });
 
 /**

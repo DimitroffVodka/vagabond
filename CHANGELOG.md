@@ -91,10 +91,48 @@
 - **AE choices**: All seven Barbarian fields + character `statusImmunities` added to Active Effect attribute list.
 - **Bug fix — typeless damage (`"-"`) bypassing Rage DR**: NPC actions default to `damageType: "-"` (typeless). The `calculateFinalDamage()` function had an early `return` for typeless damage that only applied armor and exited — completely skipping Rage DR. Fix: moved Rage DR to the top of `calculateFinalDamage()` so it runs before any early returns for typeless/weakness/immunity paths. **Pattern to watch for**: any future damage reduction mechanic added to `calculateFinalDamage()` must be placed before the typeless early return at the top, or it will silently fail on all NPC attacks that use the default `"-"` damage type.
 
+### Bard Class Features (actor-character.mjs, item.mjs, vagabond.mjs, bard-helper.mjs, damage-helper.mjs, roll-handler.mjs, spell-handler.mjs, roll-builder.mjs, downtime-app.mjs, active-effect.mjs)
+- **Virtuoso (L1)**: Bard performs a Performance Check to grant the Group one benefit for 1 Round. Triggered by using an equipment item named "Virtuoso" from inventory (or `/virtuoso` chat command as backup). Three choices:
+  - **Inspiration**: d6 bonus to Healing rolls (via `system.virtuosoHealingBonus`)
+  - **Resolve**: Favor on all Saves (via `system.virtuosoSavesFavor` — contextual, doesn't affect attacks)
+  - **Valor**: Favor on Attack and Cast Checks (via `system.virtuosoAttacksFavor` — contextual, doesn't affect saves)
+  - Group = all PC-type actors. Buffs auto-expire at round change and combat end.
+- **Well-Versed (L1)**: Ignores Perk prerequisites during character creation and level-up. Automated in both `level-up-dialog.mjs` and `perks-step-manager.mjs`:
+  - Prerequisite checks detect Well-Versed from class `levelFeatures` and override `met: true` while preserving the actual prereq data.
+  - Perks the Bard wouldn't normally qualify for show a purple "Prerequisite waived" indicator (music note icon) instead of being hidden or locked.
+  - Original prerequisites still display so players can see what's normally required.
+  - "Show All" checkbox hidden when Well-Versed is active (unnecessary since all perks are visible).
+  - "Perk" feature entries (mechanical perk-grant slots) hidden from the Features display on the character sheet for all classes.
+- **Song of Rest (L2)**: During a Breather, if any PC has Song of Rest, all PCs gain bonus HP equal to (Bard's Presence + Bard Level) and a Studied Die. Integrated into `downtime-app.mjs` Breather handler. Chat card shows Song of Rest contribution separately.
+- **Starstruck (L4)**: After a successful Virtuoso performance, if the Bard has Starstruck, a follow-up dialog lets them choose a status (Berserk, Charmed, Confused, or Frightened) to apply to a targeted Near Enemy. Duration tracked via a visible Cd4 countdown die on screen — the GM rolls it each round, and when it expires (d4 rolls 1), the linked status effect is automatically removed from affected actors. Starstruck link data (`status` + `actorIds`) stored on the countdown die's journal flags for auto-cleanup on deletion.
+- **Starstruck Enhancement (L10)**: Starstruck affects ALL Near Enemies (NPC tokens within 30ft) instead of a single target. Auto-detected when class is Bard and level >= 10 with Starstruck feature.
+- **Bravado (L6)**: Will Saves can't be Hindered while not Incapacitated. Applied in both the damage-helper save path (combat saves) and the generic roll-handler save path (character sheet saves). Overrides both system-level and conditional Hinder.
+- **Climax (L8)**: Favor dice and bonus dice granted by the Bard can Explode. When a Bard with Climax uses Virtuoso, all PCs get `system.grantedDiceCanExplode = true`. The d6 Favor die in d20 rolls then explodes on 6 (max face) using `_manuallyExplodeDice`. Applied in `roll-builder.mjs` `evaluateRoll()` and `buildAndEvaluateD20WithRollData()`.
+- **Starstruck auto-removal on countdown die expiry**: When the Cd4 countdown die expires and is deleted, a `deleteJournalEntry` hook checks for `flags.vagabond.starstruckLink` data and automatically removes the linked status effect from all affected actors. Posts a chat notification confirming removal.
+- **Schema fields**: `hasVirtuoso`, `hasSongOfRest`, `hasStarstruck`, `hasBravado`, `hasClimax`, `hasStarstruckEnhancement`, `bardLevel`, `virtuosoSavesFavor`, `virtuosoAttacksFavor`, `virtuosoHealingBonus`, `grantedDiceCanExplode` — all auto-detected from class feature names. Feature detection uses `includes()` for flexible name matching.
+- **AE choices**: All Bard fields added to Active Effect attribute list.
+- **New file**: `module/helpers/bard-helper.mjs` — contains all Virtuoso/Starstruck logic (performVirtuoso, handleStarstruck, expiry helpers).
+
+### Life Spell Revive Mechanic (spell-handler.mjs)
+- **0-dice (0 mana) cast**: Revives a dead target — sets HP to 1, removes Dead/Unconscious status, adds 1 Fatigue. Only works on targets with the Dead condition; no effect otherwise. Posts a "Life — Revive" chat card. Virtuoso Inspiration does NOT apply.
+- **1+ dice cast**: Heals for Xd6 per mana spent. Virtuoso Inspiration adds bonus d6 as normal.
+- **Healing spells default to 0 dice**: `_getSpellState()` and post-cast reset now start healing/recover/recharge spells at 0 dice instead of 1, so base cast costs 0 mana.
+- **No "Roll Damage" button at 0 dice**: Chat card correctly omits the damage/healing button when no dice are rolled.
+- **"Roll Healing" button label**: `createDamageButton()` in `damage-helper.mjs` now shows context-appropriate labels — "Roll Healing" (heart icon) for healing, "Roll Recovery" for recover, "Roll Recharge" for recharge.
+
+### System Compatibility
+- Updated `system.json` `compatibility.verified` from `"13.351"` to `"14.356"`.
+
 ### V14 ContextMenu Deprecation Fix (vagabond.mjs, combat-tracker.mjs)
 - Replaced deprecated `condition` property with `visible` on all ContextMenuEntry definitions (Fluke Reroll, Force Critical, combat tracker entries) to resolve V14 deprecation warnings.
 
 ## Compendium Updates
+
+### Bard Class Feature Names (packs/classes, item-class.mjs)
+- Fixed Level 8 feature from "Awe-Inspiring" to **Climax** with correct description ("Favor and bonus dice you grant can Explode.")
+- Fixed Level 10 feature from "Encore" to **Starstruck Enhancement** with correct description
+- Added `migrateData()` auto-fix in `item-class.mjs` to rename legacy feature names on load, so existing characters are corrected automatically
+- Detection code also matches old names ("awe-inspiring", "encore") as fallback safety net
 
 ### Weapon Damage Types (packs/items/weapons)
 - Updated all 47 weapons in the LevelDB compendium with correct `damageType`, `damageTypeOneHand`, and `damageTypeTwoHands` values (blunt, piercing, slashing) from source spreadsheet

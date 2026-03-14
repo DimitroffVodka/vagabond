@@ -447,6 +447,57 @@ export class CountdownDiceOverlay {
   }
 
   /**
+   * Clean up any linked effects before a countdown die is deleted.
+   * Currently handles Starstruck: removes the linked status effect from affected actors.
+   * @param {JournalEntry} dice - The dice journal entry about to be deleted
+   */
+  async _cleanupLinkedEffects(dice) {
+    if (!game.user.isGM) return;
+
+    const starstruckLink = dice.flags?.vagabond?.starstruckLink;
+    if (!starstruckLink) return;
+
+    const { status, tokenIds, sceneId } = starstruckLink;
+    if (!status) return;
+
+    // Resolve tokens from the scene — NPC tokens are typically unlinked,
+    // so the status lives on the synthetic token actor, not the world actor.
+    const clearedNames = [];
+
+    if (tokenIds?.length && sceneId) {
+      const scene = game.scenes.get(sceneId);
+      if (scene) {
+        for (const tokenId of tokenIds) {
+          const tokenDoc = scene.tokens.get(tokenId);
+          const actor = tokenDoc?.actor;
+          if (!actor) continue;
+          if (actor.statuses?.has(status)) {
+            await actor.toggleStatusEffect(status);
+            clearedNames.push(actor.name);
+          }
+        }
+      }
+    }
+
+    // Legacy fallback: older data may have actorIds instead of tokenIds
+    if (clearedNames.length === 0 && starstruckLink.actorIds?.length) {
+      for (const actorId of starstruckLink.actorIds) {
+        const actor = game.actors.get(actorId);
+        if (!actor) continue;
+        if (actor.statuses?.has(status)) {
+          await actor.toggleStatusEffect(status);
+          clearedNames.push(actor.name);
+        }
+      }
+    }
+
+    if (clearedNames.length > 0) {
+      const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+      ui.notifications.info(`Starstruck expired — ${statusLabel} removed from ${clearedNames.join(', ')}.`);
+    }
+  }
+
+  /**
    * Handle rolling a dice
    * @param {JournalEntry} dice - The dice journal entry
    */
@@ -467,6 +518,8 @@ export class CountdownDiceOverlay {
       if (smallerDice === null) {
         // d4 rolled 1 - countdown ends
         await this._postChatMessage(dice, roll, rollResult, 'ended');
+        // Clean up any linked effects (e.g., Starstruck status removal)
+        await this._cleanupLinkedEffects(dice);
         // Wait for dice animation to complete before deleting (Dice So Nice takes ~2 seconds)
         const timeoutId = setTimeout(async () => {
           this.pendingDeletions.delete(dice.id);
@@ -570,6 +623,8 @@ export class CountdownDiceOverlay {
       });
 
       if (confirmed) {
+        // Clean up any linked effects before deleting
+        await this._cleanupLinkedEffects(dice);
         // Remove DOM element immediately before async delete
         const diceId = dice.id;
         this.removeDice(diceId);

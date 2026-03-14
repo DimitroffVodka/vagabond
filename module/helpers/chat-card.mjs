@@ -425,7 +425,11 @@ export class VagabondChatCard {
            // Use provided damageFormula, or fall back to item's current damage
            // For spells, damageFormula should be passed explicitly with increased dice
            // For weapons, item.system.currentDamage accounts for grip state
-           const formula = damageFormula || item.system.currentDamage || '1d6';
+           // If damageFormula is explicitly null and no item damage, skip the button entirely
+           const formula = damageFormula || item.system.currentDamage || null;
+           if (!formula) {
+             // No damage formula available (e.g., 0-dice healing spell) — skip damage button
+           } else {
 
            // Determine statKey for crit damage bonus
            // For weapons: get from weaponSkill.stat
@@ -614,6 +618,7 @@ export class VagabondChatCard {
                    }
                }
            }
+           } // end of formula check
       }
 
       if (footerActions.length) footerActions.forEach(a => card.addFooterAction(a));

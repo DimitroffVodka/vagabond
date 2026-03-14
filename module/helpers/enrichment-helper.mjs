@@ -30,6 +30,12 @@ export class EnrichmentHelper {
           }
         );
       }
+      // Flag actionable features for UI buttons
+      const featureName = (feature.name || '').toLowerCase();
+      if (featureName === 'virtuoso' || featureName.includes('virtuoso')) {
+        feature.isVirtuoso = true;
+      }
+
       context.enrichedFeatures.push(feature);
     }
   }

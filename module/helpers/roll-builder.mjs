@@ -42,6 +42,17 @@ export class VagabondRollBuilder {
     const { VagabondDiceAppearance } = await import('./dice-appearance.mjs');
     const roll = new Roll(formula, actor.getRollData());
     await VagabondDiceAppearance.evaluateWithCustomColors(roll, favorHinder);
+
+    // Climax: if the actor has grantedDiceCanExplode, explode the favor d6 on max
+    if (favorHinder === 'favor' && (actor.system?.grantedDiceCanExplode || false)) {
+      const { VagabondDamageHelper } = await import('./damage-helper.mjs');
+      // Find the d6 favor term and explode it on 6
+      const hasFavorDie = roll.terms.some(t => t.constructor.name === 'Die' && t.faces === 6);
+      if (hasFavorDie) {
+        await VagabondDamageHelper._manuallyExplodeDice(roll, [6]);
+      }
+    }
+
     return roll;
   }
 
@@ -86,6 +97,16 @@ export class VagabondRollBuilder {
     const { VagabondDiceAppearance } = await import('./dice-appearance.mjs');
     const roll = new Roll(formula, rollData);
     await VagabondDiceAppearance.evaluateWithCustomColors(roll, favorHinder);
+
+    // Climax: if rollData indicates grantedDiceCanExplode, explode the favor d6 on max
+    if (favorHinder === 'favor' && (rollData.grantedDiceCanExplode || false)) {
+      const { VagabondDamageHelper } = await import('./damage-helper.mjs');
+      const hasFavorDie = roll.terms.some(t => t.constructor.name === 'Die' && t.faces === 6);
+      if (hasFavorDie) {
+        await VagabondDamageHelper._manuallyExplodeDice(roll, [6]);
+      }
+    }
+
     return roll;
   }
 

@@ -58,6 +58,7 @@ export class VagabondActorSheet extends api.HandlebarsApplicationMixin(
       viewClass: this._viewClass,
       levelUp: this._onLevelUp,
       toggleFeature: this._onToggleFeature,
+      performVirtuoso: this._onPerformVirtuoso,
       toggleTrait: this._onToggleTrait,
       togglePerk: this._onTogglePerk,
       togglePanel: this._onTogglePanel,
@@ -600,9 +601,16 @@ export class VagabondActorSheet extends api.HandlebarsApplicationMixin(
           break;
         case 'class':
           // Get features for current level and below
+          // Hide purely mechanical features (e.g., "Perk" entries that only grant perk slots)
           if (item.system.levelFeatures) {
             const classFeatures = item.system.levelFeatures
-              .filter(f => f.level <= currentLevel)
+              .filter(f => {
+                if (f.level > currentLevel) return false;
+                // Hide features named "Perk" that are just perk grant slots
+                const fname = (f.name || '').toLowerCase().trim();
+                if (fname === 'perk' || fname === 'perks') return false;
+                return true;
+              })
               .map((f, index) => ({
                 ...f,
                 index: index,
@@ -1185,6 +1193,23 @@ export class VagabondActorSheet extends api.HandlebarsApplicationMixin(
   static async _onToggleFeature(event, target) {
     const accordion = target.closest('.feature.accordion-item');
     AccordionHelper.toggle(accordion);
+  }
+
+  /**
+   * Perform Virtuoso — triggered from the Features tab button
+   * @param {PointerEvent} event - The originating click event
+   * @param {HTMLElement} target - The capturing HTML element
+   * @protected
+   */
+  static async _onPerformVirtuoso(event, target) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!this.actor.system.hasVirtuoso) {
+      ui.notifications.warn(`${this.actor.name} does not have the Virtuoso feature.`);
+      return;
+    }
+    const { performVirtuoso } = await import('../helpers/bard-helper.mjs');
+    await performVirtuoso(this.actor);
   }
 
   /**

@@ -281,6 +281,7 @@
                 <img src="{{img}}" alt="" class="lu-list-img" />
                 <span class="lu-list-name">{{name}}</span>
                 {{#if isOwned}}<span class="lu-badge taken">Taken{{#if ownedCount}} x{{ownedCount}}{{/if}}</span>{{/if}}
+                {{#if prerequisitesWaived}}<span class="lu-badge waived" title="Well-Versed: Prerequisite waived"><i class="fas fa-music"></i></span>{{/if}}
                 {{#unless prerequisitesMet}}<span class="lu-badge prereq"><i class="fas fa-lock"></i></span>{{/unless}}
               </div>
             {{/each}}

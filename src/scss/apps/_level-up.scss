@@ -708,6 +708,9 @@
       &.prereq {
         color: $c-red;
       }
+      &.waived {
+        color: #8e6bbf;
+      }
       &.required {
         background: $c-dark-yellow;
         color: $c-lite;
