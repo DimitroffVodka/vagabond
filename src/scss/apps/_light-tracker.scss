@@ -1,0 +1,153 @@
+/* ── Light Tracker ───────────────────────────────────────────── */
+
+.vlt-tracker {
+  padding: 8px;
+  font-size: 13px;
+  min-width: 280px;
+}
+
+.vlt-time-passes {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.vlt-tp-label {
+  color: #ccc;
+  font-size: 12px;
+  white-space: nowrap;
+  i { margin-right: 4px; }
+}
+
+.vlt-mins-input {
+  width: 50px;
+  text-align: center;
+  padding: 3px 4px;
+  border: 1px solid #444;
+  border-radius: 3px;
+  background: #1a1a1a;
+  color: #ddd;
+  font-size: 13px;
+}
+
+.vlt-tp-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  border: 1px solid #444;
+  border-radius: 3px;
+  background: #252830;
+  color: #ddd;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  &:hover {
+    background: #2e3138;
+    border-color: #666;
+  }
+}
+
+.vcb-unit {
+  color: #888;
+  font-size: 11px;
+}
+
+.vlt-divider {
+  height: 1px;
+  background: #3a3d44;
+  margin: 6px 0;
+}
+
+.vlt-entry {
+  padding: 6px 0;
+  border-bottom: 1px solid #2a2d32;
+
+  &:last-child { border-bottom: none; }
+}
+
+.vlt-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: #e8eaed;
+  margin-bottom: 4px;
+}
+
+.vlt-lights {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vlt-light-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.vlt-fire-icon {
+  color: #ff9900;
+  flex-shrink: 0;
+}
+
+.vlt-time-bar {
+  flex: 1;
+  height: 6px;
+  background: #2a2d32;
+  border-radius: 3px;
+  overflow: hidden;
+  min-width: 60px;
+}
+
+.vlt-time-fill {
+  height: 100%;
+  background: #e08800;
+  border-radius: 3px;
+  transition: width 0.3s;
+
+  &.low { background: #c03030; }
+}
+
+.vlt-douse {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 4px;
+  flex-shrink: 0;
+
+  &:hover { color: #e74c3c; }
+}
+
+.vlt-darkvision {
+  color: #7878b8;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.vlt-no-lights {
+  color: #666;
+  font-size: 11px;
+  font-style: italic;
+}
+
+.vlt-empty-msg {
+  color: #666;
+  text-align: center;
+  padding: 12px;
+  font-style: italic;
+}
+
+/* Context menu entry */
+.vlt-ctx-item {
+  cursor: pointer;
+  i { margin-right: 4px; }
+}

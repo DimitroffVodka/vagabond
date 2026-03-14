@@ -42,6 +42,9 @@ import { VagabondCombatTracker } from './ui/combat-tracker.mjs';
 import { EncounterSettings } from './applications/encounter-settings.mjs';
 import { SequencerFxConfig } from './applications/sequencer-fx-config.mjs';
 import { CompendiumSettings } from './applications/compendium-settings.mjs';
+import { FlankingHelper } from './helpers/flanking-helper.mjs';
+import { MoraleHelper } from './helpers/morale-helper.mjs';
+import { LightTracker } from './helpers/light-tracker.mjs';
 import { LevelUpDialog } from './applications/level-up-dialog.mjs';
 import { PartyCompactView } from './applications/party-compact-view.mjs';
 import VagabondActiveEffectConfig from './applications/active-effect-config.mjs';
@@ -401,6 +404,39 @@ function registerGameSettings() {
     restricted: true,
   });
 
+  // Setting: Flanking
+  game.settings.register('vagabond', 'flankingEnabled', {
+    name: 'Flanking',
+    hint: 'Automatically apply Vulnerable when 2+ allies are Close to a foe that is no more than one size larger. Disabled if the vagabond-crawler module provides its own flanking.',
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: true,
+    requiresReload: false,
+  });
+
+  // Setting: Morale
+  game.settings.register('vagabond', 'moraleEnabled', {
+    name: 'Morale Checks',
+    hint: 'Automatically trigger morale checks when: their leader is defeated, the first NPC dies, half the group is defeated, or a solo NPC drops to half HP. Results are whispered to the GM.',
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: true,
+    requiresReload: false,
+  });
+
+  // Setting: Light Tracking
+  game.settings.register('vagabond', 'lightTrackingEnabled', {
+    name: 'Light Tracking',
+    hint: 'Track torch and lantern burn time automatically. Light sources can be toggled from the inventory context menu, dropped on the canvas, and picked up via the Token HUD. Disabled if the vagabond-crawler module provides its own light tracker.',
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: true,
+    requiresReload: false,
+  });
+
 }
 
 /* -------------------------------------------- */
@@ -751,6 +787,41 @@ Hooks.once('ready', function () {
   Hooks.on('hotbarDrop', (bar, data, slot) => createDocMacro(data, slot));
 });
 
+// Initialize flanking detection
+Hooks.once('ready', () => {
+  FlankingHelper.init();
+});
+
+// Initialize morale checks
+Hooks.once('ready', () => {
+  MoraleHelper.init();
+});
+
+// Initialize light tracker
+Hooks.once('ready', () => {
+  LightTracker.init();
+  LightTracker.registerSocketListeners();
+});
+
+// Auto-mark NPCs as defeated in combat when HP reaches 0
+Hooks.on('updateActor', async (actor, changes) => {
+  if (!game.user.isGM || !game.combat) return;
+  if (actor.type !== 'npc') return;
+  const newHP = changes?.system?.health?.value;
+  if (newHP === undefined || newHP > 0) return;
+
+  // Find this actor's combatant and mark defeated
+  const combatant = game.combat.combatants.find(c => c.actorId === actor.id || c.actor?.id === actor.id);
+  if (combatant && !combatant.defeated) {
+    await combatant.update({ defeated: true });
+    // Also apply the dead status to the token
+    const token = combatant.token?.object;
+    if (token?.actor && !token.actor.statuses?.has('dead')) {
+      await token.actor.toggleStatusEffect('dead', { active: true });
+    }
+  }
+});
+
 // Pre-load JB2A animation defaults when both Sequencer and JB2A are installed.
 // Runs silently — no errors if modules are absent.
 Hooks.once('ready', function () {
@@ -897,6 +968,16 @@ Hooks.on('getSceneControlButtons', (controls) => {
           } catch (error) {
             ui.notifications.error("Failed to open countdown dice config: " + error.message);
           }
+        }
+      },
+      lightTracker: {
+        name: 'lightTracker',
+        title: 'Light Tracker',
+        icon: 'fas fa-fire',
+        button: true,
+        visible: game.user.isGM && game.settings.get('vagabond', 'lightTrackingEnabled'),
+        onClick: () => {
+          LightTracker.openTracker();
         }
       }
     }
@@ -1841,6 +1922,7 @@ Hooks.on('renderChatMessageHTML', (message, html) => {
               statuses: ['restrained'],
               changes: restrainedDef.changes || [],
               description: restrainedDef.description || '',
+              duration: { rounds: 99, startRound: game.combat?.round ?? 0 },
               flags: {
                 vagabond: {
                   grappledBy: actorId

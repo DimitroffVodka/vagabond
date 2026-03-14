@@ -144,6 +144,58 @@
 - Added Utility - Holding (Rank) effect with `system.inventory.bonusSlots`
 - Added Ace - Keen effect with `system.meleeCritBonus` and `system.finesseCritBonus` set to `-1`
 
+### Flanking — Automated Vulnerable Detection (flanking-helper.mjs, vagabond.mjs, active-effect.mjs)
+- **Auto-detection**: When 2+ allied tokens are Close (≤5ft edge-to-edge) to a foe, that foe automatically gains the Vulnerable (Flanked) condition. Removed when flanking conditions no longer met.
+- **Flag-based effect identification**: Uses `flags.vagabond.flankingEffect: true` instead of `origin` field (which is unreliable in V14) to find and manage flanking effects on actors.
+- **Effect data**: Applies Hinder to the flanked target's rolls, Favor on incoming attacks, and Favor on incoming saves via AE changes (`system.favorHinder`, `system.incomingAttacksModifier`, `system.outgoingSavesModifier`).
+- **Duration for icon visibility**: Effects include `duration: { rounds: 99, startRound: 0 }` so token icons display when token effect display is set to "If Temporary".
+- **Distance calculation**: Edge-to-edge Chebyshev distance using token bounding box grid coordinates.
+- **Hook**: Uses `updateToken` hook (not `refreshToken` which causes infinite debounce loops) with 100ms debounce.
+- **Token refresh**: Force `token.renderFlags.set({ refreshEffects: true })` after apply/remove to update token overlays immediately.
+- **System setting**: `flankingEnabled` (Boolean, default true). GM can toggle in system settings.
+- **New file**: `module/helpers/flanking-helper.mjs`
+
+### Morale — Automated NPC Morale Checks (morale-helper.mjs, vagabond.mjs)
+- **Triggers**: Automatic morale checks fire when: (1) first NPC death in a group, (2) half the NPC group is defeated, (3) the leader (highest Threat Level NPC) is defeated, (4) a solo NPC drops to half HP.
+- **Leader detection**: Finds the highest-TL living NPC as the "leader" whose Morale stat is used for the check.
+- **Roll**: 2d6 ≤ Morale = pass (group holds), otherwise fail (retreat/surrender).
+- **No Morale value**: NPCs without a Morale stat fight to the death — shown with skull-crossbones icon.
+- **GM-only**: Results whispered only to GMs via `ChatMessage.create` with whisper filter.
+- **State tracking**: Tracks `initialNPCCount`, `isSolo`, `firstDeathFired`, `halfGroupFired`, `halfHPFired`, `leaderDefeatedFired` to prevent duplicate triggers.
+- **Manual check**: `MoraleHelper.manualCheck(reason)` for GM-triggered checks.
+- **System setting**: `moraleEnabled` (Boolean, default true).
+- **New file**: `module/helpers/morale-helper.mjs`
+
+### Auto-Defeat — NPCs at 0 HP (vagabond.mjs)
+- **Auto-mark defeated**: When an NPC's HP drops to 0 via `updateActor` hook, the system automatically marks their combatant as defeated and applies the Dead status effect.
+- **Enables morale triggering**: This was required because the Morale helper listens for `updateCombatant` with `changes.defeated === true`, which wasn't firing when NPCs hit 0 HP without manual defeat marking.
+
+### Light Tracker — Torch/Lantern/Candle Burn Tracking (light-tracker.mjs, vagabond.mjs, light-tracker.hbs, _light-tracker.scss)
+- **Ported from vagabond-crawler module**: Full light source tracking with system-native integration (no module dependency).
+- **Light sources**: Torch, Lantern (Hooded), Lantern (Bullseye), Candle — all with 1-hour (3600s) burn time.
+- **Toggle from inventory**: Right-click context menu on light source items in character sheet to Light/Extinguish.
+- **Stack splitting**: Lighting a torch from a stack (e.g., 5 torches) splits off 1 as a separate lit item, reducing the stack by 1. Prevents issues with drag-and-drop of stacked lit items.
+- **Token light emission**: Lit items automatically configure token light settings (bright/dim radius, color, animation).
+- **Drop on canvas**: Drag a light source from inventory to the canvas to create a small dropped-light token. Retains lit state and remaining time.
+- **Pick up from canvas**: Token HUD button on dropped light tokens lets GM assign the light to a character, creating an inventory item and deleting the canvas token.
+- **Real-time burn**: `setInterval` accumulates seconds, flushed to `game.time.advance()` every 6 seconds. `updateWorldTime` hook deducts burn time from all lit items.
+- **Burn out**: Consumables (torch, candle) are consumed when time runs out. Lanterns show "needs refueling" message. Chat notifications for all burn-out events.
+- **GM Tracker Panel**: `LightTrackerApp` (ApplicationV2 + HandlebarsApplicationMixin) showing all lit light sources with progress bars, time remaining, and douse buttons. Time Passes controls to add/subtract minutes.
+- **Scene control button**: "Light Tracker" button (fire icon) in Vagabond Tools toolbar for GM access.
+- **Socket support**: Player-initiated actions (drop, pickup) forwarded to GM via `system.vagabond` socket channel.
+- **Crawler module deferral**: Skips initialization if `vagabond-crawler` module is active to avoid duplication.
+- **System setting**: `lightTrackingEnabled` (Boolean, default true).
+- **New files**: `module/helpers/light-tracker.mjs`, `templates/apps/light-tracker.hbs`, `src/scss/apps/_light-tracker.scss`
+
+### Token Effect Icon Visibility Fixes (vagabond.mjs, damage-helper.mjs, chat-card.mjs)
+- **Root cause**: Effects without a `duration` property don't show icons on tokens when token effect display is set to "If Temporary" (Foundry's `ActiveEffect#isTemporary` checks for duration).
+- **Restrained (Grapple)**: Added `duration: { rounds: 99, startRound: 0 }` to Restrained effects created by Grapple/Brawl (two locations in `vagabond.mjs`).
+- **Frightened (Fearmonger)**: Added `duration: { rounds: 1, startRound: currentRound }` to the Frightened effect applied by Barbarian Fearmonger in `damage-helper.mjs`.
+- **Restrained (Grapple in chat-card.mjs)**: Added duration to the Restrained effect created via chat card grapple handler.
+
+### System V14-Only Declaration (system.json)
+- Updated `compatibility.minimum` from `"13"` to `"14"` — the system uses V14-only APIs throughout (DialogV2, ApplicationV2, string-based AE types, `foundry.dice.terms.DiceTerm`, `renderFlags.set()`, `roll.evaluate()` without `{async: true}`).
+
 ## Files Modified
 
 | File | Changes |
@@ -151,14 +203,21 @@
 | `module/documents/actor.mjs` | `super.prepareBaseData()`, `change.type` fix |
 | `module/documents/item.mjs` | Brutal weapon property |
 | `module/helpers/config.mjs` | All AE mode constants → strings |
-| `module/helpers/chat-card.mjs` | Cleave detection/tag, Brawl/Shield Grapple/Shove, Fisticuffs |
-| `module/helpers/damage-helper.mjs` | Cleave data attribute, damage halving |
+| `module/helpers/chat-card.mjs` | Cleave detection/tag, Brawl/Shield Grapple/Shove, Fisticuffs, Restrained duration fix |
+| `module/helpers/damage-helper.mjs` | Cleave data attribute, damage halving, Fearmonger Frightened duration fix |
+| `module/helpers/flanking-helper.mjs` | **New** — Automated flanking detection and Vulnerable application |
+| `module/helpers/morale-helper.mjs` | **New** — Automated NPC morale checks |
+| `module/helpers/light-tracker.mjs` | **New** — Light source burn tracking, canvas drop/pickup, GM tracker panel |
 | `module/sheets/item-sheet.mjs` | Lock toggle submit fix |
 | `module/applications/level-up-dialog.mjs` | AE mode constant → string |
 | `module/data/item-perk.mjs` | effectMode field type + migration |
-| `module/vagabond.mjs` | Push/Prone/Grapple/Shove button handlers, Bully weapon cleanup hook |
+| `module/vagabond.mjs` | Push/Prone/Grapple/Shove handlers, Bully cleanup, Flanking/Morale/Light init, auto-defeat hook, scene controls, Restrained duration fix |
 | `module/sheets/handlers/roll-handler.mjs` | Pre-roll Brawl/Shield intent dialog, Bully conditional Favor |
 | `module/data/actor-character.mjs` | `brawlCheckFavor`, `fisticuffs`, `hasBully`, `shoveSizeOverride`, `incomingMeleeAttacksModifier` fields, perk detection |
 | `module/documents/active-effect.mjs` | AE attribute choices for brawl/bully fields |
 | `module/documents/item.mjs` | Melee-only incoming attacks modifier, `attackerFavorHinder` tracking |
 | `packs/items/weapons/` | Damage types (LevelDB) |
+| `templates/apps/light-tracker.hbs` | **New** — Light Tracker GM panel template |
+| `src/scss/apps/_light-tracker.scss` | **New** — Light Tracker styles |
+| `src/scss/components/_chat-cards.scss` | Morale check chat card styles |
+| `system.json` | `compatibility.minimum` → `"14"` |

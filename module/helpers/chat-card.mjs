@@ -473,6 +473,7 @@ export class VagabondChatCard {
                                statuses: ['restrained'],
                                changes: restrainedDef.changes || [],
                                description: restrainedDef.description || '',
+                               duration: { rounds: 99, startRound: game.combat?.round ?? 0 },
                                flags: {
                                    vagabond: {
                                        grappledBy: actor.id

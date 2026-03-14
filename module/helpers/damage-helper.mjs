@@ -2479,6 +2479,7 @@ export class VagabondDamageHelper {
         img: frightDef.img || 'icons/svg/hazard.svg',
         statuses: ['frightened'],
         changes: frightDef.changes || [],
+        duration: { rounds: 1, startRound: currentRound },
         flags: {
           vagabond: {
             fearmongerExpireRound: currentRound + 1

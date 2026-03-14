@@ -1530,6 +1530,48 @@ li.chat-message:has(.vagabond-chat-card-v2) {
     cursor: default;
 }
 
+/* ── Morale Check Chat Card ────────────────────────────── */
+.vagabond-chat.morale-check {
+  padding: 4px 8px;
+
+  h3 {
+    margin: 0 0 6px;
+    font-family: $font-title;
+    font-size: 16px;
+    color: #e72124;
+    i { margin-right: 4px; }
+  }
+
+  .morale-body {
+    font-size: 13px;
+    line-height: 1.5;
+
+    p { margin: 2px 0; }
+
+    .morale-result {
+      font-weight: bold;
+      font-size: 14px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      margin-top: 6px;
+
+      i { margin-right: 4px; }
+
+      &.morale-pass {
+        color: #2d8a4e;
+        background: rgba(45, 138, 78, 0.1);
+        border: 1px solid rgba(45, 138, 78, 0.3);
+      }
+
+      &.morale-fail {
+        color: #c0392b;
+        background: rgba(192, 57, 43, 0.1);
+        border: 1px solid rgba(192, 57, 43, 0.3);
+      }
+    }
+  }
+}
+
 /* Animations */
 @keyframes popIn {
     from { transform: scale(0); opacity: 0; }

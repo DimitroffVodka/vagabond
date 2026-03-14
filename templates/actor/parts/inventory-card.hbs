@@ -14,6 +14,9 @@
   draggable='true'
 >
   <img src='{{item.img}}' alt='{{item.name}}' class='item-image' />
+  {{#if showQuantityBadge}}
+    <div class='quantity-badge' title='Quantity: {{item.system.quantity}}'>×{{item.system.quantity}}</div>
+  {{/if}}
   <div class='item-name-display'>{{item.name}}</div>
   {{#if requiresBound}}
     <div class='bound-marker'>
