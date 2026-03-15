@@ -1430,7 +1430,8 @@
       "equipment": "Gear",
       "starterPack": "Starter Pack",
       "container": "Container",
-      "vehiclePart": "Construct Part"
+      "vehiclePart": "Construct Part",
+      "effect": "Effect"
     },
     "CountdownDice": {
       "SceneControls": {

@@ -1586,8 +1586,12 @@ export class VagabondDamageHelper {
         await targetActor.update({ 'system.health.value': newHP });
         // Fearmonger: frighten nearby weaker enemies on kill
         if (newHP <= 0 && sourceActor) await this.checkFearmonger(targetActor, sourceActor);
+        // Lifesteal / Manasteal: heal or restore mana on kill
+        if (newHP <= 0 && sourceActor) await this.checkOnKillEffects(targetActor, sourceActor);
         // Briar Healer: thorn damage on melee hits
         if (finalDamage > 0 && sourceActor) await this.checkBriarHealer(targetActor, sourceActor, attackType);
+        // On-Hit Burning: apply burning status from relic power
+        if (finalDamage > 0 && sourceActor) await this.checkOnHitBurning(targetActor, sourceActor);
       }
 
       // Post save result to chat
@@ -2349,8 +2353,12 @@ export class VagabondDamageHelper {
         ui.notifications.info(`Applied ${finalDamage} (Cleave) damage to ${targetActor.name}`);
         // Fearmonger: frighten nearby weaker enemies on kill
         if (newHP <= 0 && sourceActor) await this.checkFearmonger(targetActor, sourceActor);
+        // Lifesteal / Manasteal: heal or restore mana on kill
+        if (newHP <= 0 && sourceActor) await this.checkOnKillEffects(targetActor, sourceActor);
         // Briar Healer: thorn damage on melee hits
         if (finalDamage > 0 && sourceActor) await this.checkBriarHealer(targetActor, sourceActor, attackType);
+        // On-Hit Burning: apply burning status from relic power
+        if (finalDamage > 0 && sourceActor) await this.checkOnHitBurning(targetActor, sourceActor);
       }
     } else {
       // Normal (non-cleave) damage application
@@ -2368,8 +2376,12 @@ export class VagabondDamageHelper {
         ui.notifications.info(`Applied ${finalDamage} damage to ${targetActor.name}`);
         // Fearmonger: frighten nearby weaker enemies on kill
         if (newHP <= 0 && sourceActor) await this.checkFearmonger(targetActor, sourceActor);
+        // Lifesteal / Manasteal: heal or restore mana on kill
+        if (newHP <= 0 && sourceActor) await this.checkOnKillEffects(targetActor, sourceActor);
         // Briar Healer: thorn damage on melee hits
         if (finalDamage > 0 && sourceActor) await this.checkBriarHealer(targetActor, sourceActor, attackType);
+        // On-Hit Burning: apply burning status from relic power
+        if (finalDamage > 0 && sourceActor) await this.checkOnHitBurning(targetActor, sourceActor);
       }
     }
 
@@ -2533,5 +2545,164 @@ export class VagabondDamageHelper {
         <p><em>(d6 roll: ${thornRoll.total})</em></p>
       `);
     await card.send();
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  //  RELIC POWER: ON-KILL EFFECTS (Lifesteal / Manasteal)
+  // ═══════════════════════════════════════════════════════════════════════
+
+  /**
+   * On-Kill Effects: When a target is killed, check the attacker for
+   * Lifesteal (onKillHealDice) and Manasteal (onKillManaDice) fields.
+   * These are ArrayFields populated by Active Effects.
+   * @param {Actor} targetActor - The actor that was killed
+   * @param {Actor} sourceActor - The actor that dealt the killing blow
+   */
+  static async checkOnKillEffects(targetActor, sourceActor) {
+    if (!sourceActor?.system) return;
+
+    // ── Lifesteal: heal the attacker ──
+    const healDice = sourceActor.system.onKillHealDice;
+    if (Array.isArray(healDice) && healDice.length > 0) {
+      const formula = healDice.filter(d => !!d).join(' + ');
+      if (formula) {
+        try {
+          const healRoll = new Roll(formula);
+          await healRoll.evaluate();
+          const healAmount = healRoll.total;
+
+          const currentHP = sourceActor.system.health?.value || 0;
+          const maxHP = sourceActor.system.health?.max || currentHP;
+          const newHP = Math.min(maxHP, currentHP + healAmount);
+          await sourceActor.update({ 'system.health.value': newHP });
+
+          const { VagabondChatCard } = await import('./chat-card.mjs');
+          const card = new VagabondChatCard()
+            .setType('generic')
+            .setActor(sourceActor)
+            .setTitle('Lifesteal')
+            .setSubtitle(sourceActor.name)
+            .setDescription(`
+              <p><i class="fas fa-heart"></i> <strong>Life energy absorbed!</strong></p>
+              <p><strong>${sourceActor.name}</strong> heals <strong>${healAmount} HP</strong> from slaying ${targetActor.name}!</p>
+              <p>(${currentHP} → ${newHP} HP) <em>[${formula}: ${healRoll.total}]</em></p>
+            `);
+          await card.send();
+        } catch (e) {
+          console.error('Vagabond | Lifesteal roll error:', e);
+        }
+      }
+    }
+
+    // ── Manasteal: restore mana ──
+    const manaDice = sourceActor.system.onKillManaDice;
+    if (Array.isArray(manaDice) && manaDice.length > 0) {
+      const formula = manaDice.filter(d => !!d).join(' + ');
+      if (formula) {
+        try {
+          const manaRoll = new Roll(formula);
+          await manaRoll.evaluate();
+          const manaAmount = manaRoll.total;
+
+          const currentMana = sourceActor.system.mana?.current || 0;
+          const maxMana = sourceActor.system.mana?.max || 0;
+          if (maxMana > 0) {
+            const newMana = Math.min(maxMana, currentMana + manaAmount);
+            await sourceActor.update({ 'system.mana.current': newMana });
+
+            const { VagabondChatCard } = await import('./chat-card.mjs');
+            const card = new VagabondChatCard()
+              .setType('generic')
+              .setActor(sourceActor)
+              .setTitle('Manasteal')
+              .setSubtitle(sourceActor.name)
+              .setDescription(`
+                <p><i class="fas fa-hat-wizard"></i> <strong>Mana siphoned!</strong></p>
+                <p><strong>${sourceActor.name}</strong> restores <strong>${manaAmount} Mana</strong> from slaying ${targetActor.name}!</p>
+                <p>(${currentMana} → ${newMana} Mana) <em>[${formula}: ${manaRoll.total}]</em></p>
+              `);
+            await card.send();
+          }
+        } catch (e) {
+          console.error('Vagabond | Manasteal roll error:', e);
+        }
+      }
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  //  RELIC POWER: ON-HIT BURNING
+  // ═══════════════════════════════════════════════════════════════════════
+
+  /**
+   * On-Hit Burning: When the attacker has onHitBurningDice set,
+   * apply the Burning status to the target and create a Countdown Die.
+   * The AE value stores the die type (d4, d6, d8).
+   * When the countdown die expires, the Burning status is auto-removed.
+   * @param {Actor} targetActor - The actor that was hit
+   * @param {Actor} sourceActor - The actor that dealt the hit
+   */
+  static async checkOnHitBurning(targetActor, sourceActor) {
+    if (!sourceActor?.system) return;
+
+    const burningDice = sourceActor.system.onHitBurningDice;
+    if (!burningDice || typeof burningDice !== 'string' || burningDice.trim() === '') return;
+
+    // Don't stack — skip if target already has Burning
+    if (targetActor.statuses?.has('burning')) return;
+
+    // Check target immunity
+    const statusImmunities = targetActor.system.statusImmunities || [];
+    if (statusImmunities.includes('burning')) return;
+
+    try {
+      // Apply Burning status to the target
+      await targetActor.toggleStatusEffect('burning', { active: true });
+
+      // Determine the countdown die type from the AE value
+      const dieType = burningDice.trim().toLowerCase();
+      const validDice = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20'];
+      const finalDieType = validDice.includes(dieType) ? dieType : 'd4';
+
+      // Find the target's token ID and scene for linked cleanup
+      const targetToken = canvas?.tokens?.placeables?.find(t => t.actor?.id === targetActor.id);
+      const tokenIds = targetToken ? [targetToken.id] : [];
+      const sceneId = canvas?.scene?.id || '';
+
+      // Create a Countdown Die linked to the Burning status
+      const { CountdownDice } = await import('../documents/countdown-dice.mjs');
+      const journal = await CountdownDice.create({
+        name: `Burning: ${targetActor.name}`,
+        diceType: finalDieType,
+        size: 'S',
+        ownership: { default: 3, [game.user.id]: 3 }
+      });
+
+      // Link the countdown die to the Burning status for auto-cleanup on expiry
+      if (journal) {
+        await journal.setFlag('vagabond', 'linkedStatusEffect', {
+          status: 'burning',
+          label: 'Burning',
+          tokenIds: tokenIds,
+          sceneId: sceneId
+        });
+      }
+
+      // Post chat card
+      const { VagabondChatCard } = await import('./chat-card.mjs');
+      const card = new VagabondChatCard()
+        .setType('generic')
+        .setActor(sourceActor)
+        .setTitle('Burning!')
+        .setSubtitle(targetActor.name)
+        .setDescription(`
+          <p><i class="fas fa-fire"></i> <strong>${targetActor.name} catches fire!</strong></p>
+          <p>Burning for <strong>C${finalDieType}</strong>!</p>
+          <p><em>Roll the countdown die each round — on a 1, it shrinks or ends.</em></p>
+        `);
+      await card.send();
+    } catch (e) {
+      console.error('Vagabond | On-Hit Burning error:', e);
+    }
   }
 }

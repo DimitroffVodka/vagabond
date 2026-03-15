@@ -45,6 +45,7 @@ import { CompendiumSettings } from './applications/compendium-settings.mjs';
 import { FlankingHelper } from './helpers/flanking-helper.mjs';
 import { MoraleHelper } from './helpers/morale-helper.mjs';
 import { LightTracker } from './helpers/light-tracker.mjs';
+import { EffectsCompendium } from './helpers/effects-compendium.mjs';
 import { LevelUpDialog } from './applications/level-up-dialog.mjs';
 import { PartyCompactView } from './applications/party-compact-view.mjs';
 import VagabondActiveEffectConfig from './applications/active-effect-config.mjs';
@@ -547,6 +548,7 @@ globalThis.vagabond = {
     EnrichmentHelper,
   },
   models,
+  EffectsCompendium,
 };
 
 Hooks.once('init', function () {
@@ -664,6 +666,7 @@ Hooks.once('init', function () {
     starterPack: models.VagabondStarterPack,
     container: models.VagabondContainerData,
     vehiclePart: models.VagabondVehiclePart,
+    effect: models.VagabondEffect,
   };
 
   globalThis.vagabond.managers = {
@@ -2344,6 +2347,16 @@ Hooks.on('deleteCombat', async (combat) => {
   const { expireVirtuosoBuffs } = await import('./helpers/bard-helper.mjs');
   await expireVirtuosoBuffs();
 });
+
+// ---------------------------------------------------------
+// Burning — Damage is now applied via Countdown Dice rolls.
+// When a "Burning: [Name]" countdown die is clicked/rolled,
+// _applyLinkedDamage() in countdown-dice-overlay.mjs handles
+// rolling the damage formula and applying it to the target.
+// The statusEffectData.burning.damageFormula (default 1d6)
+// and damageType (default fire) fields on the actor control
+// how much damage is dealt per tick.
+// ---------------------------------------------------------
 
 /**
  * Inject attribute choices into the ActiveEffect configuration form.

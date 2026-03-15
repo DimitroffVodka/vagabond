@@ -166,6 +166,9 @@ export class VagabondItemSheet extends api.HandlebarsApplicationMixin(
     vehiclePartDetails: {
       template: 'systems/vagabond/templates/item/details-parts/vehicle-part-details.hbs',
     },
+    effectDetails: {
+      template: 'systems/vagabond/templates/item/details-parts/effect-details.hbs',
+    },
     effects: {
       template: 'systems/vagabond/templates/item/effects.hbs',
     },
@@ -201,6 +204,9 @@ export class VagabondItemSheet extends api.HandlebarsApplicationMixin(
         break;
       case 'vehiclePart':
         options.parts.push('vehiclePartDetails', 'effects');
+        break;
+      case 'effect':
+        options.parts.push('effectDetails', 'effects');
         break;
     }
   }
@@ -758,6 +764,20 @@ export class VagabondItemSheet extends api.HandlebarsApplicationMixin(
         };
         break;
 
+      case 'effectDetails':
+        context.tab = context.tabs[partId];
+        context.enriched = {
+          description: await foundry.applications.ux.TextEditor.enrichHTML(
+            this.item.system.description,
+            {
+              secrets: this.document.isOwner,
+              rollData: this.item.getRollData(),
+              relativeTo: this.item,
+            }
+          )
+        };
+        break;
+
       case 'effects':
         context.tab = context.tabs[partId];
         // Prepare active effects for easier access
@@ -778,7 +798,7 @@ export class VagabondItemSheet extends api.HandlebarsApplicationMixin(
     const tabGroup = 'primary';
     // Default tab for spell, ancestry, class, perk, equipment, starterPack, and container is details, others default to description
     if (!this.tabGroups[tabGroup]) {
-      this.tabGroups[tabGroup] = (this.document.type === 'spell' || this.document.type === 'ancestry' || this.document.type === 'class' || this.document.type === 'perk' || this.document.type === 'equipment' || this.document.type === 'starterPack' || this.document.type === 'container' || this.document.type === 'vehiclePart') ? 'details' : 'description';
+      this.tabGroups[tabGroup] = (this.document.type === 'spell' || this.document.type === 'ancestry' || this.document.type === 'class' || this.document.type === 'perk' || this.document.type === 'equipment' || this.document.type === 'starterPack' || this.document.type === 'container' || this.document.type === 'vehiclePart' || this.document.type === 'effect') ? 'details' : 'description';
     }
     return parts.reduce((tabs, partId) => {
       const tab = {
@@ -808,6 +828,7 @@ export class VagabondItemSheet extends api.HandlebarsApplicationMixin(
         case 'starterPackDetails':
         case 'containerDetails':
         case 'vehiclePartDetails':
+        case 'effectDetails':
           tab.id = 'details';
           tab.label += 'Details';
           break;
@@ -2594,6 +2615,26 @@ export class VagabondItemSheet extends api.HandlebarsApplicationMixin(
           } else {
             ui.notifications.warn('Perk already added to this feature');
           }
+        }
+        return true;
+      }
+    }
+
+    // 0b. Handle dropping "effect" type items — extract their AEs onto this item
+    {
+      const droppedItem = await Item.implementation.fromDropData(data);
+      if (droppedItem?.type === 'effect') {
+        const effectsData = droppedItem.effects.map(e => {
+          const obj = e.toObject();
+          // Remove the source _id so Foundry generates fresh ones
+          delete obj._id;
+          return obj;
+        });
+        if (effectsData.length) {
+          await this.item.createEmbeddedDocuments('ActiveEffect', effectsData);
+          ui.notifications.info(`Added ${effectsData.length} effect(s) from "${droppedItem.name}" to ${this.item.name}.`);
+        } else {
+          ui.notifications.warn(`"${droppedItem.name}" has no Active Effects to transfer.`);
         }
         return true;
       }

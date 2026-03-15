@@ -1,0 +1,40 @@
+{{! Effect Details Tab }}
+<section class='tab details {{tab.cssClass}}' data-group='primary' data-tab='details'>
+  <div class='equipment-item-content'>
+    {{! Description }}
+    <div class='form-group'>
+      <label class='resource-label'>Description</label>
+      <div class='equipment-description'>
+        {{#if editable}}
+          <prose-mirror name="system.description" data-document-uuid="{{item.uuid}}" value="{{system.description}}" collaborate="true" toggled="true">
+            {{{enriched.description}}}
+          </prose-mirror>
+        {{else}}
+          <div>{{{enriched.description}}}</div>
+        {{/if}}
+      </div>
+    </div>
+
+    {{! Category & Duration }}
+    <div class='form-group'>
+      <label class='resource-label'>Effect Properties</label>
+      <div class='form-fields'>
+        <label>Category</label>
+        {{formInput systemFields.category value=system.category localize=true}}
+      </div>
+      <div class='form-fields'>
+        <label>Duration Hint</label>
+        {{formInput systemFields.durationHint value=system.durationHint}}
+      </div>
+    </div>
+
+    {{! Hint about Active Effects tab }}
+    <div class='form-group'>
+      <p class='field-hint'>
+        <i class='fas fa-info-circle'></i>
+        Use the <strong>Effects</strong> tab to add or edit the Active Effects carried by this item.
+        When dragged onto an Actor, these effects will be transferred automatically.
+      </p>
+    </div>
+  </div>
+</section>

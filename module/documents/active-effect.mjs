@@ -240,6 +240,11 @@ export class VagabondActiveEffect extends ActiveEffect {
       'system.fisticuffs': 'Brawl: Fisticuffs (Post-Hit Grapple/Shove)',
       'system.hasBully': 'Perk: Bully (Grapple/Shove Favor + use as weapon)',
       'system.hasBriarHealer': 'Perk: Briar Healer (Life focus +1 Armor + d6 thorns)',
+
+      // -- Relic Powers: On-Kill / On-Hit --
+      'system.onKillHealDice': 'Relic: Lifesteal — Heal dice on kill (e.g. 1d8)',
+      'system.onKillManaDice': 'Relic: Manasteal — Mana dice on kill (e.g. 1d4)',
+      'system.onHitBurningDice': 'Relic: Burning — Countdown die type on hit (d4, d6, d8)',
       'system.sneakAttackDice': 'Rogue: Sneak Attack Dice (number of d4s)',
       'system.hasLethalWeapon': 'Rogue: Lethal Weapon (all Favored attacks get Sneak Attack)',
       'system.unflinchingLuckDie': 'Rogue: Unflinching Luck Die (12 or 10)',

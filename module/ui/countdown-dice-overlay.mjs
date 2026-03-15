@@ -454,10 +454,12 @@ export class CountdownDiceOverlay {
   async _cleanupLinkedEffects(dice) {
     if (!game.user.isGM) return;
 
-    const starstruckLink = dice.flags?.vagabond?.starstruckLink;
-    if (!starstruckLink) return;
+    // Check for any linked status effect (Starstruck, Burning, etc.)
+    const link = dice.flags?.vagabond?.starstruckLink
+              || dice.flags?.vagabond?.linkedStatusEffect;
+    if (!link) return;
 
-    const { status, tokenIds, sceneId } = starstruckLink;
+    const { status, tokenIds, sceneId, label } = link;
     if (!status) return;
 
     // Resolve tokens from the scene — NPC tokens are typically unlinked,
@@ -480,8 +482,8 @@ export class CountdownDiceOverlay {
     }
 
     // Legacy fallback: older data may have actorIds instead of tokenIds
-    if (clearedNames.length === 0 && starstruckLink.actorIds?.length) {
-      for (const actorId of starstruckLink.actorIds) {
+    if (clearedNames.length === 0 && link.actorIds?.length) {
+      for (const actorId of link.actorIds) {
         const actor = game.actors.get(actorId);
         if (!actor) continue;
         if (actor.statuses?.has(status)) {
@@ -492,8 +494,8 @@ export class CountdownDiceOverlay {
     }
 
     if (clearedNames.length > 0) {
-      const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
-      ui.notifications.info(`Starstruck expired — ${statusLabel} removed from ${clearedNames.join(', ')}.`);
+      const statusLabel = label || status.charAt(0).toUpperCase() + status.slice(1);
+      ui.notifications.info(`${statusLabel} expired — removed from ${clearedNames.join(', ')}.`);
     }
   }
 
@@ -510,6 +512,9 @@ export class CountdownDiceOverlay {
     await roll.evaluate();
 
     const rollResult = roll.total;
+
+    // Apply linked status damage (e.g. Burning — the die roll IS the damage)
+    await this._applyLinkedDamage(dice, rollResult);
 
     // Determine outcome
     if (rollResult === 1) {
@@ -543,6 +548,71 @@ export class CountdownDiceOverlay {
     } else {
       // Countdown continues
       await this._postChatMessage(dice, roll, rollResult, 'continues');
+    }
+  }
+
+  /**
+   * Apply damage from a linked status effect when a countdown die is rolled.
+   * The countdown die roll result IS the damage (e.g. Cd4 rolls 3 = 3 fire damage).
+   * @param {JournalEntry} dice - The countdown die journal entry
+   * @param {number} rollResult - The result of the countdown die roll
+   */
+  async _applyLinkedDamage(dice, rollResult) {
+    const link = dice.flags?.vagabond?.linkedStatusEffect;
+    if (!link) return;
+
+    // Only handle Burning for now (expandable for other statuses later)
+    if (link.status !== 'burning') return;
+
+    const { tokenIds, sceneId } = link;
+    if (!tokenIds?.length || !sceneId) return;
+
+    const scene = game.scenes.get(sceneId);
+    if (!scene) return;
+
+    const damageType = 'fire';
+    const burnDamage = rollResult;
+    const diceType = dice.flags.vagabond.countdownDice.diceType;
+
+    for (const tokenId of tokenIds) {
+      const tokenDoc = scene.tokens.get(tokenId);
+      const actor = tokenDoc?.actor;
+      if (!actor) continue;
+
+      // Only deal damage if the actor still has the Burning status
+      if (!actor.statuses?.has('burning')) continue;
+
+      try {
+        // Apply damage (bypasses armor — direct fire damage)
+        const currentHP = actor.system.health?.value ?? actor.system.hp?.value ?? 0;
+        const newHP = Math.max(0, currentHP - burnDamage);
+
+        if (actor.system.health !== undefined) {
+          await actor.update({ 'system.health.value': newHP });
+        } else if (actor.system.hp !== undefined) {
+          await actor.update({ 'system.hp.value': newHP });
+        }
+
+        // Post chat card
+        const { VagabondChatCard } = await import('../helpers/chat-card.mjs');
+        const card = new VagabondChatCard()
+          .setType('generic')
+          .setActor(actor)
+          .setTitle('Burning!')
+          .setSubtitle(actor.name)
+          .setDescription(`
+            <p><i class="fas fa-fire"></i> <strong>${actor.name} is burning!</strong></p>
+            <p>Takes <strong>${burnDamage} ${damageType}</strong> damage! <em>[${diceType}: ${rollResult}]</em></p>
+            <p>(${currentHP} → ${newHP} HP)</p>
+          `);
+        await card.send();
+
+        if (newHP <= 0) {
+          ui.notifications.warn(`${actor.name} has been killed by Burning damage!`);
+        }
+      } catch (e) {
+        console.error('Vagabond | Burning countdown damage error:', e);
+      }
     }
   }
 

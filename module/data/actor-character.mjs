@@ -608,6 +608,42 @@ export default class VagabondCharacter extends VagabondActorBase {
       label: "Granted Dice Can Explode"
     });
 
+    // ── Relic Power: On-Kill Effects ──────────────────────────────────────
+    // These are dice formulas set by Active Effects (e.g. "1d8", "2d8").
+    // When the actor kills a target, the damage-helper rolls these and
+    // applies the result (heal HP / restore Mana).
+    // ArrayField so multiple sources can stack (e.g. two Lifesteal items).
+
+    // Lifesteal: on kill, roll these dice and heal the attacker
+    schema.onKillHealDice = new fields.ArrayField(
+      new fields.StringField({ blank: true }),
+      {
+        initial: [],
+        label: "On-Kill Heal Dice",
+        hint: "Dice formula for HP healed on kill (e.g. 1d8, 2d8). Multiple sources stack."
+      }
+    );
+
+    // Manasteal: on kill, roll these dice and restore mana
+    schema.onKillManaDice = new fields.ArrayField(
+      new fields.StringField({ blank: true }),
+      {
+        initial: [],
+        label: "On-Kill Mana Dice",
+        hint: "Dice formula for Mana restored on kill (e.g. 1d4, 2d4). Multiple sources stack."
+      }
+    );
+
+    // ── Relic Power: On-Hit Effects ───────────────────────────────────────
+    // Burning: on weapon hit, apply Burning status to target for this many rounds.
+    // Uses override mode so higher tier replaces lower (III overrides I).
+    schema.onHitBurningDice = new fields.StringField({
+      initial: '',
+      blank: true,
+      label: "On-Hit Burning Duration Dice",
+      hint: "Dice formula for Burning duration in rounds (e.g. 1d4, 1d6, 1d8). Set by Active Effects."
+    });
+
     // Perk — Briar Healer: Life spell focus gives target +1 Armor and d6 thorn damage
     schema.hasBriarHealer = new fields.BooleanField({
       initial: false,
@@ -737,7 +773,12 @@ export default class VagabondCharacter extends VagabondActorBase {
     this.attributes.isSpellcaster = false;
     this.attributes.manaMultiplier = 0;
 
-    // --- 6. Reset Status Condition Fields ---
+    // --- 6. Reset Relic Power Fields ---
+    this.onKillHealDice = [];
+    this.onKillManaDice = [];
+    this.onHitBurningDice = '';
+
+    // --- 7. Reset Status Condition Fields ---
     this.incomingHealingModifier = 0;
     this.incomingAttacksModifier = 'none';
     this.incomingMeleeAttacksModifier = 'none';

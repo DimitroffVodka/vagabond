@@ -15,4 +15,5 @@ export { default as VagabondPerk } from './item-perk.mjs';
 export { default as VagabondStarterPack } from './item-starter-pack.mjs';
 export { default as VagabondContainerData } from './item-container.mjs';
 export { default as VagabondVehiclePart } from './item-vehicle-part.mjs';
+export { default as VagabondEffect } from './item-effect.mjs';
 

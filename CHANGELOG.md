@@ -1,5 +1,47 @@
 # Vagabond System Changelog — V14 Migration & Features
 
+## Active Effects Compendium
+
+### New "Effect" Item Type (item-effect.mjs, system.json, item-sheet.mjs)
+- Added `effect` item type — lightweight container whose sole purpose is to carry Active Effects
+- Data model includes `category` (condition / buff / debuff / weapon / armor / material / classFeature / misc) and `durationHint` fields
+- Full item sheet support with Details + Effects tabs
+- Registered in `system.json` documentTypes, data models, and item sheet PARTS
+
+### Effects Compendium Pack (effects-compendium.mjs, system.json)
+- New "Active Effects" compendium pack (type: Item, path: packs/effects)
+- Organized under Vagabond > Effects folder in the compendium sidebar
+- Population helper at `vagabond.EffectsCompendium.populate()` — creates all effect items in the compendium
+- Run `vagabond.EffectsCompendium.populate({ force: true })` in the console to regenerate
+
+### Compendium Contents (104 drag-and-drop effect items)
+- **Status Conditions (19):** All Vagabond conditions — Dazed, Prone, Frightened, Sickened, Confused, Vulnerable, Blinded, Invisible, Restrained, Incapacitated, Paralyzed, Unconscious, Dead, Berserk, Burning, Charmed, Focusing, Fatigued, Suffocating
+- **Combat Buffs (34):** Favored/Hindered (All Rolls), Damage +1/+2/-2, Armor +1/+2, Speed +10ft/-10ft, Stat +1/-1 for all 6 stats, Save +1 for Reflex/Endure/Will, HP +5/+10/+1 per level
+- **Weapon Enhancements (13):** Keen (Crit 19+), Melee/Ranged Damage Die +1 Step, Melee/Ranged Crit Range -1, +1 Weapon Damage, +1d4 Weapon Damage, Relic Weapon +1/+2/+3, Strike +d4/+d6/+d8
+- **Relic Enchantments:** Trinket +1/+2/+3 (spell dmg), Protection +1/+2/+3 (all saves), Swiftness I/II/III (+5/+10/+15 Speed)
+- **Cursed Items (6):** Weakness -1/-2/-3 (weapon dmg), Vulnerability -1/-2/-3 (armor)
+- **Material Bonuses (3):** Adamant (Weapon +1 dmg), Adamant (Armor +1), Mythral (+1 slot)
+- **Armor Properties (3):** Relic Armor +1/+2/+3
+- **Ancestry Traits (5):** Orc Hulking (+2 slots), Dwarf Tough (+1 HP/lvl), Elf Naturally Attuned (spellcaster), Nimble (+5 speed), Draken Scale (+1 armor)
+- **Perk Effects (5):** Tough (+1 HP/lvl), Pack Mule (+2 slots), Metamagic (+1 mana), Secret of Mana (+mana/lvl), Magical Secret (spellcaster)
+- **Class Features (22):** Barbarian (Rage, Damage Reduction, Rip and Tear, Aggressor, Fearmonger, Mindless Rancor, Bloodthirsty), Rogue (Sneak Attack 1-3d4, Lethal Weapon, Evasive), Bard (Bravado, Climax), Brawl (Check Favor, Fisticuffs), Sorcerer (Spell-Slinger Lv2/Lv10), Merchant (Deep Pockets), Wizard (Sculpt Spell Lv2/Lv10)
+- **Gear Effects (1):** Backpack (+2 slots)
+- All effects sourced from existing compendium data include proper `applicationMode` flags (when-equipped, on-use, permanent)
+
+### Files Modified
+| File | Change |
+|------|--------|
+| `module/data/item-effect.mjs` | **NEW** — Effect item data model |
+| `module/data/_module.mjs` | Export VagabondEffect |
+| `module/helpers/effects-compendium.mjs` | **NEW** — Compendium definitions + populate() helper |
+| `module/vagabond.mjs` | Register effect data model + EffectsCompendium global |
+| `module/sheets/item-sheet.mjs` | PARTS, _configureRenderOptions, _preparePartContext, tab config |
+| `templates/item/details-parts/effect-details.hbs` | **NEW** — Effect item sheet template |
+| `system.json` | documentTypes.Item.effect, packs entry, packFolders entry |
+| `lang/en.json` | TYPES.Item.effect label |
+
+---
+
 ## V14 Compatibility Fixes
 
 ### Active Effect Modes (config.mjs, item-perk.mjs, level-up-dialog.mjs)
@@ -112,6 +154,18 @@
 - **Schema fields**: `hasVirtuoso`, `hasSongOfRest`, `hasStarstruck`, `hasBravado`, `hasClimax`, `hasStarstruckEnhancement`, `bardLevel`, `virtuosoSavesFavor`, `virtuosoAttacksFavor`, `virtuosoHealingBonus`, `grantedDiceCanExplode` — all auto-detected from class feature names. Feature detection uses `includes()` for flexible name matching.
 - **AE choices**: All Bard fields added to Active Effect attribute list.
 - **New file**: `module/helpers/bard-helper.mjs` — contains all Virtuoso/Starstruck logic (performVirtuoso, handleStarstruck, expiry helpers).
+
+### Relic Power Automation — Burning, Lifesteal, Manasteal (actor-character.mjs, damage-helper.mjs, countdown-dice-overlay.mjs, effects-compendium.mjs, active-effect.mjs)
+- **Event-driven AE fields**: New schema fields that Active Effects can target, with system code reacting at specific game events (on-kill, on-hit, on-countdown-roll). AEs control the values; code reacts to them.
+- **Lifesteal (on-kill heal)**: `system.onKillHealDice` ArrayField — when a kill occurs, rolls the accumulated dice formulas and heals the attacker (capped at max HP). Multiple AE sources stack (e.g. two Lifesteal items). Tiers: I = 1d8, II = 2d8, III = 3d8. Chat card shows heal amount.
+- **Manasteal (on-kill mana restore)**: `system.onKillManaDice` ArrayField — on kill, rolls dice and restores mana (capped at max, only if spellcaster). Multiple sources stack. Tiers: I = 1d4, II = 2d4, III = 3d4. Chat card shows mana restored.
+- **Burning (on-hit countdown die)**: `system.onHitBurningDice` StringField — on weapon hit dealing damage, applies Burning status to the target and creates a Countdown Die (Cd4/Cd6/Cd8) on the canvas. The countdown die roll result IS the burning damage — no separate damage roll. Tiers: I = Cd4, II = Cd6, III = Cd8. Override mode so higher tier replaces lower.
+- **Countdown die integration**: Burning uses the built-in Vagabond Countdown Dice system. When the die is clicked/rolled, `_applyLinkedDamage()` in `countdown-dice-overlay.mjs` applies the roll result as fire damage to the target. When the die expires (rolls 1 and shrinks below d4), the linked Burning status is auto-removed.
+- **Generic `linkedStatusEffect` flag**: Countdown dice now support a generic `linkedStatusEffect` flag (alongside the existing `starstruckLink`). `_cleanupLinkedEffects()` checks both flags, enabling any future status effect to be linked to a countdown die for auto-cleanup on expiry.
+- **`_resetBonuses()` integration**: All three new fields reset in `prepareBaseData()` before AEs apply (onKillHealDice → [], onKillManaDice → [], onHitBurningDice → '').
+- **Damage application wiring**: `checkOnKillEffects()` and `checkOnHitBurning()` called from all 3 damage application points in `damage-helper.mjs` (direct apply, save damage auto-apply, save damage manual apply).
+- **AE attribute choices**: All three fields added to Active Effect attribute dropdown with descriptive labels.
+- **Effects compendium**: Burning I/II/III, Lifesteal I/II/III, and Manasteal I/II/III updated from flag-only reminders to real AE-driven automation. Run `vagabond.EffectsCompendium.populate({ force: true })` to regenerate.
 
 ### Life Spell Revive Mechanic (spell-handler.mjs)
 - **0-dice (0 mana) cast**: Revives a dead target — sets HP to 1, removes Dead/Unconscious status, adds 1 Fatigue. Only works on targets with the Dead condition; no effect otherwise. Posts a "Life — Revive" chat card. Virtuoso Inspiration does NOT apply.
