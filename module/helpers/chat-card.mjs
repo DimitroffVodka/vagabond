@@ -117,7 +117,10 @@ export class VagabondChatCard {
 
   static isRollCritical(roll, critNumber = 20) {
     const d20Term = roll.terms.find(term => term.constructor.name === 'Die' && term.faces === 20);
-    const d20Result = d20Term?.results?.[0]?.result || 0;
+    if (!d20Term?.results?.length) return false;
+    // Use the highest active result (handles 2d20kh where discarded dice have active: false)
+    const activeResults = d20Term.results.filter(r => r.active !== false);
+    const d20Result = Math.max(...activeResults.map(r => r.result));
     return d20Result >= critNumber;
   } 
 
@@ -702,7 +705,13 @@ export class VagabondChatCard {
 
     // Check if critical
     // For skills, check if it's a weapon skill key to apply type-specific crit bonus
-    const critType = type === 'skill' && ['melee', 'ranged', 'brawl', 'finesse'].includes(key) ? key : null;
+    // For saves, check if it's a reflex save to apply Dancer Fleet of Foot crit bonus
+    let critType = null;
+    if (type === 'skill' && ['melee', 'ranged', 'brawl', 'finesse'].includes(key)) {
+      critType = key;
+    } else if (type === 'save' && key === 'reflex') {
+      critType = 'reflex-save';
+    }
     const { VagabondRollBuilder } = await import('./roll-builder.mjs');
     const critNumber = VagabondRollBuilder.calculateCritThreshold(actor.getRollData(), critType);
     const isCritical = VagabondChatCard.isRollCritical(roll, critNumber);
@@ -715,12 +724,37 @@ export class VagabondChatCard {
       isCritical: isCritical
     };
 
+    // Build save crit rule text if critical save
+    let description = '';
+    if (type === 'save' && isCritical) {
+      description = `
+        <div class="save-crit-rule">
+          <p>
+            <strong>${game.i18n.localize('VAGABOND.DefendMechanics.CritTitle')}:</strong>
+            ${game.i18n.localize('VAGABOND.DefendMechanics.CritDescription')}
+          </p>
+        </div>
+      `;
+      // Flash of Beauty: Crit on Save = two Actions
+      if (actor.system.hasFlashOfBeauty) {
+        description += `
+          <div class="save-crit-rule" style="border-left:3px solid #d4af37; padding-left:8px; margin-top:4px;">
+            <p>
+              <strong>Flash of Beauty:</strong>
+              ${actor.name} can take <strong>two Actions</strong> instead of one!
+            </p>
+          </div>
+        `;
+      }
+    }
+
     // Create and send card first, then reveal luck gain
     const result = await VagabondChatCard.createActionCard({
       actor: actor,
       title: title,
       rollData: rollData,
       tags: tags,
+      description: description,
       rerollData: {
         type: type,
         key: key,

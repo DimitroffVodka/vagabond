@@ -1,10 +1,101 @@
 /**
- * Manages creation and previewing of measured templates for Vagabond.
+ * Manages creation and previewing of measured templates and aura regions for Vagabond.
  */
 export class VagabondMeasureTemplates {
   constructor() {
-    // Stores active preview template IDs keyed by "${actorId}-${itemId}"
+    // Stores active preview IDs keyed by "${actorId}-${itemId}"
+    // Values are either a plain string (template ID) or { type: 'region', id: regionId }
     this.activePreviews = new Map();
+
+    // Stores active aura region IDs keyed by actorId
+    this.activeAuras = new Map();
+  }
+
+  /* -------------------------------------------- */
+  /* Aura Region API (V14)                       */
+  /* -------------------------------------------- */
+
+  /**
+   * Creates an aura region attached to a token using V14 Scene Regions.
+   * @param {TokenDocument} tokenDoc - The token document to attach the aura to.
+   * @param {number} distanceFeet - The aura radius in feet.
+   * @param {Object} options
+   * @param {boolean} [options.isPreview=false] - Whether this is a preview aura.
+   * @param {string} [options.actorId] - The caster's actor ID.
+   * @param {string} [options.itemId] - The spell item ID.
+   * @param {string} [options.spellName] - The spell name for labeling.
+   * @returns {Promise<RegionDocument|null>} The created region document.
+   */
+  async _createAuraRegion(tokenDoc, distanceFeet, options = {}) {
+    const { isPreview = false, actorId = '', itemId = '', spellName = 'Aura' } = options;
+
+    // createTokenEmanation expects distance in scene units (feet), not grid units
+    const range = distanceFeet;
+
+    try {
+      const regionDoc = await RegionDocument.createTokenEmanation(tokenDoc, range, {
+        name: `${spellName}${isPreview ? ' (Preview)' : ''}`,
+        color: game.user.color || '#FF0000',
+        visibility: CONST.REGION_VISIBILITY.ALWAYS,
+        flags: {
+          vagabond: {
+            isAura: true,
+            isPreview: isPreview,
+            actorId: actorId,
+            itemId: itemId,
+            spellName: spellName
+          }
+        }
+      });
+
+      return regionDoc;
+    } catch (e) {
+      console.error('Vagabond | Failed to create aura region:', e);
+      ui.notifications.error('Failed to create aura region.');
+      return null;
+    }
+  }
+
+  /**
+   * Dismisses an active aura region for a given actor.
+   * @param {string} actorId - The actor whose aura to dismiss.
+   */
+  async dismissAura(actorId) {
+    const regionId = this.activeAuras.get(actorId);
+    if (regionId) {
+      const region = canvas.scene.regions?.get(regionId);
+      if (region) await region.delete();
+      this.activeAuras.delete(actorId);
+    }
+  }
+
+  /**
+   * Dismisses all active aura regions.
+   */
+  async dismissAllAuras() {
+    for (const [actorId, regionId] of this.activeAuras.entries()) {
+      const region = canvas.scene.regions?.get(regionId);
+      if (region) await region.delete();
+    }
+    this.activeAuras.clear();
+  }
+
+  /**
+   * Recovers orphaned aura regions from the current scene into the activeAuras map.
+   * Called on ready hook to handle page refresh / reconnect.
+   */
+  recoverOrphanedAuras() {
+    if (!canvas.scene?.regions) return;
+    for (const region of canvas.scene.regions) {
+      const flags = region.flags?.vagabond;
+      if (flags?.isAura && !flags?.isPreview && flags?.actorId) {
+        this.activeAuras.set(flags.actorId, region.id);
+      }
+    }
+    const count = this.activeAuras.size;
+    if (count > 0) {
+      console.log(`Vagabond | Recovered ${count} orphaned aura region(s)`);
+    }
   }
 
   /* -------------------------------------------- */
@@ -31,14 +122,29 @@ export class VagabondMeasureTemplates {
       return;
     }
 
-    // 3. Calculate centroid from current targets
+    // 3. Aura delivery → create V14 Region instead of MeasuredTemplate
+    if (deliveryType.toLowerCase() === 'aura') {
+      const spellItem = actor.items.get(itemId);
+      const regionDoc = await this._createAuraRegion(token.document, distance, {
+        isPreview: true,
+        actorId: actor.id,
+        itemId: itemId,
+        spellName: spellItem?.name || 'Aura'
+      });
+      if (regionDoc) {
+        this.activePreviews.set(`${actor.id}-${itemId}`, { type: 'region', id: regionDoc.id });
+      }
+      return;
+    }
+
+    // 4. Calculate centroid from current targets (non-aura types)
     const targetArray = Array.from(game.user.targets);
     let centroid = null;
     if (targetArray.length > 0) {
       centroid = this._calculateTargetCentroid(targetArray);
     }
 
-    // 4. Construct Data
+    // 5. Construct Data
     const templateData = this._constructTemplateData({
       type: deliveryType,
       distance: distance,
@@ -49,51 +155,63 @@ export class VagabondMeasureTemplates {
 
     if (!templateData) return;
 
-    // 5. Create the Template
+    // 6. Create the Template
     // Flag it so we know it's a Vagabond preview
-    templateData.flags = { 
-      vagabond: { 
-        isPreview: true, 
-        actorId: actor.id, 
-        itemId: itemId 
-      } 
+    templateData.flags = {
+      vagabond: {
+        isPreview: true,
+        actorId: actor.id,
+        itemId: itemId
+      }
     };
 
     const doc = await canvas.scene.createEmbeddedDocuments('MeasuredTemplate', [templateData]);
 
-    // 6. Track the ID
+    // 7. Track the ID
     if (doc && doc[0]) {
       this.activePreviews.set(`${actor.id}-${itemId}`, doc[0].id);
     }
   }
 
   /**
-   * Removes the preview template for a specific item.
-   * @param {string} actorId 
-   * @param {string} itemId 
+   * Removes the preview template or region for a specific item.
+   * @param {string} actorId
+   * @param {string} itemId
    */
   async clearPreview(actorId, itemId) {
     const key = `${actorId}-${itemId}`;
-    const templateId = this.activePreviews.get(key);
-    
-    if (templateId) {
-      const template = canvas.scene.templates.get(templateId);
-      if (template) {
-        await template.delete();
-      }
-      this.activePreviews.delete(key);
+    const tracked = this.activePreviews.get(key);
+
+    if (!tracked) return;
+
+    // Region-based preview (aura)
+    if (typeof tracked === 'object' && tracked.type === 'region') {
+      const region = canvas.scene.regions?.get(tracked.id);
+      if (region) await region.delete();
     }
+    // Template-based preview (cone, line, etc.)
+    else if (typeof tracked === 'string') {
+      const template = canvas.scene.templates.get(tracked);
+      if (template) await template.delete();
+    }
+
+    this.activePreviews.delete(key);
   }
 
   /**
    * Clears all active previews for a specific actor (used when closing sheet).
-   * @param {string} actorId 
+   * @param {string} actorId
    */
   async clearActorPreviews(actorId) {
-    for (const [key, templateId] of this.activePreviews.entries()) {
+    for (const [key, tracked] of this.activePreviews.entries()) {
       if (key.startsWith(`${actorId}-`)) {
-        const template = canvas.scene.templates.get(templateId);
-        if (template) await template.delete();
+        if (typeof tracked === 'object' && tracked.type === 'region') {
+          const region = canvas.scene.regions?.get(tracked.id);
+          if (region) await region.delete();
+        } else if (typeof tracked === 'string') {
+          const template = canvas.scene.templates.get(tracked);
+          if (template) await template.delete();
+        }
         this.activePreviews.delete(key);
       }
     }
@@ -104,7 +222,7 @@ export class VagabondMeasureTemplates {
   /* -------------------------------------------- */
 
   /**
-   * Creates a template from Chat Card metadata.
+   * Creates a template or aura region from Chat Card metadata.
    * @param {string} deliveryType
    * @param {string} deliveryText
    * @param {ChatMessage} message
@@ -127,7 +245,38 @@ export class VagabondMeasureTemplates {
         casterToken = actor?.getActiveTokens()[0];
     }
 
-    // 3. Get stored targets from message flags and resolve to tokens
+    // 3. Aura delivery → create V14 Region attached to selected token
+    if (deliveryType.toLowerCase() === 'aura') {
+      // Determine attachment token: selected token first, caster fallback
+      const attachToken = canvas.tokens.controlled[0] || casterToken;
+      if (!attachToken) {
+        ui.notifications.warn('Select a token to attach the aura to, or ensure the caster has a token on the scene.');
+        return;
+      }
+
+      // Clean up previous aura for same actor
+      const actorId = speaker?.actor || attachToken.actor?.id;
+      if (actorId) await this.dismissAura(actorId);
+
+      // Get spell name from message flags or content
+      const spellName = message.flags?.vagabond?.spellName
+        || message.flags?.vagabond?.itemName
+        || 'Aura';
+
+      const regionDoc = await this._createAuraRegion(attachToken.document, distance, {
+        isPreview: false,
+        actorId: actorId,
+        spellName: spellName
+      });
+
+      if (regionDoc && actorId) {
+        this.activeAuras.set(actorId, regionDoc.id);
+        ui.notifications.info(`${spellName} aura attached to ${attachToken.name}.`);
+      }
+      return;
+    }
+
+    // 4. Non-aura types: get stored targets and resolve to tokens
     const storedTargets = message.flags?.vagabond?.targetsAtRollTime || [];
     const resolvedTargets = [];
 
@@ -142,13 +291,13 @@ export class VagabondMeasureTemplates {
       }
     }
 
-    // 4. Calculate centroid if we have multiple targets
+    // 5. Calculate centroid if we have multiple targets
     let centroid = null;
     if (resolvedTargets.length > 0) {
       centroid = this._calculateTargetCentroid(resolvedTargets);
     }
 
-    // 5. Construct Data with centroid
+    // 6. Construct Data with centroid
     const templateData = this._constructTemplateData({
       type: deliveryType,
       distance: distance,
@@ -197,6 +346,7 @@ export class VagabondMeasureTemplates {
 
   /**
    * Generates the MeasuredTemplateDocument data.
+   * Used for non-aura delivery types (cone, line, cube, sphere).
    * @param {Object} params
    * @param {string} params.type - Delivery type (cone, line, etc.)
    * @param {number} params.distance - Distance in feet
@@ -206,7 +356,7 @@ export class VagabondMeasureTemplates {
    * @returns {Object|null} Template data
    */
   _constructTemplateData({ type, distance, token, targets, centroid = null }) {
-    if (!token && ['cone','line','aura'].includes(type)) {
+    if (!token && ['cone','line'].includes(type)) {
        ui.notifications.warn('Could not determine origin point (Caster Token) for template.');
        return null;
     }
@@ -226,13 +376,6 @@ export class VagabondMeasureTemplates {
     const destinationPoint = centroid || (targetToken ? targetToken.center : null);
 
     switch (type.toLowerCase()) {
-      case 'aura':
-        // Aura remains centered on caster (unchanged)
-        templateData.t = 'circle';
-        templateData.x = token.center.x;
-        templateData.y = token.center.y;
-        break;
-
       case 'cone':
         templateData.t = 'cone';
         templateData.angle = 90;

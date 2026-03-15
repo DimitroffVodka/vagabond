@@ -79,16 +79,43 @@ export class RollHandler {
         if (favorHinder === 'hinder') { favorHinder = 'none'; }
       }
 
+      // Evasive: Reflex Saves can't be Hindered (while not Incapacitated)
+      if (rollType === 'save' && rollKey === 'reflex' && (this.actor.system.hasEvasive || false) && !this.actor.statuses?.has('incapacitated')) {
+        if (favorHinder === 'hinder') { favorHinder = 'none'; }
+      }
+
+      // Don't Stop Me Now: Favor on Saves vs Paralyzed/Restrained/moved
+      if (rollType === 'save' && (this.actor.system.hasDontStopMeNow || false) &&
+          (this.actor.statuses?.has('paralyzed') || this.actor.statuses?.has('restrained'))) {
+        if (favorHinder === 'hinder') { favorHinder = 'none'; }
+        else if (favorHinder === 'none') { favorHinder = 'favor'; }
+      }
+
       // Virtuoso Resolve: Favor on Saves (granted by Bard's Virtuoso performance)
       if (rollType === 'save' && (this.actor.system.virtuosoSavesFavor || false)) {
         if (favorHinder === 'hinder') { favorHinder = 'none'; }
         else if (favorHinder === 'none') { favorHinder = 'favor'; }
       }
 
+      // Dancer — Step Up Active: 2d20kh on Reflex Saves
+      let baseFormula = null;
+      if (rollType === 'save' && rollKey === 'reflex' && (this.actor.system.stepUpActive || false)) {
+        baseFormula = '2d20kh';
+      }
+
+      // Dancer — Choreographer: one-check Favor (consume after this roll)
+      if (this.actor.getFlag('vagabond', 'choreographerFavorOneCheck')) {
+        if (favorHinder === 'hinder') { favorHinder = 'none'; }
+        else if (favorHinder === 'none') { favorHinder = 'favor'; }
+        // Consume the one-check favor after the roll (must await to prevent multi-fire)
+        await this.actor.update({ 'system.favorHinder': 'none' });
+        await this.actor.unsetFlag('vagabond', 'choreographerFavorOneCheck');
+      }
+
       const roll = await VagabondRollBuilder.buildAndEvaluateD20(
         this.actor,
-        favorHinder
-        // baseFormula intentionally omitted — uses homebrew dice.baseCheck config
+        favorHinder,
+        baseFormula
       );
 
       // For skills and saves, use the formatted chat cards

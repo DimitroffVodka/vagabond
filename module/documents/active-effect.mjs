@@ -270,6 +270,17 @@ export class VagabondActiveEffect extends ActiveEffect {
       'system.virtuosoHealingBonus': 'Bard: Virtuoso Inspiration (d6 Healing bonus)',
       'system.grantedDiceCanExplode': 'Bard: Climax (granted dice Explode)',
 
+      // -- Dancer --
+      'system.hasStepUp': 'Dancer: Step Up (grant ally bonus Action)',
+      'system.stepUpActive': 'Dancer: Step Up Active (2d20 Reflex Saves)',
+      'system.hasDoubleTime': 'Dancer: Double Time (Step Up 2 allies)',
+      'system.hasChoreographer': 'Dancer: Choreographer (Favor + Speed on Step Up)',
+      'system.hasFleetOfFoot': 'Dancer: Fleet of Foot (Reflex crit bonus)',
+      'system.hasDontStopMeNow': "Dancer: Don't Stop Me Now (Favor vs Paralyzed/Restrained)",
+      'system.hasFlashOfBeauty': 'Dancer: Flash of Beauty (crit save = 2 Actions)',
+      'system.dancerLevel': 'Dancer: Level (for Fleet of Foot formula)',
+      'system.reflexSaveCritBonus': 'Dancer: Reflex Save Crit Bonus',
+
       'system.statusImmunities': 'Character: Status Immunities (Array)',
       'system.shoveSizeOverride': 'Shove: Size Override (large, huge, etc.)',
       'system.incomingAttacksModifier': 'Defender: Incoming Attacks Modifier (All)',

@@ -541,7 +541,8 @@ export class SpellHandler {
       const d20Term = roll.terms.find(
         (term) => term.constructor.name === 'Die' && term.faces === 20
       );
-      const d20Result = d20Term?.results?.[0]?.result || 0;
+      const activeResults = d20Term?.results?.filter(r => r.active !== false) || [];
+      const d20Result = activeResults.length ? Math.max(...activeResults.map(r => r.result)) : 0;
       isCritical = d20Result >= critNumber;
     }
 

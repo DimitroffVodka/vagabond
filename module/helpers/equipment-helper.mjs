@@ -78,7 +78,7 @@ export class EquipmentHelper {
       return item.system.equipped === true;
     }
     if (this.isGear(item) || this.isAlchemical(item) || this.isRelic(item)) {
-      return item.system.worn === true;
+      return item.system.equipped === true;
     }
     if (this.isContainer(item)) {
       return false; // Containers are not "equipped" in the traditional sense

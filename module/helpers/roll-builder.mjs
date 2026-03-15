@@ -212,6 +212,9 @@ export class VagabondRollBuilder {
       critThreshold += (rollData.brawlCritBonus || 0);
     } else if (type === 'finesse') {
       critThreshold += (rollData.finesseCritBonus || 0);
+    } else if (type === 'reflex-save') {
+      // Dancer Fleet of Foot: reduces reflex save crit threshold
+      critThreshold += (rollData.reflexSaveCritBonus || 0);
     }
 
     // Ensure it doesn't go below 1 or above 20

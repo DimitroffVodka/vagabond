@@ -664,7 +664,8 @@ export class VagabondItem extends Item {
     // ✅ CRITICAL: Use type-specific crit threshold from rollData
     const critNumber = VagabondRollBuilder.calculateCritThreshold(rollData, weaponSkillKey);
     const d20Term = roll.terms.find(term => term.constructor.name === 'Die' && term.faces === 20);
-    const d20Result = d20Term?.results?.[0]?.result || 0;
+    const activeResults = d20Term?.results?.filter(r => r.active !== false) || [];
+    const d20Result = activeResults.length ? Math.max(...activeResults.map(r => r.result)) : 0;
     const isCritical = forceCritical || (d20Result >= critNumber);
 
     return {

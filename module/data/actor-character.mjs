@@ -608,6 +608,62 @@ export default class VagabondCharacter extends VagabondActorBase {
       label: "Granted Dice Can Explode"
     });
 
+    // ── Dancer Class Features ──────────────────────────────────────────────
+
+    // Dancer — Step Up: grant ally bonus Action, 2d20 on Reflex Saves
+    schema.hasStepUp = new fields.BooleanField({
+      initial: false,
+      label: "Step Up"
+    });
+
+    // Dancer — Step Up Active: currently has 2d20 on Reflex Saves
+    schema.stepUpActive = new fields.BooleanField({
+      initial: false,
+      label: "Step Up Active"
+    });
+
+    // Dancer — Double Time: Step Up targets 2 allies instead of 1
+    schema.hasDoubleTime = new fields.BooleanField({
+      initial: false,
+      label: "Double Time"
+    });
+
+    // Dancer — Choreographer: Step Up also grants Favor + Speed bonus
+    schema.hasChoreographer = new fields.BooleanField({
+      initial: false,
+      label: "Choreographer"
+    });
+
+    // Dancer — Fleet of Foot: Reflex Save crit range reduced by ceil(dancerLevel/4)
+    schema.hasFleetOfFoot = new fields.BooleanField({
+      initial: false,
+      label: "Fleet of Foot"
+    });
+
+    // Dancer — Don't Stop Me Now: Favor on Saves vs Paralyzed/Restrained/moved
+    schema.hasDontStopMeNow = new fields.BooleanField({
+      initial: false,
+      label: "Don't Stop Me Now"
+    });
+
+    // Dancer — Flash of Beauty: Crit on Save = two Actions
+    schema.hasFlashOfBeauty = new fields.BooleanField({
+      initial: false,
+      label: "Flash of Beauty"
+    });
+
+    // Dancer Level (for Fleet of Foot crit formula: ceil(dancerLevel/4))
+    schema.dancerLevel = new fields.NumberField({
+      ...requiredInteger, initial: 0, min: 0,
+      label: "Dancer Level"
+    });
+
+    // Dancer — Reflex Save Crit Bonus (negative = easier crits)
+    schema.reflexSaveCritBonus = new fields.ArrayField(
+      new fields.StringField({ blank: true }),
+      { initial: [], label: "Reflex Save Crit Bonus" }
+    );
+
     // ── Relic Power: On-Kill Effects ──────────────────────────────────────
     // These are dice formulas set by Active Effects (e.g. "1d8", "2d8").
     // When the actor kills a target, the damage-helper rolls these and
@@ -778,6 +834,9 @@ export default class VagabondCharacter extends VagabondActorBase {
     this.onKillManaDice = [];
     this.onHitBurningDice = '';
 
+    // --- 6b. Reset Dancer Fields ---
+    this.reflexSaveCritBonus = [];
+
     // --- 7. Reset Status Condition Fields ---
     this.incomingHealingModifier = 0;
     this.incomingAttacksModifier = 'none';
@@ -899,6 +958,7 @@ export default class VagabondCharacter extends VagabondActorBase {
     this.rangedCritBonus = this._evaluateFormulaField(this.rangedCritBonus, rollData);
     this.brawlCritBonus = this._evaluateFormulaField(this.brawlCritBonus, rollData);
     this.finesseCritBonus = this._evaluateFormulaField(this.finesseCritBonus, rollData);
+    this.reflexSaveCritBonus = this._evaluateFormulaField(this.reflexSaveCritBonus, rollData);
 
     // NOTE: Stat bonuses, Save bonuses, Skill bonuses, and Weapon Skill bonuses
     // are NOT evaluated here - they're done inline in prepareDerivedData
@@ -983,6 +1043,12 @@ export default class VagabondCharacter extends VagabondActorBase {
 
     // Detect class feature flags FIRST so combat/speed calculations can use them (e.g. Aggressor +10 speed)
     this._detectTraitAndFeatureFlags();
+
+    // Dancer: Fleet of Foot sets reflexSaveCritBonus DURING detection, so evaluate it now
+    // (it was [] when _evaluateNonStatBonusFields ran earlier, before detection)
+    if (Array.isArray(this.reflexSaveCritBonus)) {
+      this.reflexSaveCritBonus = this._evaluateFormulaField(this.reflexSaveCritBonus, rollData);
+    }
 
     this._calculateManaValues(rollData);
 
@@ -1225,6 +1291,41 @@ export default class VagabondCharacter extends VagabondActorBase {
         if (name.includes('encore')) {
           this.hasStarstruckEnhancement = true;
         }
+
+        // Dancer — Step Up: grant ally bonus Action, 2d20 on Reflex Saves
+        if (name.includes('step up')) {
+          this.hasStepUp = true;
+        }
+
+        // Dancer — Double Time: Step Up targets 2 allies instead of 1
+        if (name.includes('double time')) {
+          this.hasDoubleTime = true;
+        }
+
+        // Dancer — Choreographer: Step Up also grants Favor + Speed bonus
+        if (name.includes('choreographer')) {
+          this.hasChoreographer = true;
+        }
+
+        // Dancer — Fleet of Foot: Reflex Save crit range reduced
+        if (name.includes('fleet of foot')) {
+          this.hasFleetOfFoot = true;
+        }
+
+        // Dancer — Evasive: same mechanic as Rogue Evasive
+        if (name.includes('evasive')) {
+          this.hasEvasive = true;
+        }
+
+        // Dancer — Don't Stop Me Now: Favor on Saves vs Paralyzed/Restrained/moved
+        if (name.includes("don't stop me now") || name.includes('dont stop me now')) {
+          this.hasDontStopMeNow = true;
+        }
+
+        // Dancer — Flash of Beauty: Crit on Save = two Actions
+        if (name.includes('flash of beauty')) {
+          this.hasFlashOfBeauty = true;
+        }
       }
 
       // Track Bard level for Song of Rest HP formula (Presence + Bard Level)
@@ -1234,6 +1335,15 @@ export default class VagabondCharacter extends VagabondActorBase {
         // If they have Starstruck and are L10+, they get the enhancement
         if (this.hasStarstruck && actorLevel >= 10) {
           this.hasStarstruckEnhancement = true;
+        }
+      }
+
+      // Track Dancer level + Fleet of Foot crit bonus
+      if (classItem.name?.toLowerCase() === 'dancer') {
+        this.dancerLevel = actorLevel;
+        if (this.hasFleetOfFoot) {
+          const critReduction = Math.ceil(actorLevel / 4);
+          this.reflexSaveCritBonus = [String(-critReduction)];
         }
       }
     }
@@ -1336,6 +1446,7 @@ export default class VagabondCharacter extends VagabondActorBase {
     data.brawlCritBonus = this.brawlCritBonus || 0;
     data.finesseCritBonus = this.finesseCritBonus || 0;
     data.spellCritBonus = this.spellCritBonus || 0;
+    data.reflexSaveCritBonus = this.reflexSaveCritBonus || 0;
 
     // Bard Climax: granted dice can explode (Virtuoso buff)
     data.grantedDiceCanExplode = this.grantedDiceCanExplode || false;
@@ -1376,6 +1487,11 @@ export default class VagabondCharacter extends VagabondActorBase {
       if (combat?.started && combat.round === 1) {
         baseSpeed += 10;
       }
+    }
+
+    // Dancer — Choreographer: +10ft Speed when Step Up is active
+    if (this.parent?.getFlag?.('vagabond', 'choreographerSpeedBonus')) {
+      baseSpeed += 10;
     }
 
     // 3. Evaluate crawl/travel formulas — @speed.base is available via augmented rollData

@@ -1546,7 +1546,8 @@ export class VagabondDamageHelper {
       const isSuccess = saveRoll.total >= difficulty;
       const { VagabondChatCard } = await import('./chat-card.mjs');
       const { VagabondRollBuilder } = await import('./roll-builder.mjs');
-      const critNumber = VagabondRollBuilder.calculateCritThreshold(targetActor.getRollData());
+      const saveCritType = saveType === 'reflex' ? 'reflex-save' : null;
+      const critNumber = VagabondRollBuilder.calculateCritThreshold(targetActor.getRollData(), saveCritType);
       const isCritical = VagabondChatCard.isRollCritical(saveRoll, critNumber);
 
       // Calculate damage breakdown for display
@@ -1704,7 +1705,8 @@ export class VagabondDamageHelper {
       const isSuccess = saveRoll.total >= difficulty;
       const { VagabondChatCard } = await import('./chat-card.mjs');
       const { VagabondRollBuilder } = await import('./roll-builder.mjs');
-      const critNumber = VagabondRollBuilder.calculateCritThreshold(targetActor.getRollData());
+      const saveCritType2 = saveType === 'reflex' ? 'reflex-save' : null;
+      const critNumber = VagabondRollBuilder.calculateCritThreshold(targetActor.getRollData(), saveCritType2);
       const isCritical = VagabondChatCard.isRollCritical(saveRoll, critNumber);
 
       // Post simplified save result to chat (no damage calculations)
@@ -1832,10 +1834,37 @@ export class VagabondDamageHelper {
       isHindered = false; // Also override conditional hinder
     }
 
+    // Evasive: Reflex Saves can't be Hindered (while not Incapacitated)
+    if (saveType === 'reflex' && (actor.system.hasEvasive || false) && !actor.statuses?.has('incapacitated')) {
+      if (effectiveFavorHinder === 'hinder') effectiveFavorHinder = 'none';
+      if (isHindered) isHindered = false;
+    }
+
+    // Don't Stop Me Now: Favor on Saves vs Paralyzed/Restrained/moved
+    if ((actor.system.hasDontStopMeNow || false) &&
+        (actor.statuses?.has('paralyzed') || actor.statuses?.has('restrained'))) {
+      if (effectiveFavorHinder === 'hinder') { effectiveFavorHinder = 'none'; }
+      else if (effectiveFavorHinder === 'none') { effectiveFavorHinder = 'favor'; }
+    }
+
     // Virtuoso Resolve: Favor on Saves (granted by Bard's Virtuoso performance)
     if (actor.system.virtuosoSavesFavor || false) {
       if (effectiveFavorHinder === 'hinder') { effectiveFavorHinder = 'none'; }
       else if (effectiveFavorHinder === 'none') { effectiveFavorHinder = 'favor'; }
+    }
+
+    // Dancer — Step Up Active: 2d20kh on Reflex Saves
+    let baseFormula = null;
+    if (saveType === 'reflex' && (actor.system.stepUpActive || false)) {
+      baseFormula = '2d20kh';
+    }
+
+    // Dancer — Choreographer: one-check Favor (consume after this roll)
+    if (actor.getFlag('vagabond', 'choreographerFavorOneCheck')) {
+      if (effectiveFavorHinder === 'hinder') { effectiveFavorHinder = 'none'; }
+      else if (effectiveFavorHinder === 'none') { effectiveFavorHinder = 'favor'; }
+      await actor.update({ 'system.favorHinder': 'none' });
+      await actor.unsetFlag('vagabond', 'choreographerFavorOneCheck');
     }
 
     // Build and evaluate roll with conditional hinder support
@@ -1843,7 +1872,8 @@ export class VagabondDamageHelper {
     const roll = await VagabondRollBuilder.buildAndEvaluateD20WithConditionalHinder(
       actor,
       effectiveFavorHinder,
-      isHindered
+      isHindered,
+      baseFormula
     );
 
     return roll;
@@ -2008,6 +2038,17 @@ export class VagabondDamageHelper {
           </p>
         </div>
       `;
+      // Flash of Beauty: Crit on Save = two Actions
+      if (actor.system.hasFlashOfBeauty) {
+        critRuleHTML += `
+          <div class="save-crit-rule" style="border-left:3px solid #d4af37; padding-left:8px; margin-top:4px;">
+            <p>
+              <strong>Flash of Beauty:</strong>
+              ${actor.name} can take <strong>two Actions</strong> instead of one!
+            </p>
+          </div>
+        `;
+      }
     }
 
     card.setDescription((card.data.description || '') + damageCalculationHTML + critRuleHTML);
@@ -2077,6 +2118,17 @@ export class VagabondDamageHelper {
           </p>
         </div>
       `;
+      // Flash of Beauty: Crit on Save = two Actions
+      if (targetActor.system.hasFlashOfBeauty) {
+        descriptionHTML += `
+          <div class="save-crit-rule" style="border-left:3px solid #d4af37; padding-left:8px; margin-top:4px;">
+            <p>
+              <strong>Flash of Beauty:</strong>
+              ${targetActor.name} can take <strong>two Actions</strong> instead of one!
+            </p>
+          </div>
+        `;
+      }
     }
 
     card.setDescription(descriptionHTML);

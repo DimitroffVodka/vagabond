@@ -584,6 +584,33 @@ Hooks.once('init', function () {
   // after the ready hook, so templates will be available in time.
   preloadHandlebarsTemplates();
 
+  // Register V14 chat commands (/stepup, /virtuoso)
+  // V14 validates commands before the chatMessage hook fires, so we must register them here.
+  ChatLog.CHAT_COMMANDS.stepup = {
+    rgx: /^(\/stepup\s*)([^]*)?/i,
+    fn: async function(_command, _match, _chatData) {
+      const actor = canvas.tokens?.controlled?.[0]?.actor
+        || game.actors.find(a => a.type === 'character' && a.isOwner && a.system.hasStepUp);
+      if (!actor) { ui.notifications.warn('No character with the Step Up feature found.'); return false; }
+      if (!actor.system.hasStepUp) { ui.notifications.warn(`${actor.name} does not have the Step Up feature.`); return false; }
+      const { performStepUp } = await import('./helpers/dancer-helper.mjs');
+      await performStepUp(actor);
+      return false;
+    }
+  };
+  ChatLog.CHAT_COMMANDS.virtuoso = {
+    rgx: /^(\/virtuoso\s*)([^]*)?/i,
+    fn: async function(_command, _match, _chatData) {
+      const actor = canvas.tokens?.controlled?.[0]?.actor
+        || game.actors.find(a => a.type === 'character' && a.isOwner && a.system.hasVirtuoso);
+      if (!actor) { ui.notifications.warn('No character with the Virtuoso feature found.'); return false; }
+      if (!actor.system.hasVirtuoso) { ui.notifications.warn(`${actor.name} does not have the Virtuoso feature.`); return false; }
+      const { performVirtuoso } = await import('./helpers/bard-helper.mjs');
+      await performVirtuoso(actor);
+      return false;
+    }
+  };
+
   /**
    * Set default initiative formula for the system
    * Note: PCs and NPCs use separate custom formulas from settings (see VagabondCombatant.getInitiativeRoll)
@@ -831,6 +858,11 @@ Hooks.once('ready', function () {
   if (VagabondSpellSequencer.isAvailable() && VagabondSpellSequencer.isJB2AAvailable()) {
     loadJB2ADefaults();
   }
+});
+
+// Recover orphaned aura regions after page refresh / reconnect
+Hooks.once('ready', () => {
+  globalThis.vagabond?.managers?.templates?.recoverOrphanedAuras();
 });
 
 // Register Dice So Nice colorsets when Dice So Nice is ready
@@ -2300,31 +2332,8 @@ Hooks.on('deleteCombat', async (combat) => {
   }
 });
 
-// ---------------------------------------------------------
-// Bard — Virtuoso: /virtuoso chat command (backup — primary trigger is via inventory item)
-// ---------------------------------------------------------
-Hooks.on('chatMessage', async (_chatLog, message, _chatData) => {
-  const trimmed = message.trim().toLowerCase();
-  if (!trimmed.startsWith('/virtuoso')) return;
-
-  // Find the player's owned character with Virtuoso
-  const actor = canvas.tokens?.controlled?.[0]?.actor
-    || game.actors.find(a => a.type === 'character' && a.isOwner && a.system.hasVirtuoso);
-
-  if (!actor) {
-    ui.notifications.warn('No character with the Virtuoso feature found.');
-    return false;
-  }
-
-  if (!actor.system.hasVirtuoso) {
-    ui.notifications.warn(`${actor.name} does not have the Virtuoso feature.`);
-    return false;
-  }
-
-  const { performVirtuoso } = await import('./helpers/bard-helper.mjs');
-  await performVirtuoso(actor);
-  return false;
-});
+// Bard — Virtuoso & Dancer — Step Up: chat commands now registered via
+// ChatLog.CHAT_COMMANDS in the init hook (V14 requires pre-registration).
 
 // ---------------------------------------------------------
 // Bard — Virtuoso: Auto-expire buffs at round change
