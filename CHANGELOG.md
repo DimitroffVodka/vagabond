@@ -1,5 +1,48 @@
 # Vagabond System Changelog — V14 Migration & Features
 
+## Dancer Class Features (dancer-helper.mjs, roll-handler.mjs, combat.mjs, config.mjs)
+
+### Step Up (L1) — Grant Ally a 2nd Action + Reflex Save Buff
+- **Activation**: Use a relic item named "Step Up" from inventory (or `/stepup` chat command). Intercepted in `roll-handler.mjs` `useItem()` before normal item handling.
+- **Ally selection dialog**: Shows all PC tokens on the scene (excluding the Dancer) with checkboxes. Double Time (L10) increases max selectable allies from 1 to 2.
+- **Ally buff**: Sets `flags.vagabond.stepUpBonusAction` flag on selected allies. Expires at next round.
+- **Dancer buff**: Sets `system.stepUpActive = true` — grants 2d20kh on Reflex Saves until start of next turn. Expires at next round.
+- **Choreographer (L6)**: Ally gains Favor on first check with the granted Action. Dancer and ally gain +10ft Speed for the Round.
+- **Double Time (L10)**: Allows selecting up to 2 allies instead of 1.
+- **Chat card**: Shows Step Up tag, Choreographer/Double Time tags when applicable. Displays buffed allies as targets with portraits.
+
+### Round-Based Buff Expiry (combat.mjs, dancer-helper.mjs)
+- `combat.mjs` `endCombat()` override clears all Step Up and Virtuoso buffs when combat ends.
+- `combat.mjs` `nextRound()` calls `_expireRoundBuffs(newRound)` to expire round-based buffs.
+- `expireStepUpBuffsByRound()` / `expireStepUpBuffs()`: Full cleanup of all Step Up and Choreographer flags and system fields.
+
+### Relic Item Intercepts (roll-handler.mjs)
+- `useItem()` checks for class feature relic items before normal item handling:
+  - Items named "Step Up" + actor has `hasStepUp` → triggers `performStepUp()`
+  - Items named "Virtuoso" + actor has `hasVirtuoso` → triggers `performVirtuoso()`
+
+### Virtuoso Status Effect Registration (config.mjs)
+- Registered `virtuoso-inspiration`, `virtuoso-resolve`, `virtuoso-valor` status IDs so `toggleStatusEffect()` works without "Invalid status ID" errors.
+
+### Compendium Pack Source Control (.gitignore, build-packs.sh)
+- Unpacked all 13 compendium packs to editable JSON source files in `packs/_source/`
+- Added Step Up and Virtuoso relic items to the relics compendium
+- `.gitignore` updated to ignore LevelDB binaries, track only JSON sources
+- `build-packs.sh` rebuilds all LevelDB packs from JSON sources via `fvtt-cli`
+
+### Files Modified/Created
+| File | Change |
+|------|--------|
+| `module/helpers/dancer-helper.mjs` | **NEW** — Step Up, Choreographer, Double Time logic + expiry helpers |
+| `module/sheets/handlers/roll-handler.mjs` | Relic item intercepts for Step Up and Virtuoso in `useItem()` |
+| `module/documents/combat.mjs` | `endCombat()` override, `_expireRoundBuffs()`, `nextRound()` buff expiry |
+| `module/helpers/config.mjs` | Virtuoso status IDs registered |
+| `packs/_source/` | **NEW** — JSON source files for all 13 compendium packs |
+| `.gitignore` | LevelDB ignored, JSON sources tracked |
+| `build-packs.sh` | **NEW** — Pack rebuild script |
+
+---
+
 ## Active Effects Compendium
 
 ### New "Effect" Item Type (item-effect.mjs, system.json, item-sheet.mjs)

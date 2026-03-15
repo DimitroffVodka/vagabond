@@ -1,0 +1,111 @@
+{
+  "name": "Longbow",
+  "type": "equipment",
+  "img": "icons/weapons/bows/bow-ornamental-gold-blue.webp",
+  "system": {
+    "description": "",
+    "equipmentType": "weapon",
+    "locked": true,
+    "equipped": false,
+    "quantity": 1,
+    "baseCost": {
+      "gold": 0,
+      "silver": 80,
+      "copper": 0
+    },
+    "baseSlots": 2,
+    "metal": "none",
+    "damageType": "-",
+    "damageAmount": "",
+    "properties": [
+      "Keen",
+      "Ranged"
+    ],
+    "weaponSkill": "ranged",
+    "range": "far",
+    "grip": "2H",
+    "damageOneHand": "d8",
+    "damageTwoHands": "d8",
+    "equipmentState": "twoHands",
+    "armorType": "light",
+    "immunities": [],
+    "gearCategory": "",
+    "alchemicalType": "concoction",
+    "lore": "",
+    "itemFx": {
+      "enabled": true,
+      "hitFile": "modules/JB2A_DnD5e/Library/Generic/Weapon_Attacks/Ranged/Arrow01_01_Regular_White_05ft_600x400.webm",
+      "hitDuration": 1000
+    }
+  },
+  "effects": [
+    {
+      "name": "Keen Property",
+      "origin": "Compendium.vagabond.weapons.Item.ReQB9WHhhob5MZ96",
+      "img": "icons/svg/aura.svg",
+      "_id": "4RNtQXF4PcjL0w13",
+      "type": "base",
+      "system": {},
+      "changes": [
+        {
+          "key": "system.critNumber",
+          "mode": 5,
+          "value": "19",
+          "priority": null
+        }
+      ],
+      "disabled": false,
+      "duration": {
+        "startTime": null,
+        "combat": null,
+        "seconds": null,
+        "rounds": null,
+        "turns": null,
+        "startRound": null,
+        "startTurn": null
+      },
+      "description": "",
+      "tint": "#ffffff",
+      "transfer": true,
+      "statuses": [],
+      "sort": 0,
+      "flags": {
+        "vagabond": {
+          "applicationMode": "on-use"
+        }
+      },
+      "_stats": {
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "coreVersion": "13.351",
+        "systemId": "vagabond",
+        "systemVersion": "1.8.1",
+        "createdTime": 1766842199128,
+        "modifiedTime": 1766853222317,
+        "lastModifiedBy": "13p65OEadZSZVLRk"
+      },
+      "_key": "!items.effects!ReQB9WHhhob5MZ96.4RNtQXF4PcjL0w13"
+    }
+  ],
+  "folder": null,
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.351",
+    "systemId": "vagabond",
+    "systemVersion": "4.1.0",
+    "createdTime": 1764967045011,
+    "modifiedTime": 1772499757963,
+    "lastModifiedBy": "13p65OEadZSZVLRk"
+  },
+  "ownership": {
+    "default": 0,
+    "vJkLjvlErdx6ZHoC": 3
+  },
+  "_id": "ReQB9WHhhob5MZ96",
+  "sort": 2400000,
+  "_key": "!items!ReQB9WHhhob5MZ96"
+}

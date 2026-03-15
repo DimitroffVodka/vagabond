@@ -224,7 +224,10 @@ VAGABOND.statusConditions = {
   'sickened': 'VAGABOND.StatusConditions.Sickened',
   'suffocating': 'VAGABOND.StatusConditions.Suffocating',
   'unconscious': 'VAGABOND.StatusConditions.Unconscious',
-  'vulnerable': 'VAGABOND.StatusConditions.Vulnerable'
+  'vulnerable': 'VAGABOND.StatusConditions.Vulnerable',
+  'virtuoso-inspiration': 'Virtuoso: Inspiration',
+  'virtuoso-resolve': 'Virtuoso: Resolve',
+  'virtuoso-valor': 'Virtuoso: Valor'
 };
 
 /**

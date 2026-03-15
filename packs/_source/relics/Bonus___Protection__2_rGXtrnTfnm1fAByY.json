@@ -1,0 +1,139 @@
+{
+  "name": "Bonus - Protection +2",
+  "type": "equipment",
+  "img": "icons/magic/control/buff-flight-wings-runes-blue-white.webp",
+  "system": {
+    "description": "<p>+2 bonus to Saves.</p>",
+    "equipmentType": "relic",
+    "locked": true,
+    "equipped": false,
+    "quantity": 1,
+    "baseCost": {
+      "gold": 1000,
+      "silver": 0,
+      "copper": 0
+    },
+    "baseSlots": 0,
+    "metal": "none",
+    "damageType": "-",
+    "damageAmount": "",
+    "canExplode": false,
+    "explodeValues": "",
+    "properties": [],
+    "weaponSkill": "melee",
+    "range": "close",
+    "grip": "1H",
+    "damageOneHand": "d6",
+    "damageTwoHands": "d8",
+    "equipmentState": "oneHand",
+    "armorType": "light",
+    "immunities": [],
+    "gearCategory": "",
+    "alchemicalType": "concoction",
+    "lore": "Grants an indicated bonus to the indicated attributes.",
+    "gridPosition": 0,
+    "containerId": null,
+    "damageTypeOneHand": "-",
+    "damageTypeTwoHands": "-",
+    "isConsumable": false,
+    "linkedConsumable": "",
+    "requiresBound": false,
+    "bound": false,
+    "isSupply": false,
+    "isBeverage": false,
+    "itemFx": {
+      "enabled": false,
+      "animType": "melee",
+      "hitFile": "",
+      "hitScale": 1,
+      "hitOffsetX": 0,
+      "hitDuration": 800,
+      "hitSound": "",
+      "missFile": "",
+      "missScale": 1,
+      "missDuration": 600,
+      "missSound": "",
+      "soundVolume": 0.6
+    }
+  },
+  "effects": [
+    {
+      "name": "Active Effect",
+      "origin": "Item.lS2s4o0Lvbul3YeF",
+      "img": "icons/svg/aura.svg",
+      "_id": "dVDy5IjHulZDiMr5",
+      "type": "base",
+      "system": {},
+      "changes": [
+        {
+          "key": "system.saves.reflex.bonus",
+          "mode": 2,
+          "value": "2",
+          "priority": null
+        },
+        {
+          "key": "system.saves.endure.bonus",
+          "mode": 2,
+          "value": "2",
+          "priority": null
+        },
+        {
+          "key": "system.saves.will.bonus",
+          "mode": 2,
+          "value": "2",
+          "priority": null
+        }
+      ],
+      "disabled": false,
+      "duration": {
+        "startTime": null,
+        "combat": null,
+        "seconds": null,
+        "rounds": null,
+        "turns": null,
+        "startRound": null,
+        "startTurn": null
+      },
+      "description": "",
+      "tint": "#ffffff",
+      "transfer": true,
+      "statuses": [],
+      "sort": 0,
+      "flags": {
+        "vagabond": {
+          "applicationMode": "permanent"
+        }
+      },
+      "_stats": {
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "coreVersion": "13.351",
+        "systemId": "vagabond",
+        "systemVersion": "4.2.3",
+        "lastModifiedBy": null
+      },
+      "_key": "!items.effects!rGXtrnTfnm1fAByY.dVDy5IjHulZDiMr5"
+    }
+  ],
+  "folder": "o9iJqhb7zjYleADh",
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.351",
+    "systemId": "vagabond",
+    "systemVersion": "4.2.3",
+    "createdTime": 1773092412215,
+    "modifiedTime": 1773092451380,
+    "lastModifiedBy": "13p65OEadZSZVLRk"
+  },
+  "ownership": {
+    "default": 0,
+    "13p65OEadZSZVLRk": 3
+  },
+  "_id": "rGXtrnTfnm1fAByY",
+  "sort": 0,
+  "_key": "!items!rGXtrnTfnm1fAByY"
+}

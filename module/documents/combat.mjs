@@ -8,6 +8,22 @@ export class VagabondCombat extends Combat {
   }
 
   /** @override */
+  async endCombat() {
+    // Clean up all round-based class feature buffs
+    try {
+      const { expireStepUpBuffs } = await import('../helpers/dancer-helper.mjs');
+      await expireStepUpBuffs();
+    } catch (e) { console.warn('Vagabond | Error clearing Step Up buffs:', e); }
+
+    try {
+      const { expireVirtuosoBuffs } = await import('../helpers/bard-helper.mjs');
+      await expireVirtuosoBuffs();
+    } catch (e) { console.warn('Vagabond | Error clearing Virtuoso buffs:', e); }
+
+    return super.endCombat();
+  }
+
+  /** @override */
   async startCombat() {
     await this.resetAll();
     await super.startCombat();
@@ -17,8 +33,30 @@ export class VagabondCombat extends Combat {
   /** @override */
   async nextRound() {
     await this.resetAll();
+    const newRound = this.round + 1;
+
+    // Expire round-based buffs
+    await this._expireRoundBuffs(newRound);
+
     const advanceTime = CONFIG.time.roundTime;
-    return this.update({ round: this.round + 1, turn: null }, { advanceTime });
+    return this.update({ round: newRound, turn: null }, { advanceTime });
+  }
+
+  /**
+   * Expire round-based class feature buffs.
+   * @param {number} currentRound - The round number to check against
+   * @private
+   */
+  async _expireRoundBuffs(currentRound) {
+    try {
+      const { expireStepUpBuffsByRound } = await import('../helpers/dancer-helper.mjs');
+      await expireStepUpBuffsByRound(currentRound);
+    } catch (e) { console.warn('Vagabond | Error expiring Step Up buffs:', e); }
+
+    try {
+      const { expireVirtuosoBuffsByRound } = await import('../helpers/bard-helper.mjs');
+      await expireVirtuosoBuffsByRound(currentRound);
+    } catch (e) { console.warn('Vagabond | Error expiring Virtuoso buffs:', e); }
   }
 
   /** @override */

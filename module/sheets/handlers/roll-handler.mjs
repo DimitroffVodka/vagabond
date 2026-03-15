@@ -538,10 +538,24 @@ export class RollHandler {
       return;
     }
 
-    // 2. Capture targets at use time
+    // 2. Class feature intercepts — relic items trigger class features
+    const itemNameLower = (item.name || '').toLowerCase();
+    if (itemNameLower.includes('step up') && this.actor.system.hasStepUp) {
+      const { performStepUp } = await import('../../helpers/dancer-helper.mjs');
+      await performStepUp(this.actor);
+      return;
+    }
+    if (itemNameLower.includes('virtuoso') && this.actor.system.hasVirtuoso) {
+      const targetsAtRollTime = TargetHelper.captureCurrentTargets();
+      const { performVirtuoso } = await import('../../helpers/bard-helper.mjs');
+      await performVirtuoso(this.actor, targetsAtRollTime);
+      return;
+    }
+
+    // 3. Capture targets at use time
     const targetsAtRollTime = TargetHelper.captureCurrentTargets();
 
-    // 3. Delegate to item.roll() which handles consumables, chat cards, and all logic
+    // 4. Delegate to item.roll() which handles consumables, chat cards, and all logic
     if (typeof item.roll === 'function') {
       await item.roll(event, targetsAtRollTime);
     }
