@@ -247,6 +247,15 @@ VAGABOND.burningDamageTypes = {
 };
 
 /**
+ * Spell effect types - categorizes what a spell's effect does
+ * @type {Object}
+ */
+VAGABOND.spellEffectTypes = {
+  'flavor': 'Flavor',
+  'statusEffect': 'Status Effect'
+};
+
+/**
  * Status conditions that can be applied on-hit by weapons/spells
  * Excludes dead, focusing, invisible, and virtuoso buffs
  * @type {Object}

@@ -765,6 +765,18 @@
           "crit": {
             "label": "Crit",
             "hint": "Effect on a critical success"
+          },
+          "effectType": {
+            "label": "Effect Type",
+            "hint": "What the spell's effect does mechanically"
+          },
+          "statusCondition": {
+            "label": "Status Condition",
+            "hint": "The status condition applied by this spell's effect"
+          },
+          "critContinual": {
+            "label": "Crit: Continual",
+            "hint": "On a critical success, the effect becomes continual (lasts until ended, no Focus required)"
           }
         },
         "AddSpell": "Add Spell",

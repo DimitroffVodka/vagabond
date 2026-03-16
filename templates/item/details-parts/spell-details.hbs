@@ -40,6 +40,26 @@
         </div>
       {{/if}}
 
+      {{! Effect Type, Status Condition, Crit Continual }}
+      <div class='locked-section'>
+        <div class='locked-stat'>
+          <span class='stat-label'>{{localize "VAGABOND.Item.Spell.FIELDS.effectType.label"}}:</span>
+          <span class='stat-value'>{{lookup config.spellEffectTypes system.effectType}}</span>
+        </div>
+        {{#if system.statusCondition}}
+        <div class='locked-stat'>
+          <span class='stat-label'>{{localize "VAGABOND.Item.Spell.FIELDS.statusCondition.label"}}:</span>
+          <span class='stat-value'>{{localize (lookup config.onHitStatusConditions system.statusCondition)}}</span>
+        </div>
+        {{/if}}
+        {{#if system.critContinual}}
+        <div class='locked-stat'>
+          <span class='stat-label'>{{localize "VAGABOND.Item.Spell.FIELDS.critContinual.label"}}:</span>
+          <span class='stat-value'>Yes</span>
+        </div>
+        {{/if}}
+      </div>
+
       {{! No Roll Required }}
       {{#if system.noRollRequired}}
         <div class='locked-section'>
@@ -71,6 +91,42 @@
             value='{{system.duration}}'
             placeholder='{{localize "VAGABOND.Item.Spell.FIELDS.duration.hint"}}'
           />
+        </div>
+      </div>
+
+      {{! Effect Type, Status Condition, and Crit Continual }}
+      <div class='flexrow gap-8'>
+        <div class='form-group flex-1'>
+          <label class='resource-label'>{{localize "VAGABOND.Item.Spell.FIELDS.effectType.label"}}</label>
+          <select name='system.effectType' data-dtype='String'>
+            {{#each config.spellEffectTypes as |label key|}}
+              <option value='{{key}}' {{#if (eq key ../system.effectType)}}selected{{/if}}>
+                {{label}}
+              </option>
+            {{/each}}
+          </select>
+        </div>
+        <div class='form-group flex-1'>
+          <label class='resource-label'>{{localize "VAGABOND.Item.Spell.FIELDS.statusCondition.label"}}</label>
+          <select name='system.statusCondition' data-dtype='String'>
+            <option value='' {{#unless system.statusCondition}}selected{{/unless}}>— None —</option>
+            {{#each config.onHitStatusConditions as |label key|}}
+              <option value='{{key}}' {{#if (eq key ../system.statusCondition)}}selected{{/if}}>
+                {{localize label}}
+              </option>
+            {{/each}}
+          </select>
+        </div>
+        <div class='form-group'>
+          <label class='checkbox-label'>
+            <input
+              type='checkbox'
+              name='system.critContinual'
+              {{#if system.critContinual}}checked{{/if}}
+              data-dtype='Boolean'
+            />
+            <span>{{localize "VAGABOND.Item.Spell.FIELDS.critContinual.label"}}</span>
+          </label>
         </div>
       </div>
 

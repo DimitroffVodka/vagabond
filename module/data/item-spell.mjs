@@ -76,6 +76,32 @@ export default class VagabondSpell extends VagabondItemBase {
       initial: false
     });
 
+    // Effect Type - categorizes the spell's effect for automation
+    // 'flavor' = descriptive only, 'statusEffect' = applies a status condition
+    schema.effectType = new fields.StringField({
+      ...requiredString,
+      initial: 'flavor',
+      label: "VAGABOND.Item.Spell.FIELDS.effectType.label",
+      hint: "VAGABOND.Item.Spell.FIELDS.effectType.hint"
+    });
+
+    // Status Condition - the status condition applied when effectType is 'statusEffect'
+    schema.statusCondition = new fields.StringField({
+      required: false,
+      blank: true,
+      initial: '',
+      label: "VAGABOND.Item.Spell.FIELDS.statusCondition.label",
+      hint: "VAGABOND.Item.Spell.FIELDS.statusCondition.hint"
+    });
+
+    // Crit Continual - whether the crit effect makes the duration continual
+    schema.critContinual = new fields.BooleanField({
+      required: true,
+      initial: false,
+      label: "VAGABOND.Item.Spell.FIELDS.critContinual.label",
+      hint: "VAGABOND.Item.Spell.FIELDS.critContinual.hint"
+    });
+
     // FX School - explicit Sequencer animation school override
     // Empty string = auto-derive from damage type
     schema.fxSchool = new fields.StringField({

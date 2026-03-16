@@ -27,6 +27,11 @@ export class VagabondCombat extends Combat {
       await this._cleanupAllCountdownDice();
     } catch (e) { console.warn('Vagabond | Error clearing countdown dice:', e); }
 
+    // Clean up all spell-inflicted statuses and remove tracking flags
+    try {
+      await this._cleanupAllSpellStatuses();
+    } catch (e) { console.warn('Vagabond | Error clearing spell statuses:', e); }
+
     return super.endCombat();
   }
 
@@ -50,6 +55,13 @@ export class VagabondCombat extends Combat {
       try {
         await this._autoRollAllCountdownDice();
       } catch (e) { console.warn('Vagabond | Error auto-rolling countdown dice:', e); }
+    }
+
+    // Process spell-inflicted status conditions: Focus upkeep or expiry
+    if (game.user.isGM) {
+      try {
+        await this._processSpellStatuses();
+      } catch (e) { console.warn('Vagabond | Error processing spell statuses:', e); }
     }
 
     const advanceTime = CONFIG.time.roundTime;
@@ -461,5 +473,149 @@ export class VagabondCombat extends Combat {
     const db = b.token?.disposition ?? -2;
     if (da !== db) return db - da;
     return (a.name || "").localeCompare(b.name || "");
+  }
+
+  /**
+   * Remove all spell-inflicted status conditions and tracking flags when combat ends.
+   * @private
+   */
+  async _cleanupAllSpellStatuses() {
+    const scene = game.scenes.current;
+    if (!scene) return;
+
+    for (const tokenDoc of scene.tokens) {
+      const actor = tokenDoc.actor;
+      if (!actor) continue;
+
+      const spellStatuses = actor.getFlag('vagabond', 'spellStatuses') || [];
+      if (spellStatuses.length === 0) continue;
+
+      // Remove each spell-inflicted status condition
+      for (const entry of spellStatuses) {
+        if (actor.statuses?.has(entry.statusCondition)) {
+          await actor.toggleStatusEffect(entry.statusCondition, { active: false });
+        }
+      }
+
+      // Clear the tracking flag
+      await actor.unsetFlag('vagabond', 'spellStatuses');
+    }
+  }
+
+  /**
+   * Process spell-inflicted status conditions at round start.
+   * - Continual statuses persist indefinitely (no Focus or mana needed)
+   * - Focused spells: deduct 1 mana per hostile target, keep status
+   * - Unfocused spells: remove the status condition
+   * @private
+   */
+  async _processSpellStatuses() {
+    const scene = game.scenes.current;
+    if (!scene) return;
+
+    // Track mana costs per caster for chat notification
+    const casterManaCosts = new Map();
+    const expiredStatuses = [];
+
+    // Check all tokens on the scene for spell-inflicted statuses
+    for (const tokenDoc of scene.tokens) {
+      const actor = tokenDoc.actor;
+      if (!actor) continue;
+
+      const spellStatuses = actor.getFlag('vagabond', 'spellStatuses') || [];
+      if (spellStatuses.length === 0) continue;
+
+      const remaining = [];
+
+      for (const entry of spellStatuses) {
+        const { statusCondition, spellId, spellName, casterId, casterName, continual } = entry;
+
+        // Continual statuses never expire from round processing
+        if (continual) {
+          remaining.push(entry);
+          continue;
+        }
+
+        // Check if the caster is Focusing on this spell
+        const caster = game.actors.get(casterId);
+        const focusedSpells = caster?.system?.focus?.spellIds || [];
+        const isFocused = focusedSpells.includes(spellId);
+
+        if (isFocused && caster) {
+          // Focused: check if caster can pay 1 mana
+          const currentMana = caster.system.mana?.current ?? 0;
+          const pendingCost = casterManaCosts.get(casterId) || 0;
+
+          if (currentMana > pendingCost) {
+            // Can pay — track cost and keep the status
+            casterManaCosts.set(casterId, pendingCost + 1);
+            remaining.push(entry);
+          } else {
+            // Can't pay — remove Focus and status
+            const newFocused = focusedSpells.filter(id => id !== spellId);
+            await caster.update({ 'system.focus.spellIds': newFocused });
+            if (newFocused.length === 0 && caster.statuses?.has('focusing')) {
+              await caster.toggleStatusEffect('focusing', { active: false });
+            }
+
+            // Remove the status from the target
+            if (actor.statuses?.has(statusCondition)) {
+              await actor.toggleStatusEffect(statusCondition, { active: false });
+            }
+            expiredStatuses.push({ targetName: actor.name, statusCondition, spellName, casterName, reason: 'no mana' });
+          }
+        } else {
+          // Not focused — remove the status condition
+          if (actor.statuses?.has(statusCondition)) {
+            await actor.toggleStatusEffect(statusCondition, { active: false });
+          }
+          expiredStatuses.push({ targetName: actor.name, statusCondition, spellName, casterName, reason: 'no focus' });
+        }
+      }
+
+      // Update the flag with remaining statuses
+      if (remaining.length !== spellStatuses.length) {
+        if (remaining.length === 0) {
+          await actor.unsetFlag('vagabond', 'spellStatuses');
+        } else {
+          await actor.setFlag('vagabond', 'spellStatuses', remaining);
+        }
+      }
+    }
+
+    // Deduct mana from casters
+    for (const [casterId, cost] of casterManaCosts) {
+      const caster = game.actors.get(casterId);
+      if (!caster) continue;
+      const newMana = Math.max(0, (caster.system.mana?.current ?? 0) - cost);
+      await caster.update({ 'system.mana.current': newMana });
+    }
+
+    // Post chat notifications
+    if (expiredStatuses.length > 0 || casterManaCosts.size > 0) {
+      const lines = [];
+
+      for (const expired of expiredStatuses) {
+        const condLabel = CONFIG.VAGABOND.onHitStatusConditions?.[expired.statusCondition]
+          ? game.i18n.localize(CONFIG.VAGABOND.onHitStatusConditions[expired.statusCondition])
+          : expired.statusCondition;
+        const reason = expired.reason === 'no mana' ? '(out of mana)' : '(not Focused)';
+        lines.push(`<strong>${expired.targetName}</strong> is no longer <strong>${condLabel}</strong> ${reason}`);
+      }
+
+      for (const [casterId, cost] of casterManaCosts) {
+        const caster = game.actors.get(casterId);
+        if (!caster) continue;
+        lines.push(`<strong>${caster.name}</strong> spent <strong>${cost} mana</strong> maintaining Focus`);
+      }
+
+      await ChatMessage.create({
+        content: `<div class="vagabond-spell-status-update">
+          <h3><i class="fas fa-magic"></i> Spell Status Update</h3>
+          ${lines.map(l => `<p>${l}</p>`).join('')}
+        </div>`,
+        speaker: { alias: 'Spell System' }
+      });
+    }
   }
 }

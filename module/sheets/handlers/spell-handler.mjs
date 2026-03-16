@@ -559,6 +559,11 @@ export class SpellHandler {
       await this._handleLifeRevive(spell, targetsAtRollTime);
     }
 
+    // Apply spell status condition to targets on successful cast
+    if (isSuccess && spell.system.statusCondition) {
+      await this._applySpellStatusCondition(spell, targetsAtRollTime, isCritical);
+    }
+
     // Create chat message
     await this._createSpellChatCard(
       spell,
@@ -849,6 +854,91 @@ export class SpellHandler {
         .setDescription(`
           <p><i class="fas fa-heart-pulse"></i> <strong>${revivedNames.join(', ')}</strong> ${revivedNames.length === 1 ? 'has' : 'have'} been revived!</p>
           <p>Restored to <strong>1 HP</strong> and gained <strong>1 Fatigue</strong>.</p>
+        `);
+      await card.send();
+    }
+  }
+
+  /**
+   * Apply a spell's status condition to all targets on successful cast.
+   * Respects the spell's effectType, statusCondition, and critContinual fields.
+   * @param {Item} spell - The spell being cast
+   * @param {Array} targetsAtRollTime - Targets captured at cast time
+   * @param {boolean} isCritical - Whether the cast was a critical success
+   * @private
+   */
+  async _applySpellStatusCondition(spell, targetsAtRollTime, isCritical) {
+    const statusCondition = spell.system.statusCondition;
+    if (!statusCondition) return;
+
+    const { VagabondDamageHelper } = await import('../../helpers/damage-helper.mjs');
+    const targetTokens = VagabondDamageHelper._resolveStoredTargets(targetsAtRollTime);
+
+    if (targetTokens.length === 0) {
+      const liveTargets = Array.from(game.user.targets);
+      for (const token of liveTargets) {
+        targetTokens.push(token);
+      }
+    }
+
+    if (targetTokens.length === 0) return;
+
+    const appliedNames = [];
+
+    for (const token of targetTokens) {
+      const targetActor = token.actor;
+      if (!targetActor) continue;
+
+      // Skip dead targets
+      if (targetActor.statuses?.has('dead')) continue;
+
+      // Check if target is immune to this status
+      const immunities = targetActor.system.immunities || [];
+      if (immunities.includes(statusCondition)) {
+        ui.notifications.info(`${targetActor.name} is immune to ${statusCondition}.`);
+        continue;
+      }
+
+      // Apply the status condition if not already active
+      if (!targetActor.statuses?.has(statusCondition)) {
+        await targetActor.toggleStatusEffect(statusCondition);
+
+        // Track spell-inflicted status for Focus/round-start cleanup
+        const isContinual = isCritical && spell.system.critContinual;
+        const existing = targetActor.getFlag('vagabond', 'spellStatuses') || [];
+        const entry = {
+          statusCondition,
+          spellId: spell.id,
+          spellName: spell.name,
+          casterId: this.actor.id,
+          casterName: this.actor.name,
+          continual: isContinual,
+          roundApplied: game.combat?.round ?? 0
+        };
+        await targetActor.setFlag('vagabond', 'spellStatuses', [...existing, entry]);
+
+        appliedNames.push(targetActor.name);
+      }
+    }
+
+    // Notify in chat
+    if (appliedNames.length > 0) {
+      const conditionLabel = CONFIG.VAGABOND.onHitStatusConditions?.[statusCondition]
+        ? game.i18n.localize(CONFIG.VAGABOND.onHitStatusConditions[statusCondition])
+        : statusCondition;
+
+      const continualText = (isCritical && spell.system.critContinual)
+        ? ' <em>(Continual — lasts until ended)</em>'
+        : '';
+
+      const { VagabondChatCard } = await import('../../helpers/chat-card.mjs');
+      const card = new VagabondChatCard()
+        .setType('generic')
+        .setActor(this.actor)
+        .setTitle(`${spell.name} — ${conditionLabel}`)
+        .setSubtitle(this.actor.name)
+        .setDescription(`
+          <p><i class="fas fa-bolt"></i> <strong>${appliedNames.join(', ')}</strong> ${appliedNames.length === 1 ? 'is' : 'are'} now <strong>${conditionLabel}</strong>!${continualText}</p>
         `);
       await card.send();
     }

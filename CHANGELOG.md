@@ -1,5 +1,50 @@
 # Vagabond System Changelog — V14 Migration & Features
 
+## Spell Status Condition System (spell-handler.mjs, combat.mjs, item-spell.mjs, config.mjs, spell-details.hbs)
+
+### Spell Schema Additions (item-spell.mjs)
+- `system.effectType` — Categorizes spell effect: "Flavor" (descriptive only) or "Status Effect" (applies a condition)
+- `system.statusCondition` — The status condition to apply (uses same list as weapon on-hit: Blinded, Burning, Charmed, etc.)
+- `system.critContinual` — Checkbox: on crit, effect becomes Continual (lasts until ended, no Focus required)
+
+### Spell Status Application (spell-handler.mjs)
+- `_applySpellStatusCondition()` — On successful cast, applies the configured status condition to all targets
+- Skips dead targets and targets immune to the status condition
+- Stores tracking data on each target via `flags.vagabond.spellStatuses[]` with spell ID, caster ID, continual flag
+- Posts a chat card notifying who was affected and what condition was applied
+- Crit + Continual noted in the chat message when applicable
+
+### Focus Mana Upkeep & Round Expiry (combat.mjs)
+- `_processSpellStatuses()` — Called at round start (`nextRound()`), processes all spell-inflicted statuses:
+  - **Continual** statuses persist indefinitely (no Focus or mana needed)
+  - **Focused** spells: deduct 1 mana per hostile target per round; if caster can't pay, Focus drops and status is removed
+  - **Not Focused** spells: status condition is automatically removed from the target
+- Posts a "Spell Status Update" chat message summarizing expired effects and mana spent
+- `_cleanupAllSpellStatuses()` — Called on combat end, removes all spell-inflicted statuses and clears tracking flags from all tokens
+
+### Spell Sheet UI (spell-details.hbs)
+- Added Effect Type dropdown, Status Condition dropdown, and Crit: Continual checkbox to spell details
+- All three fields always visible (not gated behind Effect Type selection)
+- Locked view shows the selected values as read-only text
+
+### Config (config.mjs)
+- `VAGABOND.spellEffectTypes` — Dropdown options: Flavor, Status Effect (plain text, no localization keys)
+
+### Localization (en.json)
+- Added field labels/hints for effectType, statusCondition, critContinual
+
+### Files Modified
+| File | Changes |
+|------|---------|
+| `module/data/item-spell.mjs` | +3 schema fields: effectType, statusCondition, critContinual |
+| `module/sheets/handlers/spell-handler.mjs` | +_applySpellStatusCondition(), status application on cast success, tracking flags |
+| `module/documents/combat.mjs` | +_processSpellStatuses() at round start, +_cleanupAllSpellStatuses() at combat end |
+| `module/helpers/config.mjs` | +spellEffectTypes config object |
+| `templates/item/details-parts/spell-details.hbs` | +Effect Type, Status Condition, Crit Continual UI in locked/unlocked views |
+| `lang/en.json` | +effectType, statusCondition, critContinual labels/hints |
+
+---
+
 ## Dancer Class Features (dancer-helper.mjs, roll-handler.mjs, combat.mjs, config.mjs)
 
 ### Step Up (L1) — Grant Ally a 2nd Action + Reflex Save Buff
