@@ -321,6 +321,10 @@ export default class VagabondEquipment extends VagabondItemBase {
         finalSlots = Math.max(1, finalSlots - 1); // Occupies 1 fewer Slot (min 1)
       }
     }
+    // Multiply slots by quantity for stacked items (slot-0 items stay at 0)
+    if (finalSlots > 0 && (this.quantity || 1) > 1) {
+      finalSlots = finalSlots * this.quantity;
+    }
     this.slots = finalSlots;
 
     // Format properties as comma-separated string for display

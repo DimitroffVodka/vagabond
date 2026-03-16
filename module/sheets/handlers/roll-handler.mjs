@@ -164,6 +164,31 @@ export class RollHandler {
     // Capture targeted tokens at roll time
     const targetsAtRollTime = TargetHelper.captureCurrentTargets();
 
+    // ── Range Validation ──────────────────────────────────────────────────
+    // Check weapon range vs distance to targets and apply Hinder/block as needed
+    let rangeHinder = false;
+    let rangeBand = null;
+    if (isWeapon && targetsAtRollTime.length > 0) {
+      const attackerToken = this.actor.token?.object ?? this.actor.getActiveTokens(true)[0];
+      if (attackerToken) {
+        // Check the first (primary) target for range
+        const targetTokenObj = canvas.tokens?.get(targetsAtRollTime[0].tokenId);
+        if (targetTokenObj) {
+          const rangeResult = TargetHelper.validateWeaponRange(item, attackerToken, targetTokenObj);
+          rangeBand = rangeResult.band;
+
+          if (!rangeResult.allowed) {
+            ui.notifications.warn(`${item.name}: ${rangeResult.reason}`);
+            return;
+          }
+          if (rangeResult.hinder) {
+            rangeHinder = true;
+            ui.notifications.info(`${item.name}: ${rangeResult.reason}`);
+          }
+        }
+      }
+    }
+
     try {
       /* PATH A: ALCHEMICAL */
       if (isAlchemical) {
@@ -243,11 +268,94 @@ export class RollHandler {
       const { VagabondRollBuilder } = await import('../../helpers/roll-builder.mjs');
 
       const systemFavorHinder = this.actor.system.favorHinder || 'none';
-      const favorHinder = VagabondRollBuilder.calculateEffectiveFavorHinder(
+      let favorHinder = VagabondRollBuilder.calculateEffectiveFavorHinder(
         systemFavorHinder,
         event.shiftKey,
         event.ctrlKey
       );
+
+      // Apply range-based Hinder (Ranged at Close, Thrown at Far)
+      if (rangeHinder) {
+        if (favorHinder === 'favor') favorHinder = 'none';
+        else if (favorHinder === 'none') favorHinder = 'hinder';
+        // Already hinder stays hinder
+      }
+
+      // ── Brawl/Shield property: pre-roll intent dialog ──────────────────
+      // Brawl: Damage / Grapple / Shove — Shield: Damage / Shove only
+      let brawlIntent = 'damage';
+      const hasBrawl = item.system?.properties?.includes('Brawl');
+      const hasShield = item.system?.properties?.includes('Shield');
+
+      if ((hasBrawl || hasShield) && targetsAtRollTime?.length >= 1) {
+        const sizeOrder = ['small', 'medium', 'large', 'huge', 'giant', 'colossal'];
+        const attackerSize = this.actor.system.ancestryData?.size || this.actor.system.size || 'medium';
+        const attackerSizeIdx = sizeOrder.indexOf(attackerSize);
+        const shoveSizeOverride = this.actor.system.shoveSizeOverride;
+        const shoveSizeIdx = shoveSizeOverride ? sizeOrder.indexOf(shoveSizeOverride) : attackerSizeIdx;
+        const effectiveShoveSizeIdx = Math.max(attackerSizeIdx, shoveSizeIdx);
+
+        const hasGrappleTarget = targetsAtRollTime.some(t => {
+          const targetActor = game.actors.get(t.actorId);
+          if (!targetActor) return false;
+          const targetSize = targetActor.system.ancestryData?.size || targetActor.system.size || 'medium';
+          return sizeOrder.indexOf(targetSize) <= attackerSizeIdx;
+        });
+
+        const hasShoveTarget = targetsAtRollTime.some(t => {
+          const targetActor = game.actors.get(t.actorId);
+          if (!targetActor) return false;
+          const targetSize = targetActor.system.ancestryData?.size || targetActor.system.size || 'medium';
+          return sizeOrder.indexOf(targetSize) <= effectiveShoveSizeIdx;
+        });
+
+        if (hasGrappleTarget || hasShoveTarget) {
+          const buttons = [
+            { action: 'damage', label: 'Damage', icon: 'fas fa-dice' }
+          ];
+          if (hasBrawl && hasGrappleTarget) {
+            buttons.push({ action: 'grapple', label: 'Grapple', icon: 'fas fa-hand-fist' });
+          }
+          if (hasShoveTarget) {
+            buttons.push({ action: 'shove', label: 'Shove', icon: 'fas fa-hand-back-fist' });
+          }
+
+          const dialogTitle = hasBrawl ? 'Brawl Attack' : 'Shield Attack';
+          const choice = await foundry.applications.api.DialogV2.wait({
+            window: { title: dialogTitle },
+            content: '<p>Choose your attack intent:</p>',
+            buttons
+          });
+
+          if (!choice) return; // dialog cancelled
+          brawlIntent = choice;
+
+          // Apply Favor for Grapple/Shove checks if actor has brawlCheckFavor
+          if (brawlIntent !== 'damage') {
+            const brawlCheckFavor = this.actor.system.brawlCheckFavor || false;
+            let favorApplied = false;
+            if (brawlCheckFavor) {
+              if (favorHinder === 'hinder') favorHinder = 'none';
+              else if (favorHinder === 'none') favorHinder = 'favor';
+              favorApplied = true;
+            }
+
+            // Bully perk: Favor on Grapple/Shove only when target is STRICTLY SMALLER
+            if (!favorApplied && (this.actor.system.hasBully || false)) {
+              const hasStrictlySmallerTarget = targetsAtRollTime.some(t => {
+                const tActor = game.actors.get(t.actorId);
+                if (!tActor) return false;
+                const tSize = tActor.system.ancestryData?.size || tActor.system.size || 'medium';
+                return sizeOrder.indexOf(tSize) < attackerSizeIdx;
+              });
+              if (hasStrictlySmallerTarget) {
+                if (favorHinder === 'hinder') favorHinder = 'none';
+                else if (favorHinder === 'none') favorHinder = 'favor';
+              }
+            }
+          }
+        }
+      }
 
       const attackResult = await item.rollAttack(this.actor, favorHinder);
       if (!attackResult) return;
@@ -268,6 +376,11 @@ export class RollHandler {
         const statKey = attackResult.weaponSkill?.stat || null;
         damageRoll = await item.rollDamage(this.actor, attackResult.isCritical, statKey);
       }
+
+      // Attach range info and brawl intent to attack result for chat card display
+      if (rangeBand) attackResult.rangeBand = rangeBand;
+      if (rangeHinder) attackResult.rangeHinder = true;
+      attackResult.brawlIntent = brawlIntent;
 
       await VagabondChatCard.weaponAttack(
         this.actor,

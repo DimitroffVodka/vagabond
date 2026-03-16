@@ -42,6 +42,9 @@ import { VagabondCombatTracker } from './ui/combat-tracker.mjs';
 import { EncounterSettings } from './applications/encounter-settings.mjs';
 import { SequencerFxConfig } from './applications/sequencer-fx-config.mjs';
 import { CompendiumSettings } from './applications/compendium-settings.mjs';
+import { FlankingHelper } from './helpers/flanking-helper.mjs';
+import { MoraleHelper } from './helpers/morale-helper.mjs';
+import { LightTracker } from './helpers/light-tracker.mjs';
 import { LevelUpDialog } from './applications/level-up-dialog.mjs';
 import { PartyCompactView } from './applications/party-compact-view.mjs';
 import VagabondActiveEffectConfig from './applications/active-effect-config.mjs';
@@ -377,6 +380,39 @@ function registerGameSettings() {
     icon: 'fas fa-flask-round-potion',
     type: HomebrewSettingsApp,
     restricted: true,
+  });
+
+  // Setting: Flanking
+  game.settings.register('vagabond', 'flankingEnabled', {
+    name: 'Flanking',
+    hint: 'Automatically apply Vulnerable when 2+ allies are Close to a foe that is no more than one size larger. Disabled if the vagabond-crawler module provides its own flanking.',
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: true,
+    requiresReload: false,
+  });
+
+  // Setting: Morale
+  game.settings.register('vagabond', 'moraleEnabled', {
+    name: 'Morale Checks',
+    hint: 'Automatically trigger morale checks when: their leader is defeated, the first NPC dies, half the group is defeated, or a solo NPC drops to half HP. Results are whispered to the GM.',
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: true,
+    requiresReload: false,
+  });
+
+  // Setting: Light Tracking
+  game.settings.register('vagabond', 'lightTrackingEnabled', {
+    name: 'Light Tracking',
+    hint: 'Track torch and lantern burn time automatically. Light sources can be toggled from the inventory context menu, dropped on the canvas, and picked up via the Token HUD. Disabled if the vagabond-crawler module provides its own light tracker.',
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: true,
+    requiresReload: false,
   });
 
 }
@@ -729,6 +765,22 @@ Hooks.once('ready', function () {
   Hooks.on('hotbarDrop', (bar, data, slot) => createDocMacro(data, slot));
 });
 
+// Initialize flanking detection
+Hooks.once('ready', () => {
+  FlankingHelper.init();
+});
+
+// Initialize morale checks
+Hooks.once('ready', () => {
+  MoraleHelper.init();
+});
+
+// Initialize light tracker
+Hooks.once('ready', () => {
+  LightTracker.init();
+  LightTracker.registerSocketListeners();
+});
+
 // Pre-load JB2A animation defaults when both Sequencer and JB2A are installed.
 // Runs silently — no errors if modules are absent.
 Hooks.once('ready', function () {
@@ -905,6 +957,16 @@ Hooks.on('getSceneControlButtons', (controls) => {
           } catch (error) {
             ui.notifications.error("Failed to open countdown dice config: " + error.message);
           }
+        }
+      },
+      lightTracker: {
+        name: 'lightTracker',
+        title: 'Light Tracker',
+        icon: 'fas fa-fire',
+        button: true,
+        visible: game.user.isGM && game.settings.get('vagabond', 'lightTrackingEnabled'),
+        onClick: () => {
+          LightTracker.openTracker();
         }
       }
     }
@@ -1734,6 +1796,293 @@ Hooks.on('renderChatMessageHTML', (message, html) => {
       });
     });
   });
+
+  // ---------------------------------------------------------
+  // 12. Brawl — Push 5' Button Handler
+  // ---------------------------------------------------------
+  const pushButtons = html.querySelectorAll('.vagabond-brawl-push-button');
+
+  pushButtons.forEach(button => {
+    button.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      button.disabled = true;
+
+      const targetIds = button.dataset.targetIds?.split(',').filter(Boolean) || [];
+      const attackerTokenId = button.dataset.attackerTokenId;
+      const attackerToken = canvas.tokens.get(attackerTokenId);
+      const appliedNames = [];
+
+      for (const tokenId of targetIds) {
+        const token = canvas.tokens.get(tokenId);
+        if (!token || !attackerToken) continue;
+
+        // Push 5' away from attacker (1 grid square)
+        const dx = token.document.x - attackerToken.document.x;
+        const dy = token.document.y - attackerToken.document.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const gridSize = canvas.grid.size;
+        const nx = Math.round(dx / dist);
+        const ny = Math.round(dy / dist);
+        await token.document.update({
+          x: token.document.x + nx * gridSize,
+          y: token.document.y + ny * gridSize
+        });
+        appliedNames.push(token.name);
+      }
+
+      if (appliedNames.length > 0) {
+        ChatMessage.create({
+          content: `<p><strong>Shove!</strong> ${appliedNames.join(', ')} pushed 5'.</p>`,
+          speaker: ChatMessage.getSpeaker({ actor: game.actors.get(button.dataset.actorId) })
+        });
+      }
+    });
+  });
+
+  // ---------------------------------------------------------
+  // 13. Brawl — Prone Button Handler
+  // ---------------------------------------------------------
+  const proneButtons = html.querySelectorAll('.vagabond-brawl-prone-button');
+
+  proneButtons.forEach(button => {
+    button.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      button.disabled = true;
+
+      const targetIds = button.dataset.targetIds?.split(',').filter(Boolean) || [];
+      const appliedNames = [];
+      const immuneNames = [];
+
+      for (const tokenId of targetIds) {
+        const token = canvas.tokens.get(tokenId);
+        if (token?.actor) {
+          const immunities = token.actor.system.statusImmunities ?? [];
+          if (immunities.includes('prone')) {
+            immuneNames.push(token.name);
+          } else {
+            await token.actor.toggleStatusEffect('prone', { active: true });
+            appliedNames.push(token.name);
+          }
+        }
+      }
+
+      let proneMsg = '';
+      if (appliedNames.length > 0) {
+        proneMsg += `<strong>Shove!</strong> ${appliedNames.join(', ')} knocked <em>Prone</em>.`;
+      }
+      if (immuneNames.length > 0) {
+        if (proneMsg) proneMsg += '<br>';
+        proneMsg += `<i class="fas fa-shield-halved"></i> ${immuneNames.join(', ')} ${immuneNames.length === 1 ? 'is' : 'are'} <strong>immune</strong> to Prone!`;
+      }
+      if (proneMsg) {
+        ChatMessage.create({
+          content: `<p>${proneMsg}</p>`,
+          speaker: ChatMessage.getSpeaker({ actor: game.actors.get(button.dataset.actorId) })
+        });
+      }
+    });
+  });
+
+  // ---------------------------------------------------------
+  // 14. Fisticuffs — Post-Hit Grapple Button Handler
+  // ---------------------------------------------------------
+  const grappleButtons = html.querySelectorAll('.vagabond-brawl-grapple-button');
+
+  grappleButtons.forEach(button => {
+    button.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      button.disabled = true;
+
+      const targetIds = button.dataset.targetIds?.split(',').filter(Boolean) || [];
+      const actorId = button.dataset.actorId;
+      const actor = game.actors.get(actorId);
+      const appliedNames = [];
+      const immuneNames = [];
+      const hasBully = actor?.system.hasBully || false;
+
+      // Get Restrained status effect definition for manual AE creation (grappler tracking)
+      const restrainedDef = CONFIG.statusEffects.find(e => e.id === 'restrained');
+
+      for (const tokenId of targetIds) {
+        const token = canvas.tokens.get(tokenId);
+        if (token?.actor) {
+          const immunities = token.actor.system.statusImmunities ?? [];
+          if (immunities.includes('restrained')) {
+            immuneNames.push(token.name);
+          } else {
+            // Create Restrained AE manually with grappler tracking
+            await token.actor.createEmbeddedDocuments('ActiveEffect', [{
+              name: game.i18n.localize(restrainedDef.name),
+              img: restrainedDef.img,
+              disabled: false,
+              statuses: ['restrained'],
+              changes: restrainedDef.changes || [],
+              description: restrainedDef.description || '',
+              duration: { rounds: 99, startRound: game.combat?.round ?? 0 },
+              flags: {
+                vagabond: {
+                  grappledBy: actorId
+                }
+              }
+            }]);
+            appliedNames.push(token.name);
+
+            // Bully perk: auto-create "Grappled Creature" weapon on the grappler
+            if (hasBully && actor) {
+              const existingWeapon = actor.items.find(i =>
+                i.flags?.vagabond?.bullyWeapon && i.flags?.vagabond?.grappledActorId === token.actor.id
+              );
+              if (existingWeapon) await existingWeapon.delete();
+
+              await actor.createEmbeddedDocuments('Item', [{
+                name: `${token.name} (Grappled)`,
+                type: 'equipment',
+                img: token.actor.img || 'icons/skills/melee/unarmed-punch-fist.webp',
+                system: {
+                  equipmentType: 'weapon',
+                  weaponSkill: 'brawl',
+                  range: 'close',
+                  grip: '2H',
+                  damageOneHand: 'd8',
+                  damageTwoHands: 'd8',
+                  damageTypeOneHand: 'physical',
+                  damageTypeTwoHands: 'physical',
+                  equipmentState: 'twoHands',
+                  equipped: true,
+                  properties: ['Brawl'],
+                  quantity: 1,
+                  baseSlots: 0
+                },
+                flags: {
+                  vagabond: {
+                    bullyWeapon: true,
+                    grappledActorId: token.actor.id
+                  }
+                }
+              }]);
+            }
+          }
+        }
+      }
+
+      let grappleMsg = '';
+      if (appliedNames.length > 0) {
+        grappleMsg += `<strong>Grapple!</strong> ${appliedNames.join(', ')} ${appliedNames.length === 1 ? 'is' : 'are'} now <em>Restrained</em>.`;
+        if (hasBully) {
+          grappleMsg += `<br><i class="fas fa-hand-back-fist"></i> ${appliedNames.join(', ')} can be used as a <strong>Greatclub</strong>!`;
+        }
+      }
+      if (immuneNames.length > 0) {
+        if (grappleMsg) grappleMsg += '<br>';
+        grappleMsg += `<i class="fas fa-shield-halved"></i> ${immuneNames.join(', ')} ${immuneNames.length === 1 ? 'is' : 'are'} <strong>immune</strong> to Restrained!`;
+      }
+      if (grappleMsg) {
+        ChatMessage.create({
+          content: `<p>${grappleMsg}</p>`,
+          speaker: ChatMessage.getSpeaker({ actor })
+        });
+      }
+    });
+  });
+
+  // ---------------------------------------------------------
+  // 15. Fisticuffs — Post-Hit Shove Button Handler
+  // ---------------------------------------------------------
+  const shoveButtons = html.querySelectorAll('.vagabond-brawl-shove-button');
+
+  shoveButtons.forEach(button => {
+    button.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      button.disabled = true;
+
+      // Show sub-choice: Push 5' or Prone
+      const choice = await foundry.applications.api.DialogV2.wait({
+        window: { title: 'Shove Effect' },
+        content: '<p>Choose the shove effect:</p>',
+        buttons: [
+          { action: 'push', label: "Push 5'", icon: 'fas fa-arrow-right' },
+          { action: 'prone', label: 'Prone', icon: 'fas fa-person-falling' }
+        ]
+      });
+
+      if (!choice) {
+        button.disabled = false;
+        return;
+      }
+
+      const targetIds = button.dataset.targetIds?.split(',').filter(Boolean) || [];
+      const attackerTokenId = button.dataset.attackerTokenId;
+      const attackerToken = canvas.tokens.get(attackerTokenId);
+      const appliedNames = [];
+      const immuneNames = [];
+
+      for (const tokenId of targetIds) {
+        const token = canvas.tokens.get(tokenId);
+        if (!token) continue;
+
+        if (choice === 'push' && attackerToken) {
+          const dx = token.document.x - attackerToken.document.x;
+          const dy = token.document.y - attackerToken.document.y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          const gridSize = canvas.grid.size;
+          const nx = Math.round(dx / dist);
+          const ny = Math.round(dy / dist);
+          await token.document.update({
+            x: token.document.x + nx * gridSize,
+            y: token.document.y + ny * gridSize
+          });
+          appliedNames.push(token.name);
+        } else if (choice === 'prone' && token.actor) {
+          const immunities = token.actor.system.statusImmunities ?? [];
+          if (immunities.includes('prone')) {
+            immuneNames.push(token.name);
+          } else {
+            await token.actor.toggleStatusEffect('prone', { active: true });
+            appliedNames.push(token.name);
+          }
+        }
+      }
+
+      let shoveMsg = '';
+      if (appliedNames.length > 0) {
+        const effectLabel = choice === 'push' ? "pushed 5'" : 'knocked <em>Prone</em>';
+        shoveMsg += `<strong>Shove!</strong> ${appliedNames.join(', ')} ${effectLabel}.`;
+      }
+      if (immuneNames.length > 0) {
+        if (shoveMsg) shoveMsg += '<br>';
+        shoveMsg += `<i class="fas fa-shield-halved"></i> ${immuneNames.join(', ')} ${immuneNames.length === 1 ? 'is' : 'are'} <strong>immune</strong> to Prone!`;
+      }
+      if (shoveMsg) {
+        ChatMessage.create({
+          content: `<p>${shoveMsg}</p>`,
+          speaker: ChatMessage.getSpeaker({ actor: game.actors.get(button.dataset.actorId) })
+        });
+      }
+    });
+  });
+});
+
+// ---------------------------------------------------------
+// Bully Perk — Auto-remove "Grappled Creature" weapon when Restrained is removed
+// ---------------------------------------------------------
+Hooks.on('deleteActiveEffect', async (effect) => {
+  if (!effect.statuses?.has('restrained')) return;
+  const grappledBy = effect.flags?.vagabond?.grappledBy;
+  if (!grappledBy) return;
+
+  const grappler = game.actors.get(grappledBy);
+  if (!grappler) return;
+
+  const victimId = effect.parent?.id;
+  if (!victimId) return;
+
+  const bullyWeapon = grappler.items.find(i =>
+    i.flags?.vagabond?.bullyWeapon && i.flags?.vagabond?.grappledActorId === victimId
+  );
+  if (bullyWeapon) {
+    await bullyWeapon.delete();
+    ui.notifications.info(`${bullyWeapon.name} removed from ${grappler.name}'s inventory.`);
+  }
 });
 
 

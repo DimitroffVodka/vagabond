@@ -355,7 +355,7 @@ VAGABOND.statusEffectDefinitions = [
     name: 'VAGABOND.StatusConditions.Prone',
     img: 'icons/svg/falling.svg',
     statuses: ['prone'],
-    description: 'Speed = 0. Costs 10\' Speed to stand. Can crawl (2:1 ratio). Can\'t Rush. Vulnerable (attacks/saves Hindered, incoming attacks Favored). [AUTOMATED: Speed = 0, Vulnerable. MANUAL: Stand cost, crawl ratio]',
+    description: 'Speed = 0. Costs 10\' Speed to stand. Can crawl (2:1 ratio). Can\'t Rush. Checks/Saves Hindered. Melee attacks against you have Favor. [AUTOMATED: Speed = 0, Hinder, Melee Favor. MANUAL: Stand cost, crawl ratio]',
     changes: [
       {
         key: 'system.speed.bonus',
@@ -368,7 +368,7 @@ VAGABOND.statusEffectDefinitions = [
         value: 'hinder'
       },
       {
-        key: 'system.incomingAttacksModifier',
+        key: 'system.incomingMeleeAttacksModifier',
         mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
         value: 'favor'
       },

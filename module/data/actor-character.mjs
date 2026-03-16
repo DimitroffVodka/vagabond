@@ -433,6 +433,13 @@ export default class VagabondCharacter extends VagabondActorBase {
       label: "Outgoing Saves Modifier"
     });
 
+    // Incoming MELEE attacks modifier (e.g., Prone: melee attackers have Favor)
+    schema.incomingMeleeAttacksModifier = new fields.StringField({
+      initial: 'none',
+      choices: ['none', 'favor', 'hinder'],
+      label: "Incoming Melee Attacks Modifier"
+    });
+
     // Auto-fail stats (e.g., Incapacitated: auto-fail Might and Dexterity)
     schema.autoFailStats = new fields.ArrayField(
       new fields.StringField({ required: true }),
@@ -443,6 +450,30 @@ export default class VagabondCharacter extends VagabondActorBase {
     schema.autoFailAllRolls = new fields.BooleanField({
       initial: false,
       label: "Auto-Fail All Rolls"
+    });
+
+    // Brawl Check Favor — grants Favor on Grapple/Shove checks (e.g., Orc Beefy trait)
+    schema.brawlCheckFavor = new fields.BooleanField({
+      initial: false,
+      label: "Favor on Grapple/Shove Checks"
+    });
+
+    // Fisticuffs — allows post-hit Grapple/Shove when attack had Favor (Pugilist feature)
+    schema.fisticuffs = new fields.BooleanField({
+      initial: false,
+      label: "Fisticuffs"
+    });
+
+    // Shove Size Override — treated as this size for Shove checks (e.g., Vanguard: Large/Huge)
+    schema.shoveSizeOverride = new fields.StringField({
+      initial: '',
+      label: "Shove Size Override"
+    });
+
+    // Bully Perk — Favor on Grapple/Shove vs strictly smaller targets, use grappled creature as greatclub
+    schema.hasBully = new fields.BooleanField({
+      initial: false,
+      label: "Bully Perk"
     });
 
     // Defender status modifiers (affects attackers targeting this actor)
@@ -575,12 +606,19 @@ export default class VagabondCharacter extends VagabondActorBase {
     // --- 6. Reset Status Condition Fields ---
     this.incomingHealingModifier = 0;
     this.incomingAttacksModifier = 'none';
+    this.incomingMeleeAttacksModifier = 'none';
     this.outgoingSavesModifier = 'none';
     this.autoFailStats = [];
     this.autoFailAllRolls = false;
     this.defenderStatusModifiers.attackersAreBlinded = false;
     this.defenderStatusModifiers.closeAttacksAutoCrit = false;
     // Don't reset statusEffectData - it contains persistent state like charmerUuid
+
+    // --- 7. Reset Brawl/Grapple/Shove Fields ---
+    this.brawlCheckFavor = false;
+    this.fisticuffs = false;
+    this.shoveSizeOverride = '';
+    this.hasBully = false;
   }
 
   /**
@@ -796,6 +834,7 @@ export default class VagabondCharacter extends VagabondActorBase {
     this._calculateAncestryData();
     // this._calculateClassData(); // Simplified: We just grab ID/Name now.
     this._prepareClassDisplayData();
+    this._detectTraitAndFeatureFlags();
     this._calculateXPRequirements();
 
     // Process Saves (dynamically from homebrew config)
@@ -879,6 +918,60 @@ export default class VagabondCharacter extends VagabondActorBase {
       };
     } else {
       this.classData = null;
+    }
+  }
+
+  /**
+   * Auto-detect known ancestry traits and class features by name,
+   * and set the corresponding mechanical flags on the actor.
+   * This allows traits/features to work without manually adding Active Effects.
+   */
+  _detectTraitAndFeatureFlags() {
+    const actorLevel = this.attributes?.level?.value || 1;
+
+    // --- Ancestry Traits ---
+    const traits = this.ancestryData?.traits || [];
+    for (const trait of traits) {
+      const name = (trait.name || '').toLowerCase();
+
+      // Orc — Beefy: Favor on Checks to Grapple or Shove
+      if (name === 'beefy') {
+        this.brawlCheckFavor = true;
+      }
+    }
+
+    // --- Class Features (level-gated) ---
+    const classItem = this.parent?.items?.find(item => item.type === 'class');
+    if (classItem) {
+      const levelFeatures = classItem.system.levelFeatures || [];
+      for (const feature of levelFeatures) {
+        if ((feature.level || 99) > actorLevel) continue;
+        const name = (feature.name || '').toLowerCase();
+
+        // Pugilist — Fisticuffs: post-hit Grapple/Shove when attack had Favor
+        if (name === 'fisticuffs') {
+          this.fisticuffs = true;
+        }
+
+        // Vanguard — "You are considered Large for Shoves" (Level 4)
+        // Vanguard — "You are considered Huge for Shoves" (Level 8)
+        const desc = (feature.description || '').toLowerCase();
+        if (desc.includes('considered large for shoves')) {
+          this.shoveSizeOverride = 'large';
+        }
+        if (desc.includes('considered huge for shoves')) {
+          this.shoveSizeOverride = 'huge';
+        }
+      }
+    }
+
+    // --- Perks ---
+    const perks = this.parent?.items?.filter(i => i.type === 'perk') || [];
+    for (const perk of perks) {
+      const name = (perk.name || '').toLowerCase();
+      if (name === 'bully') {
+        this.hasBully = true;
+      }
     }
   }
 

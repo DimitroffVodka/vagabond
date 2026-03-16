@@ -48,6 +48,7 @@ export class InventoryHandler {
         totalSlots: item.system.slots || item.system.baseSlots || 0,
         requiresBound: item.system.requiresBound || false,
         bound: item.system.bound || false,
+        showQuantityBadge: (item.system.quantity || 1) > 1,
       };
 
       // Add range abbreviation for weapons
@@ -830,6 +831,28 @@ export class InventoryHandler {
       const { draggedCard } = this._dragState;
       this._dragState = null;
       draggedCard?.classList.remove('reorder-dragging');
+
+      // Check for stackable drop — dragging onto a matching item to merge quantities
+      const dropTarget = e.target?.closest?.('.inventory-card');
+      if (dropTarget && draggedCard) {
+        const draggedId = draggedCard.dataset.itemId;
+        const targetId = dropTarget.dataset.itemId;
+        if (draggedId && targetId && draggedId !== targetId) {
+          const draggedItem = this.actor.items.get(draggedId);
+          const targetItem = this.actor.items.get(targetId);
+          if (draggedItem && targetItem
+            && draggedItem.type === 'equipment' && targetItem.type === 'equipment'
+            && draggedItem.name === targetItem.name
+            && draggedItem.img === targetItem.img) {
+            const draggedQty = draggedItem.system.quantity || 1;
+            const targetQty = targetItem.system.quantity || 1;
+            await targetItem.update({ 'system.quantity': targetQty + draggedQty });
+            await this.actor.deleteEmbeddedDocuments('Item', [draggedId]);
+            ui.notifications.info(`Stacked ${draggedItem.name} (×${targetQty + draggedQty})`);
+            return;
+          }
+        }
+      }
 
       const orderedIds = [...gridEl.querySelectorAll('.inventory-card')]
         .map(c => c.dataset.itemId)

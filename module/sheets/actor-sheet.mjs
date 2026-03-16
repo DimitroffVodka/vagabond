@@ -2175,6 +2175,24 @@ export class VagabondActorSheet extends api.HandlebarsApplicationMixin(
     const item = await Item.implementation.fromDropData(data);
     const itemData = item.toObject();
 
+    // Check for stackable drop — dragging onto a matching item to merge quantities
+    const stackTarget = this._findStackTarget(event, item);
+    if (stackTarget) {
+      const draggedQty = item.system.quantity || 1;
+      const targetQty = stackTarget.system.quantity || 1;
+      await stackTarget.update({ 'system.quantity': targetQty + draggedQty });
+
+      // Delete the source item (same actor = delete embedded, other actor = delete from source)
+      if (this.actor.uuid === item.parent?.uuid) {
+        await this.actor.deleteEmbeddedDocuments('Item', [item.id]);
+      } else if (item.parent?.documentName === 'Actor' && item.parent.isOwner) {
+        await item.delete();
+      }
+
+      ui.notifications.info(`Stacked ${item.name} (×${targetQty + draggedQty})`);
+      return;
+    }
+
     // Handle item from same actor (sorting)
     if (this.actor.uuid === item.parent?.uuid) {
       return this._onSortItem(event, itemData);
@@ -2188,6 +2206,39 @@ export class VagabondActorSheet extends api.HandlebarsApplicationMixin(
     }
 
     return created;
+  }
+
+  /**
+   * Find a valid stack target under the cursor — a matching item on this actor
+   * that can merge quantities with the dragged item.
+   * Items stack if they share the same name, type, and base item identity (img).
+   * @param {DragEvent} event
+   * @param {Item} draggedItem - The item being dragged
+   * @returns {Item|null} The target item to stack onto, or null
+   * @private
+   */
+  _findStackTarget(event, draggedItem) {
+    // Only equipment items can stack
+    if (draggedItem.type !== 'equipment') return null;
+
+    // Find the inventory card under the cursor
+    const target = event.target?.closest?.('.inventory-card');
+    if (!target) return null;
+
+    const targetItemId = target.dataset.itemId;
+    if (!targetItemId) return null;
+
+    // Don't stack onto yourself
+    if (draggedItem.id === targetItemId) return null;
+
+    const targetItem = this.actor.items.get(targetItemId);
+    if (!targetItem || targetItem.type !== 'equipment') return null;
+
+    // Items must match by name and image (same item type)
+    if (targetItem.name !== draggedItem.name) return null;
+    if (targetItem.img !== draggedItem.img) return null;
+
+    return targetItem;
   }
 
   /**

@@ -1,5 +1,124 @@
 # Changelog
 
+## Phase 4: Game Mechanics & Brawl/Grapple/Shove
+
+### New Features
+
+#### Flanking (Auto-Detect)
+- **Automatic flanking detection** during combat — when 2+ allied tokens are Close (≤5 ft) to a foe, the foe becomes Vulnerable (Hindered attacks/saves, Favored incoming attacks).
+- **Bidirectional** — heroes can flank NPCs and NPCs can flank heroes.
+- **Size-aware** — the foe must be no more than one size larger than the flanking allies.
+- **Smart cleanup** — flanking Vulnerable is tracked separately from manually-applied Vulnerable via a `flankingEffect` flag. Only the flanking-applied effect is removed when flanking ends.
+- **Respects vagabond-crawler module** — defers to the module's flanking system if it's active.
+- **Game setting** — `flankingEnabled` toggle in system settings (default: enabled).
+
+#### Morale (Auto-Trigger)
+- **Automatic morale checks** for NPCs during combat, triggered by:
+  - First NPC death in the encounter
+  - Half or more of the NPC group defeated
+  - Leader killed (highest Threat Level among living NPCs)
+  - Solo NPC (only combatant) reaching half HP
+- NPCs with no morale value fight to the death.
+- Results whispered to GM with a styled chat card showing individual pass/fail per NPC.
+- State tracking resets on combat start.
+- **Game setting** — `moraleEnabled` toggle (default: enabled).
+
+#### Light Tracker
+- **Torch/lantern/candle burn tracking** with real-time tick (1-second intervals, flush to world time every 20 seconds).
+- **Supported light sources** — Torch, Lantern, Candle, Hooded Lantern, Bullseye Lantern (configurable fuel durations).
+- **Context menu integration** — right-click inventory cards to Light or Extinguish items.
+- **Canvas drop** — dropping a lit light source onto the canvas creates a temporary actor with light emission.
+- **Token HUD pickup** — retrieve dropped light sources back to inventory.
+- **GM panel** (`LightTrackerApp` using ApplicationV2) — view all party light sources, add/burn time, douse individual lights.
+- **Stack splitting** — lighting a torch from a stack of 5 splits it into 4+1, lighting the single.
+- **Socket support** — player actions route through GM for proper permission handling.
+- **Game setting** — `lightTrackingEnabled` toggle (default: enabled).
+- **Scene control button** — "Light Tracker" added to Vagabond Tools.
+
+#### Stackable Consumables
+- **Drag-drop stacking** — dragging identical consumables onto the same actor merges them by increasing quantity (matched by name, type, and image).
+- **Quantity badge** — items with quantity > 1 display a `×N` badge on the inventory card.
+- **Slot multiplication** — stacked items occupy `baseSlots × quantity` inventory slots.
+- **Within-sheet stacking** — reordering items within the same actor also stacks matching items.
+
+#### Weapon Range Validation
+- **Melee weapons** blocked from attacking targets beyond 5 ft (10 ft with Long property).
+- **Ranged property** — Hindered when attacking Close (≤5 ft) targets.
+- **Thrown property** — melee weapon can attack at Near range; Hindered at Far range.
+- **Near-range weapons** blocked beyond 30 ft.
+- **Range band tag** in chat cards — shows Close/Near/Far with Hinder indicator.
+- **Distance calculation** — edge-to-edge Chebyshev distance supporting multi-square tokens.
+
+#### Brawl / Grapple / Shove System
+- **Pre-roll intent dialog** — attacking with a Brawl or Shield weapon shows a dialog: Damage / Grapple / Shove (Shield weapons offer Damage / Shove only).
+- **Size validation** — can only Grapple/Shove creatures your size or smaller. Shove uses a separate effective size for Vanguard overrides.
+- **Grapple** — on hit, applies Restrained to the target with `grappledBy` flag tracking the grappler. Skips the damage button.
+- **Shove** — on hit, shows Push 5' / Prone sub-choice. Push moves the target 1 grid square away from the attacker. Prone applies the Prone status.
+- **Bully perk** — when grappling, auto-creates a "Grappled Creature" weapon (d8, 2H, Brawl property) on the attacker. The weapon is auto-deleted when Restrained is removed.
+- **Fisticuffs (Pugilist)** — after a Favored hit with a Brawl weapon, shows post-hit Grapple/Shove buttons in the chat card (normal damage still applies).
+- **Orc Beefy trait** — grants Favor on Grapple/Shove checks (auto-detected from ancestry traits).
+- **Vanguard size override** — "considered Large/Huge for Shoves" (auto-detected from class feature descriptions).
+- **Immunity checks** — respects `statusImmunities` for Restrained and Prone.
+- **Prone status fix** — Prone now uses `incomingMeleeAttacksModifier` (melee-only Favor) instead of `incomingAttacksModifier` (all attacks Favored). This matches the Vagabond rulebook: Prone only benefits melee attackers, not ranged.
+
+### Technical Details
+
+#### New Files (4 files)
+
+| File | Description |
+|------|-------------|
+| `module/helpers/flanking-helper.mjs` | Flanking detection, Vulnerable application/cleanup, debounced evaluation |
+| `module/helpers/morale-helper.mjs` | Morale check triggers, leader detection, GM-whispered results |
+| `module/helpers/light-tracker.mjs` | Light source tracking, real-time tick, canvas drop/pickup, GM panel |
+| `templates/apps/light-tracker.hbs` | Light Tracker UI template |
+
+#### Modified Files (8 files)
+
+| File | Changes |
+|------|---------|
+| `module/vagabond.mjs` | Flanking/Morale/LightTracker init, 3 game settings, scene control button, Brawl Push/Prone/Grapple/Shove button handlers, Bully cleanup hook |
+| `module/helpers/chat-card.mjs` | `brawlIntent` parameter, Grapple/Shove/Fisticuffs handling in `createActionCard`, brawl intent tag |
+| `module/sheets/handlers/roll-handler.mjs` | Brawl intent dialog, size checks, Favor application, range validation block |
+| `module/data/actor-character.mjs` | New fields: `incomingMeleeAttacksModifier`, `brawlCheckFavor`, `fisticuffs`, `shoveSizeOverride`, `hasBully`. New method: `_detectTraitAndFeatureFlags()` |
+| `module/helpers/config.mjs` | Prone status: `incomingAttacksModifier` → `incomingMeleeAttacksModifier` |
+| `module/helpers/target-helper.mjs` | `distanceFt()`, `getDistanceBand()`, `bandLabel()`, `validateWeaponRange()` |
+| `module/documents/active-effect.mjs` | AE attribute choices for Brawl fields + `incomingMeleeAttacksModifier` |
+| `module/sheets/handlers/inventory-handler.mjs` | Quantity badge display for stacked items |
+| `module/sheets/actor-sheet.mjs` | Stackable drop logic in `_onDropItem()` |
+| `module/data/base-equipment.mjs` | Slot multiplication for stacked items |
+| `templates/actor/parts/inventory-card.hbs` | Quantity badge template |
+| `css/vagabond.css` | Morale, Light Tracker, quantity badge, and range hinder tag styles |
+
+#### Brawl Data Flow
+```
+Weapon Attack (Brawl/Shield property)
+  → Size check: filter eligible Grapple/Shove targets
+  → DialogV2: Damage / Grapple / Shove
+  → Apply brawlCheckFavor / Bully Favor if applicable
+  → Roll attack with modified favorHinder
+
+On Hit:
+  Grapple → createEmbeddedDocuments('ActiveEffect', Restrained + grappledBy flag)
+          → Bully? createEmbeddedDocuments('Item', Grappled Creature weapon)
+  Shove   → Chat buttons: Push 5' (move token) or Prone (toggleStatusEffect)
+  Damage  → Normal damage button
+          → Fisticuffs? Post-hit Grapple/Shove buttons
+
+Cleanup:
+  deleteActiveEffect hook → if Restrained removed, delete Bully weapon
+```
+
+#### Feature Detection (`_detectTraitAndFeatureFlags`)
+```javascript
+// Auto-detected from ancestry traits and class features:
+Orc "Beefy" trait        → brawlCheckFavor = true
+Pugilist "Fisticuffs"    → fisticuffs = true
+Vanguard Shove overrides → shoveSizeOverride = 'large' / 'huge'
+Bully perk               → hasBully = true
+```
+
+---
+
 ## Countdown Dice & Burning/Status System (Phase 1 + 2)
 
 ### New Features
