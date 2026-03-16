@@ -210,6 +210,80 @@
 - **AE attribute choices**: All three fields added to Active Effect attribute dropdown with descriptive labels.
 - **Effects compendium**: Burning I/II/III, Lifesteal I/II/III, and Manasteal I/II/III updated from flag-only reminders to real AE-driven automation. Run `vagabond.EffectsCompendium.populate({ force: true })` to regenerate.
 
+### Countdown / Burning Dice Overhaul (damage-helper.mjs, combat.mjs, countdown-dice-overlay.mjs, countdown-dice-config.mjs, config.mjs, equipment-details.hbs, vagabond.mjs, en.json)
+
+#### Burning Damage Pipeline — Through Armor, Not Bypass
+- **Before**: Burning die damage bypassed armor entirely (direct HP subtraction in `_applyLinkedDamage()`).
+- **After**: Burning damage routed through `calculateFinalDamage()` — respects armor, damage immunities, weaknesses, and Rage DR. Chat message shows full breakdown (armor absorbed, rage DR, weak bypass).
+
+#### Configurable Burning Damage Type
+- **Before**: Burning was always fire damage, hardcoded throughout.
+- **After**: Damage type stored per-die in `linkedStatusEffect.damageType` flag. Supports fire, cold, poison, acid, shock, necrotic, psychic, magical. Frostburn spell can now burn with Cold, Cobra Bite with Poison, etc.
+
+#### Auto-Roll All Countdown Dice at Round Start (combat.mjs)
+- `nextRound()` now calls `_autoRollAllCountdownDice()` — GM-only, rolls every active countdown/burning die via the overlay's `_onRollDice()` method.
+- Rolls all dice regardless of token linking — both pure countdown timers and burning damage dice.
+
+#### NPC Death Dice Cleanup (combat.mjs, vagabond.mjs)
+- `cleanupDiceForToken(tokenId, sceneId, actorName)` — static method on `VagabondCombat`. Called from `updateActor` hook when NPC drops to 0 HP.
+- Matches dice by: linked token ID, legacy actor ID, and actor name pattern (e.g., "Burning: Goblin").
+- Cleans up linked status effects before deleting the die.
+
+#### Combat End Cleanup (combat.mjs)
+- `endCombat()` now calls `_cleanupAllCountdownDice()` — deletes ALL active countdown/burning dice, removes linked status effects, posts notification.
+
+#### Burning Stacking Rules (damage-helper.mjs)
+- **Same damage type**: Keeps the higher die (upgrade if new > existing, skip if same/lower).
+- **Different damage types**: Both stack as separate countdown dice (e.g., Fire d4 + Poison d6 coexist).
+
+#### Burning Triggers on Any Hit (damage-helper.mjs)
+- **Before**: `checkOnHitBurning()` gated by `if (finalDamage > 0)` — burning didn't apply when armor absorbed all weapon damage.
+- **After**: Gate removed. Burning triggers on any successful hit, even if weapon damage was fully absorbed by armor.
+
+#### Dead Target Check (damage-helper.mjs)
+- `checkOnHitBurning()` now checks `targetActor.system.health.value <= 0` and returns early. Prevents burning dice from being created on already-dead targets (e.g., when damage kills outright).
+
+#### Countdown Dice Config Dialog (countdown-dice-config.mjs, config.hbs)
+- Added "Burning Die" toggle with:
+  - Damage type dropdown (fire, acid, shock, poison, cold, necrotic, psychic, magical)
+  - Target token picker (tokens on current scene)
+  - Auto-naming: "Burning (Poison): Goblin"
+- When creating a burning die: sets `linkedStatusEffect` flag with damageType, applies Burning status to target token, sets ownership to visible by all players.
+
+#### Weapon Properties: Burning & Status (config.mjs, equipment-details.hbs, damage-helper.mjs, en.json)
+- **New weapon properties**: Added `Burning` and `Status` to `VAGABOND.weaponProperties` with localization entries and property hints.
+- **Shared Countdown Die**: When either Burning or Status (or both) properties are selected on a weapon, an "On-Hit Effects" section appears with:
+  - **Countdown Die** dropdown (d4–d12) — shared between both properties
+  - **Burning Damage Type** dropdown — shown only when Burning property is selected, uses `config.burningDamageTypes`
+  - **On-Hit Status** dropdown — shown only when Status property is selected, populated from `config.onHitStatusConditions` (15 applicable status conditions, excludes dead/focusing/invisible/berserk/virtuoso buffs)
+- **Combined Burning + Status**: When both properties are selected, the same countdown die handles burning damage AND the status condition. Die name reflects both (e.g., "Burning (Poison) + Sickened: Goblin"). When the die expires, both effects are cleaned up.
+- **Three-source priority**: `checkOnHitBurning()` checks in order: (1) explicit overrides (spell params), (2) weapon properties + flags (`system.properties` + `flags.vagabond.onHitBurning`), (3) actor-level relic power (`system.onHitBurningDice`).
+- **Status-only path**: `_applyStatusDie()` — creates a countdown die linked to a status condition without burning damage. Same stacking rules (upgrade if new die is higher).
+- **Backward compatible**: Existing weapons with old `flags.vagabond.onHitBurning` (no Burning property) still work. Actor-level `system.onHitBurningDice` relic power unchanged.
+
+#### Config Additions (config.mjs)
+- `VAGABOND.burningDamageTypes` — filtered damage types valid for burning (fire, acid, shock, poison, cold, necrotic, psychic, magical). Used in both weapon sheet and countdown dice config dialog.
+- `VAGABOND.onHitStatusConditions` — 15 status conditions applicable on-hit (blinded, burning, charmed, confused, dazed, fatigued, frightened, incapacitated, paralyzed, prone, restrained, sickened, suffocating, unconscious, vulnerable).
+
+#### Cleanup Enhancement (countdown-dice-overlay.mjs)
+- `_cleanupLinkedEffects()` now also removes the additional `statusCondition` when a combined Burning + Status die expires.
+- Notification message updated to mention both effects when applicable.
+
+#### Files Modified
+| File | Change |
+|------|--------|
+| `module/helpers/damage-helper.mjs` | `checkOnHitBurning()` rewritten: three-source priority, property-based detection, stacking rules, dead target check, armor-absorb fix. New `_applyBurningDie()` and `_applyStatusDie()` private methods. |
+| `module/documents/combat.mjs` | `nextRound()` auto-rolls all countdown dice. `endCombat()` cleans up all dice. `_autoRollAllCountdownDice()`, `_cleanupAllCountdownDice()`, `cleanupDiceForToken()` new methods. |
+| `module/ui/countdown-dice-overlay.mjs` | `_applyLinkedDamage()` uses `calculateFinalDamage()` with configurable damage type. `_cleanupLinkedEffects()` handles combined Burning+Status cleanup. |
+| `module/applications/countdown-dice-config.mjs` | Burning die toggle with damage type, target token picker, auto-naming. |
+| `templates/countdown-dice/config.hbs` | Burning checkbox, damage type dropdown, target token selector. |
+| `templates/item/details-parts/equipment-details.hbs` | On-Hit Burning section replaced with property-conditional On-Hit Effects section (Countdown Die, Burning Damage Type, On-Hit Status). |
+| `module/helpers/config.mjs` | `burningDamageTypes`, `onHitStatusConditions` config objects. Burning/Status in `weaponProperties` and `weaponPropertyHints`. |
+| `lang/en.json` | Burning/Status property labels and hints. |
+| `module/vagabond.mjs` | `updateActor` hook extended for NPC death countdown dice cleanup. |
+
+---
+
 ### Life Spell Revive Mechanic (spell-handler.mjs)
 - **0-dice (0 mana) cast**: Revives a dead target — sets HP to 1, removes Dead/Unconscious status, adds 1 Fatigue. Only works on targets with the Dead condition; no effect otherwise. Posts a "Life — Revive" chat card. Virtuoso Inspiration does NOT apply.
 - **1+ dice cast**: Heals for Xd6 per mana spent. Virtuoso Inspiration adds bonus d6 as normal.

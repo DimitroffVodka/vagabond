@@ -62,6 +62,58 @@ export class CountdownDiceConfig extends api.HandlebarsApplicationMixin(
     if (form) {
       form.addEventListener('submit', this._onFormSubmit.bind(this));
     }
+
+    // Toggle burning options visibility
+    const burningCheckbox = this.element.querySelector('#is-burning');
+    const burningOptions = this.element.querySelector('#burning-options');
+    const nameInput = this.element.querySelector('#dice-name');
+    if (burningCheckbox && burningOptions) {
+      burningCheckbox.addEventListener('change', (e) => {
+        burningOptions.style.display = e.target.checked ? '' : 'none';
+        // Auto-update name when toggling burning
+        if (e.target.checked && nameInput.value === 'Countdown') {
+          const tokenSelect = this.element.querySelector('#target-token');
+          const tokenName = tokenSelect?.selectedOptions[0]?.textContent?.trim();
+          const damageSelect = this.element.querySelector('#damage-type');
+          const damageType = damageSelect?.value || 'fire';
+          const label = damageType.charAt(0).toUpperCase() + damageType.slice(1);
+          nameInput.value = tokenName && tokenName !== '— None (manual) —'
+            ? `Burning (${label}): ${tokenName}`
+            : `Burning (${label})`;
+        } else if (!e.target.checked && nameInput.value.startsWith('Burning')) {
+          nameInput.value = 'Countdown';
+        }
+      });
+
+      // Update name when target token changes
+      const tokenSelect = this.element.querySelector('#target-token');
+      if (tokenSelect) {
+        tokenSelect.addEventListener('change', () => {
+          if (!burningCheckbox.checked) return;
+          const tokenName = tokenSelect.selectedOptions[0]?.textContent?.trim();
+          const damageSelect = this.element.querySelector('#damage-type');
+          const damageType = damageSelect?.value || 'fire';
+          const label = damageType.charAt(0).toUpperCase() + damageType.slice(1);
+          nameInput.value = tokenName && tokenName !== '— None (manual) —'
+            ? `Burning (${label}): ${tokenName}`
+            : `Burning (${label})`;
+        });
+      }
+
+      // Update name when damage type changes
+      const damageSelect = this.element.querySelector('#damage-type');
+      if (damageSelect) {
+        damageSelect.addEventListener('change', () => {
+          if (!burningCheckbox.checked) return;
+          const tokenName = tokenSelect?.selectedOptions[0]?.textContent?.trim();
+          const damageType = damageSelect.value || 'fire';
+          const label = damageType.charAt(0).toUpperCase() + damageType.slice(1);
+          nameInput.value = tokenName && tokenName !== '— None (manual) —'
+            ? `Burning (${label}): ${tokenName}`
+            : `Burning (${label})`;
+        });
+      }
+    }
   }
 
   /**
@@ -94,6 +146,35 @@ export class CountdownDiceConfig extends api.HandlebarsApplicationMixin(
       context.diceType = 'd4';
       context.size = 'M';
       context.isEdit = false;
+
+      // Burning die options (only for new dice)
+      context.isBurning = false;
+      context.selectedDamageType = 'fire';
+      context.selectedTokenId = '';
+
+      // Filter damage types to only ones that make sense for burning
+      // (exclude healing, recover, recharge, none, physical, blunt, piercing, slashing)
+      const burningTypes = ['fire', 'acid', 'shock', 'poison', 'cold', 'necrotic', 'psychic', 'magical'];
+      context.burningDamageTypes = {};
+      const allTypes = CONFIG.VAGABOND?.damageTypes || {};
+      for (const type of burningTypes) {
+        if (allTypes[type]) {
+          context.burningDamageTypes[type] = allTypes[type];
+        }
+      }
+
+      // Get tokens on the current scene for the target picker
+      context.tokens = [];
+      if (canvas?.scene?.tokens) {
+        for (const tokenDoc of canvas.scene.tokens) {
+          context.tokens.push({
+            id: tokenDoc.id,
+            name: tokenDoc.name || tokenDoc.actor?.name || 'Unknown',
+          });
+        }
+        // Sort alphabetically
+        context.tokens.sort((a, b) => a.name.localeCompare(b.name));
+      }
     }
 
     return context;
@@ -127,12 +208,42 @@ export class CountdownDiceConfig extends api.HandlebarsApplicationMixin(
           [game.user.id]: 3, // OWNER for creator
         };
 
-        await CountdownDice.create({
+        // If burning, make visible to all players
+        if (data.isBurning) {
+          ownership.default = 3;
+        }
+
+        const journal = await CountdownDice.create({
           name: data.name,
           diceType: data.diceType,
           size: data.size,
           ownership: ownership,
         });
+
+        // If burning die, set up the linked status effect
+        if (data.isBurning && journal) {
+          const damageType = data.damageType || 'fire';
+          const targetTokenId = data.targetTokenId || '';
+          const sceneId = canvas?.scene?.id || '';
+          const tokenIds = targetTokenId ? [targetTokenId] : [];
+
+          await journal.setFlag('vagabond', 'linkedStatusEffect', {
+            status: 'burning',
+            label: `Burning (${damageType.charAt(0).toUpperCase() + damageType.slice(1)})`,
+            damageType: damageType,
+            tokenIds: tokenIds,
+            sceneId: sceneId,
+          });
+
+          // Apply Burning status to the target token's actor
+          if (targetTokenId && sceneId) {
+            const tokenDoc = canvas.scene.tokens.get(targetTokenId);
+            const actor = tokenDoc?.actor;
+            if (actor && !actor.statuses?.has('burning')) {
+              await actor.toggleStatusEffect('burning', { active: true });
+            }
+          }
+        }
       }
 
       // Close dialog

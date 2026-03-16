@@ -415,6 +415,56 @@
             </div>
           </div>
         </div>
+
+        {{! On-Hit Configuration (Burning / Status properties) }}
+        {{#if (or (contains system.properties 'Burning') (contains system.properties 'Status'))}}
+        <div class='form-group'>
+          <label class='resource-label'><i class='fas fa-dice-d20'></i> On-Hit Effects</label>
+          <div class='grid grid-1col gap-8'>
+            {{! Countdown Die - shared between Burning and Status }}
+            <div>
+              <label class='resource-label'>Countdown Die</label>
+              <select name='flags.vagabond.onHitBurning.dieType' data-dtype='String'>
+                <option value='' {{#unless flags.vagabond.onHitBurning.dieType}}selected{{/unless}}>None</option>
+                <option value='d4' {{#if (eq flags.vagabond.onHitBurning.dieType 'd4')}}selected{{/if}}>d4</option>
+                <option value='d6' {{#if (eq flags.vagabond.onHitBurning.dieType 'd6')}}selected{{/if}}>d6</option>
+                <option value='d8' {{#if (eq flags.vagabond.onHitBurning.dieType 'd8')}}selected{{/if}}>d8</option>
+                <option value='d10' {{#if (eq flags.vagabond.onHitBurning.dieType 'd10')}}selected{{/if}}>d10</option>
+                <option value='d12' {{#if (eq flags.vagabond.onHitBurning.dieType 'd12')}}selected{{/if}}>d12</option>
+              </select>
+            </div>
+
+            {{! Burning Damage Type - only when Burning property is selected }}
+            {{#if (contains system.properties 'Burning')}}
+            <div>
+              <label class='resource-label'><i class='fas fa-fire'></i> Burning Damage Type</label>
+              <select name='flags.vagabond.onHitBurning.damageType' data-dtype='String'>
+                {{#each config.burningDamageTypes as |label key|}}
+                  <option value='{{key}}' {{#if (eq key ../flags.vagabond.onHitBurning.damageType)}}selected{{/if}}>
+                    {{localize label}}
+                  </option>
+                {{/each}}
+              </select>
+            </div>
+            {{/if}}
+
+            {{! On-Hit Status Condition - only when Status property is selected }}
+            {{#if (contains system.properties 'Status')}}
+            <div>
+              <label class='resource-label'><i class='fas fa-bolt'></i> On-Hit Status</label>
+              <select name='flags.vagabond.onHitBurning.statusCondition' data-dtype='String'>
+                <option value='' {{#unless flags.vagabond.onHitBurning.statusCondition}}selected{{/unless}}>— None —</option>
+                {{#each config.onHitStatusConditions as |label key|}}
+                  <option value='{{key}}' {{#if (eq key ../flags.vagabond.onHitBurning.statusCondition)}}selected{{/if}}>
+                    {{localize label}}
+                  </option>
+                {{/each}}
+              </select>
+            </div>
+            {{/if}}
+          </div>
+        </div>
+        {{/if}}
       {{/if}}
 
       {{! ===== ARMOR-SPECIFIC FIELDS ===== }}

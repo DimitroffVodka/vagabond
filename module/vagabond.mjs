@@ -834,6 +834,7 @@ Hooks.once('ready', () => {
 });
 
 // Auto-mark NPCs as defeated in combat when HP reaches 0
+// Also clean up any countdown/burning dice linked to the dead NPC
 Hooks.on('updateActor', async (actor, changes) => {
   if (!game.user.isGM || !game.combat) return;
   if (actor.type !== 'npc') return;
@@ -848,6 +849,14 @@ Hooks.on('updateActor', async (actor, changes) => {
     const token = combatant.token?.object;
     if (token?.actor && !token.actor.statuses?.has('dead')) {
       await token.actor.toggleStatusEffect('dead', { active: true });
+    }
+
+    // Clean up countdown/burning dice linked to this NPC's token
+    if (combatant.token?.id && canvas?.scene?.id) {
+      try {
+        const { VagabondCombat } = await import('./documents/combat.mjs');
+        await VagabondCombat.cleanupDiceForToken(combatant.token.id, canvas.scene.id, actor.name);
+      } catch (e) { console.warn('Vagabond | Error cleaning up NPC countdown dice:', e); }
     }
   }
 });
@@ -2849,4 +2858,5 @@ async function promptRandomChallenge() {
   } else {
     ui.notifications.error("Access Denied.");
   }
-}
+}// test
+// test

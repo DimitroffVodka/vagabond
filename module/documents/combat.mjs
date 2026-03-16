@@ -1,3 +1,5 @@
+import { CountdownDice } from './countdown-dice.mjs';
+
 /**
  * Extend the base Combat document to implement Popcorn Initiative.
  * @extends {Combat}
@@ -20,6 +22,11 @@ export class VagabondCombat extends Combat {
       await expireVirtuosoBuffs();
     } catch (e) { console.warn('Vagabond | Error clearing Virtuoso buffs:', e); }
 
+    // Clean up all countdown/burning dice when combat ends
+    try {
+      await this._cleanupAllCountdownDice();
+    } catch (e) { console.warn('Vagabond | Error clearing countdown dice:', e); }
+
     return super.endCombat();
   }
 
@@ -37,6 +44,13 @@ export class VagabondCombat extends Combat {
 
     // Expire round-based buffs
     await this._expireRoundBuffs(newRound);
+
+    // Auto-roll ALL countdown/burning dice at the start of each round
+    if (game.user.isGM) {
+      try {
+        await this._autoRollAllCountdownDice();
+      } catch (e) { console.warn('Vagabond | Error auto-rolling countdown dice:', e); }
+    }
 
     const advanceTime = CONFIG.time.roundTime;
     return this.update({ round: newRound, turn: null }, { advanceTime });
@@ -325,6 +339,92 @@ export class VagabondCombat extends Combat {
     const newValue = Math.clamp(current + delta, 0, max);
 
     return combatant.setFlag('vagabond', 'activations.value', newValue);
+  }
+
+  /**
+   * Auto-roll ALL countdown/burning dice at the start of a new round.
+   * Rolls every die regardless of token linking — both pure timers and burning dice.
+   * Burning dice deal damage via the overlay's _applyLinkedDamage flow.
+   * @private
+   */
+  async _autoRollAllCountdownDice() {
+    const allDice = CountdownDice.getAll();
+    if (allDice.length === 0) return;
+
+    const overlay = globalThis.vagabond?.ui?.countdownDiceOverlay;
+    if (!overlay) return;
+
+    for (const dice of allDice) {
+      // Verify dice still exists (could have been deleted by a previous roll's cleanup)
+      if (!game.journal.get(dice.id)) continue;
+      await overlay._onRollDice(dice);
+    }
+  }
+
+  /**
+   * Delete all countdown/burning dice when combat ends.
+   * Cleans up linked status effects before deleting.
+   * @private
+   */
+  async _cleanupAllCountdownDice() {
+    if (!game.user.isGM) return;
+
+    const allDice = CountdownDice.getAll();
+    if (allDice.length === 0) return;
+
+    const overlay = globalThis.vagabond?.ui?.countdownDiceOverlay;
+
+    for (const dice of allDice) {
+      // Clean up linked effects (remove Burning status, etc.)
+      if (overlay) {
+        await overlay._cleanupLinkedEffects(dice);
+      }
+      // Remove from UI
+      if (overlay) overlay.removeDice(dice.id);
+      // Delete the journal entry
+      await dice.delete();
+    }
+
+    ui.notifications.info('Combat ended — all countdown dice cleared.');
+  }
+
+  /**
+   * Remove all countdown/burning dice linked to a specific token or actor.
+   * Called when an NPC drops to 0 HP.
+   * Searches by token ID, actor ID, and actor name to catch all linking methods.
+   * @param {string} tokenId - The token ID
+   * @param {string} sceneId - The scene ID
+   * @param {string} [actorName] - The actor name (fallback matching for dice named "Burning: ActorName")
+   */
+  static async cleanupDiceForToken(tokenId, sceneId, actorName = '') {
+    if (!game.user.isGM) return;
+
+    const allDice = CountdownDice.getAll();
+    const linkedDice = allDice.filter(dice => {
+      const link = dice.flags?.vagabond?.linkedStatusEffect;
+      // Match by linked token ID
+      if (link && link.sceneId === sceneId && link.tokenIds?.includes(tokenId)) return true;
+      // Match by linked actor ID (legacy data)
+      if (link && link.actorIds?.some(id => id === tokenId)) return true;
+      // Fallback: match by name pattern "Burning: ActorName" or "Sickened: ActorName"
+      if (actorName) {
+        const diceName = dice.flags?.vagabond?.countdownDice?.name || '';
+        if (diceName.includes(actorName)) return true;
+      }
+      return false;
+    });
+
+    if (linkedDice.length === 0) return;
+
+    const overlay = globalThis.vagabond?.ui?.countdownDiceOverlay;
+
+    for (const dice of linkedDice) {
+      if (overlay) {
+        await overlay._cleanupLinkedEffects(dice);
+        overlay.removeDice(dice.id);
+      }
+      await dice.delete();
+    }
   }
 
   /** @override */

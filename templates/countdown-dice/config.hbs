@@ -35,6 +35,46 @@
     </div>
   </div>
 
+  {{#unless isEdit}}
+  <div class="form-row">
+    <div class="form-field">
+      <label>
+        <input type="checkbox" name="isBurning" id="is-burning" {{#if isBurning}}checked{{/if}} />
+        <i class="fas fa-fire"></i> Burning Die (deals damage each round)
+      </label>
+    </div>
+  </div>
+
+  <div class="burning-options" id="burning-options" style="{{#unless isBurning}}display:none{{/unless}}">
+    <div class="form-row">
+      <div class="form-field">
+        <label for="damage-type">Damage Type</label>
+        <select id="damage-type" name="damageType">
+          {{#each burningDamageTypes as |label key|}}
+            <option value="{{key}}" {{#if (eq key ../selectedDamageType)}}selected{{/if}}>
+              {{localize label}}
+            </option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-field">
+        <label for="target-token">Target Token</label>
+        <select id="target-token" name="targetTokenId">
+          <option value="">— None (manual) —</option>
+          {{#each tokens as |token|}}
+            <option value="{{token.id}}" {{#if (eq token.id ../selectedTokenId)}}selected{{/if}}>
+              {{token.name}}
+            </option>
+          {{/each}}
+        </select>
+      </div>
+    </div>
+  </div>
+  {{/unless}}
+
   <footer class="form-footer">
     <button type="button" data-action="cancel">
       <i class="fas fa-times"></i> {{localize 'Cancel'}}

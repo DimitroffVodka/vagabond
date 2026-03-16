@@ -481,6 +481,22 @@ export class CountdownDiceOverlay {
       }
     }
 
+    // Also clean up additional status condition (when Burning + Status share a die)
+    const additionalStatus = link.statusCondition;
+    if (additionalStatus && additionalStatus !== status && tokenIds?.length && sceneId) {
+      const scene2 = game.scenes.get(sceneId);
+      if (scene2) {
+        for (const tokenId of tokenIds) {
+          const tokenDoc = scene2.tokens.get(tokenId);
+          const actor = tokenDoc?.actor;
+          if (!actor) continue;
+          if (actor.statuses?.has(additionalStatus)) {
+            await actor.toggleStatusEffect(additionalStatus);
+          }
+        }
+      }
+    }
+
     // Legacy fallback: older data may have actorIds instead of tokenIds
     if (clearedNames.length === 0 && link.actorIds?.length) {
       for (const actorId of link.actorIds) {
@@ -495,7 +511,10 @@ export class CountdownDiceOverlay {
 
     if (clearedNames.length > 0) {
       const statusLabel = label || status.charAt(0).toUpperCase() + status.slice(1);
-      ui.notifications.info(`${statusLabel} expired — removed from ${clearedNames.join(', ')}.`);
+      const extras = additionalStatus && additionalStatus !== status
+        ? ` and ${additionalStatus.charAt(0).toUpperCase() + additionalStatus.slice(1)}`
+        : '';
+      ui.notifications.info(`${statusLabel}${extras} expired — removed from ${clearedNames.join(', ')}.`);
     }
   }
 
@@ -552,8 +571,10 @@ export class CountdownDiceOverlay {
   }
 
   /**
-   * Apply damage from a linked status effect when a countdown die is rolled.
-   * The countdown die roll result IS the damage (e.g. Cd4 rolls 3 = 3 fire damage).
+   * Apply damage from a linked burning die when rolled.
+   * The die roll result IS the damage (e.g. Cd4 rolls 3 = 3 poison damage).
+   * Damage goes through the normal damage pipeline (armor, immune, weak).
+   * Damage type is read from the linked status effect flags, not hardcoded.
    * @param {JournalEntry} dice - The countdown die journal entry
    * @param {number} rollResult - The result of the countdown die roll
    */
@@ -561,7 +582,7 @@ export class CountdownDiceOverlay {
     const link = dice.flags?.vagabond?.linkedStatusEffect;
     if (!link) return;
 
-    // Only handle Burning for now (expandable for other statuses later)
+    // Only burning dice deal damage — plain countdown dice do not
     if (link.status !== 'burning') return;
 
     const { tokenIds, sceneId } = link;
@@ -570,9 +591,17 @@ export class CountdownDiceOverlay {
     const scene = game.scenes.get(sceneId);
     if (!scene) return;
 
-    const damageType = 'fire';
+    // Read damage type from the link flags — defaults to 'fire' for legacy data
+    const damageType = link.damageType || 'fire';
     const burnDamage = rollResult;
     const diceType = dice.flags.vagabond.countdownDice.diceType;
+
+    // Damage type display icons
+    const typeIcons = {
+      fire: 'fa-fire', cold: 'fa-snowflake', poison: 'fa-skull-crossbones',
+      lightning: 'fa-bolt', acid: 'fa-flask', necrotic: 'fa-ghost',
+    };
+    const icon = typeIcons[damageType] || 'fa-fire';
 
     for (const tokenId of tokenIds) {
       const tokenDoc = scene.tokens.get(tokenId);
@@ -583,15 +612,23 @@ export class CountdownDiceOverlay {
       if (!actor.statuses?.has('burning')) continue;
 
       try {
-        // Apply damage (bypasses armor — direct fire damage)
-        const currentHP = actor.system.health?.value ?? actor.system.hp?.value ?? 0;
-        const newHP = Math.max(0, currentHP - burnDamage);
+        // Run through the normal damage pipeline (respects armor, immune, weak)
+        const { VagabondDamageHelper } = await import('../helpers/damage-helper.mjs');
+        const breakdown = {};
+        const finalDamage = VagabondDamageHelper.calculateFinalDamage(
+          actor, burnDamage, damageType, null, 0, 1, breakdown
+        );
 
-        if (actor.system.health !== undefined) {
-          await actor.update({ 'system.health.value': newHP });
-        } else if (actor.system.hp !== undefined) {
-          await actor.update({ 'system.hp.value': newHP });
-        }
+        // Apply the final damage to HP
+        const currentHP = actor.system.health?.value ?? 0;
+        const newHP = Math.max(0, currentHP - finalDamage);
+        await actor.update({ 'system.health.value': newHP });
+
+        // Build breakdown text
+        let breakdownText = '';
+        if (breakdown.armorReduction > 0) breakdownText += ` (${breakdown.armorReduction} absorbed by armor)`;
+        if (breakdown.rageReduction > 0) breakdownText += ` (${breakdown.rageReduction} reduced by Rage)`;
+        if (finalDamage === 0 && burnDamage > 0) breakdownText = ' — fully absorbed!';
 
         // Post chat card
         const { VagabondChatCard } = await import('../helpers/chat-card.mjs');
@@ -601,8 +638,8 @@ export class CountdownDiceOverlay {
           .setTitle('Burning!')
           .setSubtitle(actor.name)
           .setDescription(`
-            <p><i class="fas fa-fire"></i> <strong>${actor.name} is burning!</strong></p>
-            <p>Takes <strong>${burnDamage} ${damageType}</strong> damage! <em>[${diceType}: ${rollResult}]</em></p>
+            <p><i class="fas ${icon}"></i> <strong>${actor.name} is burning!</strong></p>
+            <p>Takes <strong>${finalDamage} ${damageType}</strong> damage! <em>[${diceType}: ${rollResult}]</em>${breakdownText}</p>
             <p>(${currentHP} → ${newHP} HP)</p>
           `);
         await card.send();
