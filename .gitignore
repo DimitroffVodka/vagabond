@@ -1,4 +1,16 @@
+# Compendium packs — track JSON sources, ignore LevelDB
+packs/**/!(._source)
+packs/**/*.ldb
+packs/**/*.log
+packs/**/CURRENT
+packs/**/LOCK
+packs/**/LOG
+packs/**/LOG.old
+packs/**/MANIFEST-*
+packs/**/lost/
 !packs/_source/
+!packs/.gitattributes
+
 dist/
 
 CLAUDE.md

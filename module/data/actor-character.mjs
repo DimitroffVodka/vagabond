@@ -470,6 +470,16 @@ export default class VagabondCharacter extends VagabondActorBase {
       })
     });
 
+    // ── Relic Power: On-Hit Effects ───────────────────────────────────────
+    // Burning: on weapon hit, apply Burning status to target for this many rounds.
+    // Uses override mode so higher tier replaces lower (III overrides I).
+    schema.onHitBurningDice = new fields.StringField({
+      initial: '',
+      blank: true,
+      label: "On-Hit Burning Duration Dice",
+      hint: "Dice formula for Burning duration in rounds (e.g. 1d4, 1d6, 1d8). Set by Active Effects."
+    });
+
     return schema;
   }
 

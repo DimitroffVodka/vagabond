@@ -1,0 +1,112 @@
+{
+  "name": "Lance",
+  "type": "equipment",
+  "img": "icons/weapons/polearms/spear-flared-wrapped.webp",
+  "system": {
+    "description": "",
+    "equipmentType": "weapon",
+    "locked": true,
+    "equipped": false,
+    "quantity": 1,
+    "baseCost": {
+      "gold": 1,
+      "silver": 80,
+      "copper": 0
+    },
+    "baseSlots": 3,
+    "metal": "none",
+    "damageType": "piercing",
+    "damageAmount": "",
+    "properties": [
+      "Keen",
+      "Long"
+    ],
+    "weaponSkill": "melee",
+    "range": "near",
+    "grip": "2H",
+    "damageOneHand": "d10",
+    "damageTwoHands": "d10",
+    "equipmentState": "twoHands",
+    "armorType": "light",
+    "immunities": [],
+    "gearCategory": "",
+    "alchemicalType": "concoction",
+    "lore": "",
+    "itemFx": {
+      "hitFile": "modules/JB2A_DnD5e/Library/Generic/Weapon_Attacks/Melee/Glaive01*",
+      "hitDuration": 1000,
+      "hitOffsetX": -100,
+      "enabled": true
+    }
+  },
+  "effects": [
+    {
+      "name": "Keen Property",
+      "origin": "Compendium.vagabond.weapons.Item.C1DasKk6Kqqh744O",
+      "img": "icons/svg/aura.svg",
+      "_id": "oHYZPHXmb05bFiqh",
+      "type": "base",
+      "system": {},
+      "changes": [
+        {
+          "key": "system.critNumber",
+          "mode": 5,
+          "value": "19",
+          "priority": null
+        }
+      ],
+      "disabled": false,
+      "duration": {
+        "startTime": null,
+        "combat": null,
+        "seconds": null,
+        "rounds": null,
+        "turns": null,
+        "startRound": null,
+        "startTurn": null
+      },
+      "description": "",
+      "tint": "#ffffff",
+      "transfer": true,
+      "statuses": [],
+      "sort": 0,
+      "flags": {
+        "vagabond": {
+          "applicationMode": "on-use"
+        }
+      },
+      "_stats": {
+        "compendiumSource": null,
+        "duplicateSource": null,
+        "exportSource": null,
+        "coreVersion": "13.351",
+        "systemId": "vagabond",
+        "systemVersion": "1.8.1",
+        "createdTime": 1766842149076,
+        "modifiedTime": 1766853247782,
+        "lastModifiedBy": "13p65OEadZSZVLRk"
+      },
+      "_key": "!items.effects!C1DasKk6Kqqh744O.oHYZPHXmb05bFiqh"
+    }
+  ],
+  "folder": null,
+  "flags": {},
+  "_stats": {
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null,
+    "coreVersion": "13.351",
+    "systemId": "vagabond",
+    "systemVersion": "4.1.0",
+    "createdTime": 1764967045011,
+    "modifiedTime": 1772499382009,
+    "lastModifiedBy": "13p65OEadZSZVLRk"
+  },
+  "ownership": {
+    "default": 0,
+    "vJkLjvlErdx6ZHoC": 3
+  },
+  "_id": "C1DasKk6Kqqh744O",
+  "sort": 700000,
+  "_key": "!items!C1DasKk6Kqqh744O"
+}

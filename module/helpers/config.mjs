@@ -228,6 +228,54 @@ VAGABOND.statusConditions = {
 };
 
 /**
+ * Damage types valid for burning effects (excludes healing, physical, etc.)
+ * Used in weapon on-hit burning dropdown and countdown dice config
+ * @type {Object}
+ */
+VAGABOND.burningDamageTypes = {
+  'fire': 'VAGABOND.DamageTypes.Fire',
+  'acid': 'VAGABOND.DamageTypes.Acid',
+  'shock': 'VAGABOND.DamageTypes.Shock',
+  'poison': 'VAGABOND.DamageTypes.Poison',
+  'cold': 'VAGABOND.DamageTypes.Cold',
+  'necrotic': 'VAGABOND.DamageTypes.Necrotic',
+  'psychic': 'VAGABOND.DamageTypes.Psychic',
+  'magical': 'VAGABOND.DamageTypes.Magical'
+};
+
+/**
+ * Spell effect types - categorizes what a spell's effect does
+ * @type {Object}
+ */
+VAGABOND.spellEffectTypes = {
+  'flavor': 'Flavor',
+  'statusEffect': 'Status Effect'
+};
+
+/**
+ * Status conditions that can be applied on-hit by weapons/spells
+ * Excludes dead, focusing, invisible, and virtuoso buffs
+ * @type {Object}
+ */
+VAGABOND.onHitStatusConditions = {
+  'blinded': 'VAGABOND.StatusConditions.Blinded',
+  'burning': 'VAGABOND.StatusConditions.Burning',
+  'charmed': 'VAGABOND.StatusConditions.Charmed',
+  'confused': 'VAGABOND.StatusConditions.Confused',
+  'dazed': 'VAGABOND.StatusConditions.Dazed',
+  'fatigued': 'VAGABOND.StatusConditions.Fatigued',
+  'frightened': 'VAGABOND.StatusConditions.Frightened',
+  'incapacitated': 'VAGABOND.StatusConditions.Incapacitated',
+  'paralyzed': 'VAGABOND.StatusConditions.Paralyzed',
+  'prone': 'VAGABOND.StatusConditions.Prone',
+  'restrained': 'VAGABOND.StatusConditions.Restrained',
+  'sickened': 'VAGABOND.StatusConditions.Sickened',
+  'suffocating': 'VAGABOND.StatusConditions.Suffocating',
+  'unconscious': 'VAGABOND.StatusConditions.Unconscious',
+  'vulnerable': 'VAGABOND.StatusConditions.Vulnerable'
+};
+
+/**
  * Full status effect definitions for token HUD
  * Used when "Use Vagabond Status Conditions" setting is enabled
  * Uses Foundry's default icons as placeholders until custom artwork is provided
@@ -841,6 +889,7 @@ VAGABOND.weaponGripDescriptions = {
 VAGABOND.weaponProperties = {
   'Brawl': 'VAGABOND.Weapon.Property.Brawl',
   'Brutal': 'VAGABOND.Weapon.Property.Brutal',
+  'Burning': 'VAGABOND.Weapon.Property.Burning',
   'Cleave': 'VAGABOND.Weapon.Property.Cleave',
   'Entangle': 'VAGABOND.Weapon.Property.Entangle',
   'Finesse': 'VAGABOND.Weapon.Property.Finesse',
@@ -849,6 +898,7 @@ VAGABOND.weaponProperties = {
   'Near': 'VAGABOND.Weapon.Property.Near',
   'Ranged': 'VAGABOND.Weapon.Property.Ranged',
   'Shield': 'VAGABOND.Weapon.Property.Shield',
+  'Status': 'VAGABOND.Weapon.Property.Status',
   'Thrown': 'VAGABOND.Weapon.Property.Thrown'
 };
 
@@ -859,6 +909,7 @@ VAGABOND.weaponProperties = {
 VAGABOND.weaponPropertyHints = {
   'Brawl': 'VAGABOND.Weapon.PropertyHints.Brawl',
   'Brutal': 'VAGABOND.Weapon.PropertyHints.Brutal',
+  'Burning': 'VAGABOND.Weapon.PropertyHints.Burning',
   'Cleave': 'VAGABOND.Weapon.PropertyHints.Cleave',
   'Entangle': 'VAGABOND.Weapon.PropertyHints.Entangle',
   'Finesse': 'VAGABOND.Weapon.PropertyHints.Finesse',
@@ -867,6 +918,7 @@ VAGABOND.weaponPropertyHints = {
   'Near': 'VAGABOND.Weapon.PropertyHints.Near',
   'Ranged': 'VAGABOND.Weapon.PropertyHints.Ranged',
   'Shield': 'VAGABOND.Weapon.PropertyHints.Shield',
+  'Status': 'VAGABOND.Weapon.PropertyHints.Status',
   'Thrown': 'VAGABOND.Weapon.PropertyHints.Thrown'
 };
 

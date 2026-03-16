@@ -830,6 +830,36 @@ Hooks.on('canvasReady', async () => {
 });
 
 /**
+ * Auto-mark NPCs as defeated in combat when HP reaches 0.
+ * Also clean up any countdown/burning dice linked to the dead NPC.
+ */
+Hooks.on('updateActor', async (actor, changes) => {
+  if (!game.user.isGM || !game.combat) return;
+  if (actor.type !== 'npc') return;
+  const newHP = changes?.system?.health?.value;
+  if (newHP === undefined || newHP > 0) return;
+
+  // Find this actor's combatant and mark defeated
+  const combatant = game.combat.combatants.find(c => c.actorId === actor.id || c.actor?.id === actor.id);
+  if (combatant && !combatant.defeated) {
+    await combatant.update({ defeated: true });
+    // Also apply the dead status to the token
+    const token = combatant.token?.object;
+    if (token?.actor && !token.actor.statuses?.has('dead')) {
+      await token.actor.toggleStatusEffect('dead', { active: true });
+    }
+
+    // Clean up countdown/burning dice linked to this NPC's token
+    if (combatant.token?.id && canvas?.scene?.id) {
+      try {
+        const { VagabondCombat } = await import('./documents/combat.mjs');
+        await VagabondCombat.cleanupDiceForToken(combatant.token.id, canvas.scene.id, actor.name);
+      } catch (e) { console.warn('Vagabond | Error cleaning up NPC countdown dice:', e); }
+    }
+  }
+});
+
+/**
  * Add scene controls for Vagabond tools
  */
 Hooks.on('getSceneControlButtons', (controls) => {

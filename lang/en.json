@@ -980,6 +980,8 @@
       "Near": "Near",
       "Ranged": "Ranged",
       "Shield": "Shield",
+      "Burning": "Burning",
+      "Status": "Status",
       "Thrown": "Thrown"
     },
     "PropertyHints": {
@@ -993,6 +995,8 @@
       "Near": "Ranged weapon with Near range.",
       "Ranged": "Ranged weapon, uses Ranged skill.",
       "Shield": "Ignores Hinder from Blocking Ranged Attacks. Can Shove (manual play).",
+      "Burning": "On hit, applies a Burning countdown die that deals damage each round.",
+      "Status": "On hit, applies a status condition to the target for the countdown die duration.",
       "Thrown": "Can be thrown as a ranged attack."
     }
     },

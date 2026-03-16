@@ -1334,6 +1334,8 @@ export class VagabondDamageHelper {
         const currentHP = targetActor.system.health?.value || 0;
         const newHP = Math.max(0, currentHP - finalDamage);
         await targetActor.update({ 'system.health.value': newHP });
+        // On-Hit Burning: apply burning/status from weapon properties or relic power
+        if (sourceActor) await this.checkOnHitBurning(targetActor, sourceActor, null, null, sourceItem);
       }
 
       // Post save result to chat
@@ -1970,6 +1972,8 @@ export class VagabondDamageHelper {
       await targetActor.update({ 'system.health.value': newHP });
 
       ui.notifications.info(`Applied ${finalDamage} damage to ${targetActor.name}`);
+      // On-Hit Burning: apply burning/status from weapon properties or relic power
+      if (sourceActor) await this.checkOnHitBurning(targetActor, sourceActor, null, null, sourceItem);
     }
 
     // Button remains active so damage can be applied to different tokens
@@ -2011,5 +2015,267 @@ export class VagabondDamageHelper {
     button.disabled = true;
 
     ui.notifications.info(`Applied ${finalDamage} damage to ${actorName} (${currentHP} → ${newHP} HP)`);
+  }
+
+  /**
+   * Check if a weapon hit should apply burning/status effects via countdown dice.
+   * Three-source priority: explicit override > weapon flags > actor relic power.
+   * @param {Actor} targetActor - The target being hit
+   * @param {Actor} sourceActor - The attacker
+   * @param {string|null} damageType - Override damage type
+   * @param {string|null} dieTypeOverride - Override die type (e.g. from spell)
+   * @param {Item|null} sourceItem - The weapon/item used
+   */
+  static async checkOnHitBurning(targetActor, sourceActor, damageType = null, dieTypeOverride = null, sourceItem = null) {
+    if (!sourceActor?.system) return;
+
+    // Don't apply effects to a dead target
+    const targetHP = targetActor.system.health?.value ?? 0;
+    if (targetHP <= 0) return;
+
+    // Determine what on-hit effects apply
+    const properties = sourceItem?.system?.properties || [];
+    const hasBurningProperty = properties.includes('Burning');
+    const hasStatusProperty = properties.includes('Status');
+    const weaponFlags = sourceItem?.flags?.vagabond?.onHitBurning || {};
+
+    // Determine countdown die source: explicit override > weapon flags > actor relic power
+    let countdownDie = dieTypeOverride;
+    let burningDamageType = damageType;
+    let statusCondition = weaponFlags.statusCondition || '';
+
+    // Check weapon-level flags (shared countdown die for both Burning and Status)
+    if (!countdownDie && sourceItem) {
+      if (weaponFlags.dieType) {
+        countdownDie = weaponFlags.dieType;
+        burningDamageType = burningDamageType || weaponFlags.damageType || sourceItem.system?.damageType || 'fire';
+      }
+    }
+
+    // Fall back to actor-level relic power (burning only, always fire)
+    if (!countdownDie) {
+      countdownDie = sourceActor.system.onHitBurningDice;
+      burningDamageType = burningDamageType || 'fire';
+    }
+
+    // Default damage type
+    burningDamageType = burningDamageType || 'fire';
+
+    // Determine if burning should apply
+    const shouldBurn = hasBurningProperty || dieTypeOverride || (!hasBurningProperty && !hasStatusProperty && countdownDie);
+
+    // Determine if status should apply
+    const shouldStatus = hasStatusProperty && statusCondition;
+
+    // If neither burning nor status applies, nothing to do
+    if (!shouldBurn && !shouldStatus) return;
+    if (!countdownDie || typeof countdownDie !== 'string' || countdownDie.trim() === '') return;
+
+    // Validate die type
+    const validDice = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20'];
+    const finalDieType = validDice.includes(countdownDie.trim().toLowerCase()) ? countdownDie.trim().toLowerCase() : 'd4';
+
+    // Find the target's token ID and scene for linked cleanup
+    const targetToken = canvas?.tokens?.placeables?.find(t => t.actor?.id === targetActor.id);
+    const tokenIds = targetToken ? [targetToken.id] : [];
+    const sceneId = canvas?.scene?.id || '';
+
+    const { CountdownDice } = await import('../documents/countdown-dice.mjs');
+
+    // === BURNING LOGIC ===
+    if (shouldBurn) {
+      // Check target immunity to burning
+      const statusImmunities = targetActor.system.statusImmunities || [];
+      if (!statusImmunities.includes('burning')) {
+        await this._applyBurningDie(targetActor, sourceActor, finalDieType, burningDamageType, tokenIds, sceneId, statusCondition, shouldStatus, CountdownDice);
+        return; // Burning handler also applies status if both are set
+      }
+    }
+
+    // === STATUS-ONLY LOGIC (no burning, or burning was immune) ===
+    if (shouldStatus) {
+      await this._applyStatusDie(targetActor, sourceActor, finalDieType, statusCondition, tokenIds, sceneId, CountdownDice);
+    }
+  }
+
+  /**
+   * Apply a burning countdown die to a target. If Status property is also active,
+   * the same die tracks both burning damage and the status condition.
+   * @private
+   */
+  static async _applyBurningDie(targetActor, sourceActor, finalDieType, burningDamageType, tokenIds, sceneId, statusCondition, shouldStatus, CountdownDice) {
+    // Check for existing burning dice on this target with the same damage type
+    const existingDice = CountdownDice.getAll().filter(dice => {
+      const link = dice.flags?.vagabond?.linkedStatusEffect;
+      if (!link || link.status !== 'burning') return false;
+      if (link.damageType !== burningDamageType) return false;
+      if (link.tokenIds?.some(id => tokenIds.includes(id))) return true;
+      const diceName = dice.flags?.vagabond?.countdownDice?.name || '';
+      if (diceName.includes(targetActor.name)) return true;
+      return false;
+    });
+
+    if (existingDice.length > 0) {
+      // Same damage type already exists — upgrade to higher die if new one is bigger
+      const DICE_ORDER = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20'];
+      const existing = existingDice[0];
+      const existingType = existing.flags.vagabond.countdownDice.diceType;
+      const existingIndex = DICE_ORDER.indexOf(existingType);
+      const newIndex = DICE_ORDER.indexOf(finalDieType);
+
+      if (newIndex > existingIndex) {
+        await existing.update({ 'flags.vagabond.countdownDice.diceType': finalDieType });
+        ui.notifications.info(`${targetActor.name}'s ${burningDamageType} Burning upgraded to C${finalDieType}!`);
+      }
+      return;
+    }
+
+    try {
+      // Apply Burning status to the target
+      if (!targetActor.statuses?.has('burning')) {
+        await targetActor.toggleStatusEffect('burning', { active: true });
+      }
+
+      // Also apply the on-hit status condition if both Burning + Status are set
+      if (shouldStatus && statusCondition && statusCondition !== 'burning') {
+        if (!targetActor.statuses?.has(statusCondition)) {
+          await targetActor.toggleStatusEffect(statusCondition, { active: true });
+        }
+      }
+
+      // Damage type display icons
+      const typeIcons = {
+        fire: 'fa-fire', cold: 'fa-snowflake', poison: 'fa-skull-crossbones',
+        shock: 'fa-bolt', acid: 'fa-flask', necrotic: 'fa-ghost',
+        psychic: 'fa-brain', magical: 'fa-sparkles',
+      };
+      const icon = typeIcons[burningDamageType] || 'fa-fire';
+      const label = burningDamageType.charAt(0).toUpperCase() + burningDamageType.slice(1);
+
+      // Build die name
+      let dieName = `Burning (${label}): ${targetActor.name}`;
+      if (shouldStatus && statusCondition) {
+        const statusLabel = statusCondition.charAt(0).toUpperCase() + statusCondition.slice(1);
+        dieName = `Burning (${label}) + ${statusLabel}: ${targetActor.name}`;
+      }
+
+      // Create a Countdown Die linked to the Burning status
+      const journal = await CountdownDice.create({
+        name: dieName,
+        diceType: finalDieType,
+        size: 'S',
+        ownership: { default: 3, [game.user.id]: 3 }
+      });
+
+      if (journal) {
+        await journal.setFlag('vagabond', 'linkedStatusEffect', {
+          status: 'burning',
+          label: `Burning (${label})`,
+          damageType: burningDamageType,
+          statusCondition: shouldStatus ? statusCondition : '',
+          tokenIds: tokenIds,
+          sceneId: sceneId
+        });
+      }
+
+      // Post chat card
+      const { VagabondChatCard } = await import('./chat-card.mjs');
+      let desc = `<p><i class="fas ${icon}"></i> <strong>${targetActor.name} is burning!</strong></p>
+          <p>Burning (${label}) for <strong>C${finalDieType}</strong>!</p>`;
+      if (shouldStatus && statusCondition) {
+        const statusLabel = statusCondition.charAt(0).toUpperCase() + statusCondition.slice(1);
+        desc += `<p><i class="fas fa-bolt"></i> Also applying <strong>${statusLabel}</strong> for the duration.</p>`;
+      }
+      desc += `<p><em>Roll the countdown die each round — on a 1, it shrinks or ends.</em></p>`;
+
+      const card = new VagabondChatCard()
+        .setType('generic')
+        .setActor(sourceActor)
+        .setTitle('Burning!')
+        .setSubtitle(targetActor.name)
+        .setDescription(desc);
+      await card.send();
+    } catch (e) {
+      console.error('Vagabond | On-Hit Burning error:', e);
+    }
+  }
+
+  /**
+   * Apply a status-only countdown die (no burning damage).
+   * The die tracks how long the status condition lasts.
+   * @private
+   */
+  static async _applyStatusDie(targetActor, sourceActor, finalDieType, statusCondition, tokenIds, sceneId, CountdownDice) {
+    // Check target immunity to this status
+    const statusImmunities = targetActor.system.statusImmunities || [];
+    if (statusImmunities.includes(statusCondition)) return;
+
+    // Check for existing status die on this target with the same condition
+    const existingDice = CountdownDice.getAll().filter(dice => {
+      const link = dice.flags?.vagabond?.linkedStatusEffect;
+      if (!link || link.status !== statusCondition) return false;
+      if (link.tokenIds?.some(id => tokenIds.includes(id))) return true;
+      const diceName = dice.flags?.vagabond?.countdownDice?.name || '';
+      if (diceName.includes(targetActor.name)) return true;
+      return false;
+    });
+
+    if (existingDice.length > 0) {
+      // Same status already exists — upgrade to higher die if new one is bigger
+      const DICE_ORDER = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20'];
+      const existing = existingDice[0];
+      const existingType = existing.flags.vagabond.countdownDice.diceType;
+      const existingIndex = DICE_ORDER.indexOf(existingType);
+      const newIndex = DICE_ORDER.indexOf(finalDieType);
+
+      if (newIndex > existingIndex) {
+        await existing.update({ 'flags.vagabond.countdownDice.diceType': finalDieType });
+        const statusLabel = statusCondition.charAt(0).toUpperCase() + statusCondition.slice(1);
+        ui.notifications.info(`${targetActor.name}'s ${statusLabel} upgraded to C${finalDieType}!`);
+      }
+      return;
+    }
+
+    try {
+      // Apply the status condition to the target
+      if (!targetActor.statuses?.has(statusCondition)) {
+        await targetActor.toggleStatusEffect(statusCondition, { active: true });
+      }
+
+      const statusLabel = statusCondition.charAt(0).toUpperCase() + statusCondition.slice(1);
+
+      // Create a Countdown Die linked to the status condition
+      const journal = await CountdownDice.create({
+        name: `${statusLabel}: ${targetActor.name}`,
+        diceType: finalDieType,
+        size: 'S',
+        ownership: { default: 3, [game.user.id]: 3 }
+      });
+
+      if (journal) {
+        await journal.setFlag('vagabond', 'linkedStatusEffect', {
+          status: statusCondition,
+          label: statusLabel,
+          tokenIds: tokenIds,
+          sceneId: sceneId
+        });
+      }
+
+      // Post chat card
+      const { VagabondChatCard } = await import('./chat-card.mjs');
+      const card = new VagabondChatCard()
+        .setType('generic')
+        .setActor(sourceActor)
+        .setTitle(`${statusLabel}!`)
+        .setSubtitle(targetActor.name)
+        .setDescription(`
+          <p><i class="fas fa-bolt"></i> <strong>${targetActor.name} is ${statusLabel}!</strong></p>
+          <p>Duration: <strong>C${finalDieType}</strong></p>
+          <p><em>Roll the countdown die each round — on a 1, it shrinks or ends.</em></p>
+        `);
+      await card.send();
+    } catch (e) {
+      console.error('Vagabond | On-Hit Status error:', e);
+    }
   }
 }
