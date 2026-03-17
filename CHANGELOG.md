@@ -1,5 +1,92 @@
 # Changelog
 
+## Phase 7: Weapon Properties, Crit Choice, Dice Tooltips & Relic Forge
+
+### New Features
+
+#### Complete Weapon Property Mechanics (11/11)
+- **Cleave** — Damage splits between 2 targets. Smart HP-aware distribution: ceil half goes to the lower-HP target (capped at their HP), remainder to the other. Chat tag shows "Cleave (½ dmg each)".
+- **Brutal** — On crit, rolls 1 extra damage die (same type as weapon damage). Respects crit choice system.
+- **Entangle** — On hit, offers Grapple intent (same as Brawl). Does NOT grant Shove (unlike Shield). Dialog title reads "Entangle Attack".
+- Previously implemented: Brawl, Finesse, Keen, Long, Near, Ranged, Shield, Thrown.
+
+#### Target Count Validation
+- **Weapons require at least 1 target** — attacks are blocked entirely with a warning if no target is selected.
+- **Max 1 target** for normal weapons, **max 2 for Cleave** — excess targets are trimmed with a notification.
+- Non-Cleave weapons no longer deal full damage to multiple targets.
+
+#### Crit Choice System
+- **Crits are now a choice**: Take Luck OR Forgo Luck for a Benefit.
+  - **Attack/Cast crits** — Benefit = deal bonus damage equal to your stat.
+  - **Save crits** — Benefit = negate all damage from the save.
+- **Generic skill crits** (non-combat) auto-grant Luck with no choice needed.
+- **Max Luck auto-benefit** — if already at full Luck pool, automatically takes Benefit (no dialog).
+- **Chat card** announces the chosen benefit.
+- **Flag stored on ChatMessage** (`critChoice`) so the damage button knows whether to add stat damage.
+
+#### Dice Hover Tooltips
+- **Damage dice** — hovering shows formula + individual results (e.g. "2d6 → [4, 2]").
+- **Roll dice** — hovering shows full formula, breakdown per die group, and total.
+- Visual cursor changes to `help` on hover.
+
+#### Relic Forge (ApplicationV2)
+- **Drag-drop base item** — drop any equipment item (weapon, armor, gear) onto the forge. Items keep their original type (weapons stay weapons, armor stays armor).
+- **Tier selector** — Minor / (None) / Major. The tier scales power values automatically (e.g. Striking gives +1/+2/+3 damage by tier).
+- **Power browser** — 81 pre-defined relic powers across 17 categories (Damage, Bonus, On-Hit, On-Kill, Critical, Ace Property, Stat Bonus, Bane, Protection, Resistance, Movement, Senses, Light, Stealth, Cursed, Fabled, Utility).
+- **Category filter tabs** — filter the browser by category or view all.
+- **Custom power builder** — create ad-hoc powers with custom AE key/mode/value.
+- **Relic naming** — auto-generates name: `[Tier Prefix] [Power Labels...] [Base Item Name]` (e.g. "Minor Striking Light Hammer").
+- **Forge button** — creates the relic item with all selected powers as Active Effects, stores forge metadata in flags, posts a chat card.
+- **Scene control button** — "Relic Forge" gem icon in Vagabond Tools sidebar (GM-only).
+
+#### Relic Powers Database (81 powers, 16 tier-scaled)
+- **Damage**: Striking (+flat damage), Strike (+bonus damage dice)
+- **Bonus**: Armor, Protection (all saves), Trinket (spell damage), Weapon (attack bonus)
+- **On-Hit**: Burning (countdown die)
+- **On-Kill**: Lifesteal, Manasteal
+- **Critical**: Keen (crit threshold -1)
+- **Ace Properties**: Brutal, Cleave, Long, Entangle, Thrown, Keen (adds weapon property)
+- **Stat Bonuses**: +1 to any of 6 stats
+- **Bane**: General/Niche/Specific (+1d6/2d6/3d6 vs creature type)
+- **Ward**: General/Niche/Specific (Favor on saves vs creature type)
+- **Resistance**: Condition saves (Bravery, Clarity, Repulsing) + typed damage (Fire, Cold, Lightning, Poison, Necrotic, Radiant)
+- **Movement**: Climb, Fly, Levitate, Waterwalk, Blink, Clinging, Displacement, Webwalk, Swiftness (tier-scaled speed), Jumping (tier-scaled multiplier)
+- **Senses**: Darksight, Echolocation, Telepathy, True-Seeing, Detection, Sense Life, Sense Valuables
+- **Light**: Radiant, Moonlit, Darkness (tier-scaled range)
+- **Stealth**: Invisibility I (action-limited), Invisibility II (permanent)
+- **Cursed**: Anger, Cowardice, Gullibility (auto-fail saves), Doom (healing cap), Vulnerability (armor penalty), Weakness (damage penalty)
+- **Fabled**: Vorpal, Vicious, Benediction, Soul Eater, Blasting, Precision, Wish-Granting
+- **Utility**: Warning, Loyalty, Store Spell, Aqua Lung, After-Image, Ambassador, Holding (inventory slots), Infinite, Unique
+
+### Bug Fixes
+- **Cleave dealing full damage to all targets** — `rollDamageFromButton()` wasn't reading stored targets from the button, and `postDamageResult()` wasn't passing them to `createActionCard()`. Fixed the full data chain.
+- **Item sheet crash on delete** — race condition where `close()` called `submit()` after item already removed from EmbeddedCollection. Added `_destroyed` and `id` existence checks.
+- **Crits gave both Luck AND stat damage** — now correctly a choice per rules.
+- **Non-Cleave weapons hitting multiple targets for full damage** — target count validation now enforces 1 target max (2 for Cleave).
+
+### Technical Details
+
+#### New Files (3 files)
+
+| File | Description |
+|------|-------------|
+| `module/helpers/relic-powers.mjs` | Relic powers database (81 powers, 17 categories, tier-scaled values) |
+| `module/applications/relic-forge.mjs` | Relic Forge ApplicationV2 (drag-drop, tier selector, power browser, custom builder) |
+| `templates/apps/relic-forge.hbs` | Relic Forge Handlebars template (three-column layout) |
+
+#### Modified Files (6 files)
+
+| File | Changes |
+|------|---------|
+| `module/helpers/damage-helper.mjs` | Cleave distribution (`_distributeCleave`), Brutal extra die, crit choice flag reading, cleave-aware save handling |
+| `module/helpers/chat-card.mjs` | Cleave tag, crit choice system (`_grantLuckOnCrit` rewrite, `_postCritChoiceCard`), `critChoice` flag storage |
+| `module/sheets/handlers/roll-handler.mjs` | Target count validation, Entangle support, grapple/shove eligibility |
+| `module/sheets/item-sheet.mjs` | Delete race condition fix (`_destroyed` checks) |
+| `module/vagabond.mjs` | Relic Forge import/registration, scene control button, dice hover tooltips |
+| `css/vagabond.css` | Relic Forge styles (~200 lines), tooltip cursor styles |
+
+---
+
 ## Phase 6: Spell Status Conditions, Imbue Delivery & Focus Mechanics
 
 ### New Features

@@ -162,7 +162,22 @@ export class RollHandler {
     }
 
     // Capture targeted tokens at roll time
-    const targetsAtRollTime = TargetHelper.captureCurrentTargets();
+    let targetsAtRollTime = TargetHelper.captureCurrentTargets();
+
+    // ── Target Requirement & Count Validation ────────────────────────────
+    // Weapons require at least 1 target, max 1 (or 2 with Cleave)
+    if (isWeapon) {
+      if (targetsAtRollTime.length === 0) {
+        ui.notifications.warn('You must target an enemy before attacking.');
+        return;
+      }
+      const hasCleave = item.system?.properties?.includes('Cleave');
+      const maxTargets = hasCleave ? 2 : 1;
+      if (targetsAtRollTime.length > maxTargets) {
+        ui.notifications.warn(`${item.name} can only target ${maxTargets} ${maxTargets === 1 ? 'enemy' : 'enemies'}. Targeting the first ${maxTargets}.`);
+        targetsAtRollTime = targetsAtRollTime.slice(0, maxTargets);
+      }
+    }
 
     // ── Range Validation ──────────────────────────────────────────────────
     // Check weapon range vs distance to targets and apply Hinder/block as needed
@@ -281,13 +296,14 @@ export class RollHandler {
         // Already hinder stays hinder
       }
 
-      // ── Brawl/Shield property: pre-roll intent dialog ──────────────────
-      // Brawl: Damage / Grapple / Shove — Shield: Damage / Shove only
+      // ── Brawl/Entangle/Shield property: pre-roll intent dialog ──────────
+      // Brawl: Damage / Grapple / Shove — Entangle: Damage / Grapple — Shield: Damage / Shove
       let brawlIntent = 'damage';
       const hasBrawl = item.system?.properties?.includes('Brawl');
+      const hasEntangle = item.system?.properties?.includes('Entangle');
       const hasShield = item.system?.properties?.includes('Shield');
 
-      if ((hasBrawl || hasShield) && targetsAtRollTime?.length >= 1) {
+      if ((hasBrawl || hasEntangle || hasShield) && targetsAtRollTime?.length >= 1) {
         const sizeOrder = ['small', 'medium', 'large', 'huge', 'giant', 'colossal'];
         const attackerSize = this.actor.system.ancestryData?.size || this.actor.system.size || 'medium';
         const attackerSizeIdx = sizeOrder.indexOf(attackerSize);
@@ -313,14 +329,14 @@ export class RollHandler {
           const buttons = [
             { action: 'damage', label: 'Damage', icon: 'fas fa-dice' }
           ];
-          if (hasBrawl && hasGrappleTarget) {
+          if ((hasBrawl || hasEntangle) && hasGrappleTarget) {
             buttons.push({ action: 'grapple', label: 'Grapple', icon: 'fas fa-hand-fist' });
           }
-          if (hasShoveTarget) {
+          if ((hasBrawl || hasShield) && hasShoveTarget) {
             buttons.push({ action: 'shove', label: 'Shove', icon: 'fas fa-hand-back-fist' });
           }
 
-          const dialogTitle = hasBrawl ? 'Brawl Attack' : 'Shield Attack';
+          const dialogTitle = hasBrawl ? 'Brawl Attack' : hasEntangle ? 'Entangle Attack' : 'Shield Attack';
           const choice = await foundry.applications.api.DialogV2.wait({
             window: { title: dialogTitle },
             content: '<p>Choose your attack intent:</p>',

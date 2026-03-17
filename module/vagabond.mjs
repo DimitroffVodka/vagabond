@@ -47,6 +47,7 @@ import { MoraleHelper } from './helpers/morale-helper.mjs';
 import { LightTracker } from './helpers/light-tracker.mjs';
 import { LevelUpDialog } from './applications/level-up-dialog.mjs';
 import { PartyCompactView } from './applications/party-compact-view.mjs';
+import { RelicForge } from './applications/relic-forge.mjs';
 import VagabondActiveEffectConfig from './applications/active-effect-config.mjs';
 import { VagabondSpellSequencer } from './helpers/spell-sequencer.mjs';
 import { VagabondItemSequencer } from './helpers/item-sequencer.mjs';
@@ -510,6 +511,7 @@ globalThis.vagabond = {
     HomebrewSettingsApp,
     LevelUpDialog,
     PartyCompactView,
+    RelicForge,
   },
   ui: {
     ProgressClockOverlay,
@@ -967,6 +969,16 @@ Hooks.on('getSceneControlButtons', (controls) => {
         visible: game.user.isGM && game.settings.get('vagabond', 'lightTrackingEnabled'),
         onClick: () => {
           LightTracker.openTracker();
+        }
+      },
+      relicForge: {
+        name: 'relicForge',
+        title: 'Relic Forge',
+        icon: 'fas fa-gem',
+        button: true,
+        visible: game.user.isGM,
+        onClick: () => {
+          RelicForge.open();
         }
       }
     }
@@ -2435,6 +2447,72 @@ Hooks.on('renderChatMessageHTML', (message, html) => {
       await card.send();
     });
   });
+
+  // ---------------------------------------------------------
+  // 21. Dice Hover Tooltips — show dice formula + individual results
+  // ---------------------------------------------------------
+
+  // Damage dice tooltips: "2d6 → [4, 2]"
+  const diceLists = html.querySelectorAll('.damage-dice-list');
+  for (const list of diceLists) {
+    const wrappers = list.querySelectorAll('.vb-die-wrapper');
+    if (!wrappers.length) continue;
+    const diceByFaces = new Map();
+    for (const w of wrappers) {
+      const faces = w.dataset.faces;
+      if (!faces) continue;
+      const val = w.querySelector('.vb-die-val')?.textContent?.trim();
+      if (!val) continue;
+      if (!diceByFaces.has(faces)) diceByFaces.set(faces, []);
+      diceByFaces.get(faces).push(val);
+    }
+    const parts = [];
+    for (const [faces, results] of diceByFaces) {
+      parts.push(`${results.length}d${faces} \u2192 [${results.join(', ')}]`);
+    }
+    const tooltip = parts.join('  +  ');
+    for (const w of wrappers) {
+      w.title = tooltip;
+      w.style.cursor = 'help';
+    }
+  }
+
+  // Roll dice tooltips (d20 + favor/hinder): full formula + breakdown + total
+  const rollContainers = html.querySelectorAll('.roll-dice-container');
+  for (const container of rollContainers) {
+    const parts = [];
+    for (const child of container.children) {
+      if (child.classList.contains('roll-operator')) {
+        parts.push(child.textContent.trim());
+      } else if (child.classList.contains('roll-modifier')) {
+        parts.push(child.textContent.trim());
+      } else if (child.classList.contains('vb-die-wrapper')) {
+        const faces = child.dataset.faces;
+        const val = child.querySelector('.vb-die-val')?.textContent?.trim();
+        if (faces && val) parts.push(`d${faces} \u2192 [${val}]`);
+      }
+    }
+    if (!parts.length) continue;
+
+    let formulaLine = '';
+    if (message?.rolls?.length) {
+      const roll = message.rolls[0];
+      if (roll?.formula) formulaLine = roll.formula;
+    }
+
+    const breakdown = parts.join('  ');
+    let tooltip = '';
+    if (formulaLine) tooltip += formulaLine + '\n';
+    tooltip += breakdown;
+    if (message?.rolls?.[0]) tooltip += '\n= ' + message.rolls[0].total;
+
+    container.title = tooltip;
+    container.style.cursor = 'help';
+    for (const w of container.querySelectorAll('.vb-die-wrapper')) {
+      w.title = tooltip;
+      w.style.cursor = 'help';
+    }
+  }
 });
 
 // ---------------------------------------------------------

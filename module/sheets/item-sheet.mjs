@@ -25,7 +25,8 @@ export class VagabondItemSheet extends api.HandlebarsApplicationMixin(
    * @override
    */
   async close(options = {}) {
-    if (this.element && this.isEditable) {
+    // Skip form save if the item was deleted (avoids EmbeddedCollection error)
+    if (this.element && this.isEditable && !this.document._destroyed && this.document.id) {
       try { await this.submit(); } catch(e) {}
     }
     return super.close(options);
@@ -3021,6 +3022,8 @@ export class VagabondItemSheet extends api.HandlebarsApplicationMixin(
   async _safeUpdate(data, options = {}) {
     this._updateQueue = this._updateQueue.then(async () => {
       try {
+        // Skip if the item was deleted
+        if (this.document._destroyed || !this.document.id) return;
         await this.document.update(data, options);
       } catch (err) {
         console.error("Vagabond | Sequential update failed:", err);

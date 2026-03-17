@@ -1,0 +1,155 @@
+<div class="relic-forge-container">
+
+  {{!-- Header: Preview Name --}}
+  <div class="forge-header">
+    <div class="preview-name">
+      <i class="fas fa-gem"></i>
+      <span class="name-text">{{previewName}}</span>
+    </div>
+  </div>
+
+  <div class="forge-body">
+
+    {{!-- LEFT: Power Browser --}}
+    <div class="forge-column power-browser">
+      <h3><i class="fas fa-book-open"></i> Power Database</h3>
+
+      {{!-- Category Filter Tabs --}}
+      <div class="category-tabs">
+        {{#each categories}}
+        <button class="category-tab {{#if active}}active{{/if}}"
+                data-action="filterCategory" data-category="{{key}}"
+                title="{{label}}">
+          <i class="{{icon}}"></i> {{label}}
+        </button>
+        {{/each}}
+      </div>
+
+      {{!-- Scrollable Power List --}}
+      <div class="power-browser-list">
+        {{#each powers}}
+        <div class="power-card {{#if selected}}selected{{/if}}"
+             data-action="togglePower" data-power-id="{{id}}">
+          <div class="power-icon">
+            <i class="{{icon}}"></i>
+          </div>
+          <div class="power-info">
+            <div class="power-name">{{name}}</div>
+            <div class="power-desc">{{description}}</div>
+          </div>
+          <div class="power-check">
+            {{#if selected}}<i class="fas fa-check-circle"></i>{{/if}}
+          </div>
+        </div>
+        {{/each}}
+      </div>
+    </div>
+
+    {{!-- CENTER: Base Item + Config --}}
+    <div class="forge-column forge-config">
+
+      {{!-- Drop Zone --}}
+      <h3><i class="fas fa-hammer"></i> Base Item</h3>
+      <div class="drop-zone {{#if baseItem}}has-item{{/if}}">
+        {{#if baseItem}}
+          <div class="dropped-item">
+            <img src="{{baseItem.img}}" alt="{{baseItem.name}}" width="48" height="48" />
+            <div class="item-details">
+              <div class="item-name">{{baseItem.name}}</div>
+              <div class="item-type">{{baseItem.system.equipmentType}}</div>
+            </div>
+            <button class="clear-btn" data-action="clearBase" title="Remove">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        {{else}}
+          <div class="drop-prompt">
+            <i class="fas fa-hand-pointer"></i>
+            <p>Drag & drop a weapon here</p>
+          </div>
+        {{/if}}
+      </div>
+
+      {{!-- Tier Selector --}}
+      <h3><i class="fas fa-layer-group"></i> Relic Tier</h3>
+      <div class="tier-selector">
+        {{#each tiers}}
+        <button class="tier-btn {{#if active}}active{{/if}}"
+                data-action="setTier" data-tier="{{key}}">
+          {{label}}
+        </button>
+        {{/each}}
+      </div>
+
+      {{!-- Custom Power Builder --}}
+      <h3><i class="fas fa-wand-magic-sparkles"></i> Custom Power</h3>
+      <div class="custom-power-builder">
+        <div class="custom-row">
+          <input type="text" class="custom-power-name" placeholder="Effect Name" />
+          <input type="text" class="custom-power-namelabel" placeholder="Relic Name Word" />
+        </div>
+        <div class="custom-row">
+          <input type="text" class="custom-power-key" placeholder="system.stats.might.bonus" />
+          <select class="custom-power-mode">
+            {{#each aeModes}}
+            <option value="{{value}}">{{label}}</option>
+            {{/each}}
+          </select>
+          <input type="text" class="custom-power-value" placeholder="Value" />
+        </div>
+        <button class="add-custom-btn" data-action="addCustomPower">
+          <i class="fas fa-plus"></i> Add Custom
+        </button>
+      </div>
+
+      {{!-- Forge Button --}}
+      <button class="forge-btn {{#unless canForge}}disabled{{/unless}}"
+              data-action="forge" {{#unless canForge}}disabled{{/unless}}>
+        <i class="fas fa-fire"></i> Forge Relic
+      </button>
+    </div>
+
+    {{!-- RIGHT: Selected Powers --}}
+    <div class="forge-column selected-panel">
+      <h3><i class="fas fa-list-check"></i> Selected Powers ({{selectedPowers.length}})</h3>
+
+      <div class="selected-powers-list">
+        {{#each selectedPowers}}
+        <div class="selected-power-card">
+          <div class="power-icon"><i class="{{icon}}"></i></div>
+          <div class="power-info">
+            <div class="power-name">{{name}}</div>
+            <div class="power-desc">{{description}}</div>
+          </div>
+          <button class="remove-btn" data-action="removePower" data-power-id="{{id}}" title="Remove">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+        {{/each}}
+
+        {{#each customPowers}}
+        <div class="selected-power-card custom">
+          <div class="power-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
+          <div class="power-info">
+            <div class="power-name">{{name}} <span class="custom-tag">Custom</span></div>
+            <div class="power-desc">{{description}}</div>
+          </div>
+          <button class="remove-btn" data-action="removeCustomPower" data-index="{{index}}" title="Remove">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+        {{/each}}
+
+        {{#unless selectedPowers.length}}
+          {{#unless customPowers.length}}
+          <div class="empty-state">
+            <i class="fas fa-wand-sparkles"></i>
+            <p>No powers selected</p>
+          </div>
+          {{/unless}}
+        {{/unless}}
+      </div>
+    </div>
+
+  </div>
+</div>

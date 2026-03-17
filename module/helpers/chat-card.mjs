@@ -394,9 +394,12 @@ export class VagabondChatCard {
 
           const isHealing = damageType.toLowerCase() === 'healing';
 
+          // Cleave: half damage to each target when 2+ targets selected
+          const isCleave = item?.system?.properties?.includes('Cleave') && targetsAtRollTime?.length >= 2;
+
           let btns = isHealing
             ? VagabondDamageHelper.createApplyDamageButton(damageRoll.total, dLabel, actor.id, item?.id, targetsAtRollTime)
-            : VagabondDamageHelper.createSaveButtons(damageRoll.total, damageType, damageRoll, actor.id, item?.id, attackType, targetsAtRollTime);
+            : VagabondDamageHelper.createSaveButtons(damageRoll.total, damageType, damageRoll, actor.id, item?.id, attackType, targetsAtRollTime, isCleave);
 
           card.addFooterAction(btns);
 
@@ -935,6 +938,11 @@ export class VagabondChatCard {
       // Determine attack type from weapon skill (ranged vs melee)
       const attackType = weaponSkillKey === 'ranged' ? 'ranged' : 'melee';
 
+      // Cleave indicator: show when weapon has Cleave and 2+ targets selected
+      if (weapon.system.properties?.includes('Cleave') && targetsAtRollTime?.length >= 2) {
+        tags.push({ label: 'Cleave (½ dmg each)', icon: 'fas fa-angles-right', cssClass: 'tag-property' });
+      }
+
       const result = await this.createActionCard({
           actor,
           item: weapon,
@@ -958,7 +966,11 @@ export class VagabondChatCard {
             difficulty: attackResult.difficulty
           }
       });
-      if (isCritical) await VagabondChatCard._grantLuckOnCrit(actor, result, 'Critical Hit');
+      if (isCritical) {
+        const critChoice = await VagabondChatCard._grantLuckOnCrit(actor, result, 'Critical Hit');
+        // Store choice on message so damage button knows whether to add stat bonus
+        if (result) await result.setFlag('vagabond', 'critChoice', critChoice);
+      }
       return result;
   }
 
@@ -1040,7 +1052,10 @@ export class VagabondChatCard {
             difficulty: difficulty
           }
       });
-      if (isCritical) await VagabondChatCard._grantLuckOnCrit(actor, result, 'Critical Cast');
+      if (isCritical) {
+        const critChoice = await VagabondChatCard._grantLuckOnCrit(actor, result, 'Critical Cast');
+        if (result) await result.setFlag('vagabond', 'critChoice', critChoice);
+      }
       return result;
   }
   
@@ -1651,15 +1666,88 @@ export class VagabondChatCard {
     });
   }
 
+  /**
+   * Handle crit choice: Take 1 Luck OR forgo luck for crit benefit.
+   * Attack/Cast: forgo luck → stat bonus damage added to roll
+   * Save: forgo luck → fully negate damage + gain an Action
+   * @param {Actor} actor
+   * @param {ChatMessage|null} rollMessage
+   * @param {string} reason - 'Critical Hit', 'Critical Cast', 'Critical Save', etc.
+   * @returns {Promise<string>} 'luck' or 'benefit'
+   */
   static async _grantLuckOnCrit(actor, rollMessage = null, reason = 'Critical') {
-    if (actor.system.currentLuck === undefined) return;
+    if (actor.system.currentLuck === undefined) return 'benefit';
     await VagabondChatCard._waitForDiceAnimation(rollMessage);
     const currentLuck = actor.system.currentLuck ?? 0;
     const maxLuck = actor.system.maxLuck ?? 0;
-    if (currentLuck >= maxLuck) return;
-    const newLuck = currentLuck + 1;
-    await actor.update({ 'system.currentLuck': newLuck });
-    await VagabondChatCard.luckGain(actor, newLuck, maxLuck, reason);
+    const isMaxLuck = currentLuck >= maxLuck;
+
+    // Only Attack/Cast/Save crits have a forgo-for-benefit option
+    const isCombatCrit = reason.toLowerCase().includes('hit') ||
+                         reason.toLowerCase().includes('cast') ||
+                         reason.toLowerCase().includes('save');
+
+    if (!isCombatCrit) {
+      // Generic skill check crit: just grant luck (no benefit option)
+      if (!isMaxLuck) {
+        const newLuck = currentLuck + 1;
+        await actor.update({ 'system.currentLuck': newLuck });
+        await VagabondChatCard.luckGain(actor, newLuck, maxLuck, reason);
+      }
+      return 'luck';
+    }
+
+    const isSave = reason.toLowerCase().includes('save');
+    const benefitLabel = isSave
+      ? 'Fully negate damage + gain an Action'
+      : 'Add Stat bonus to damage';
+
+    // If already at max luck, auto-take benefit (no choice needed)
+    if (isMaxLuck) {
+      await VagabondChatCard._postCritChoiceCard(actor, 'benefit', reason, benefitLabel);
+      return 'benefit';
+    }
+
+    // Present choice dialog
+    const choice = await foundry.applications.api.DialogV2.wait({
+      window: { title: `${reason} — Crit Choice` },
+      content: `<p><strong>${actor.name}</strong> scored a ${reason}!</p>
+        <p>Choose one:</p>
+        <ul>
+          <li><strong>Take Luck:</strong> Gain 1 Luck (${currentLuck} → ${currentLuck + 1}/${maxLuck})</li>
+          <li><strong>Forgo Luck:</strong> ${benefitLabel}</li>
+        </ul>`,
+      buttons: [
+        { action: 'luck', label: 'Take Luck', icon: 'fas fa-clover' },
+        { action: 'benefit', label: 'Forgo for Benefit', icon: isSave ? 'fas fa-shield-alt' : 'fas fa-burst' }
+      ],
+      default: 'luck'
+    });
+
+    if (!choice || choice === 'luck') {
+      // Grant luck
+      const newLuck = currentLuck + 1;
+      await actor.update({ 'system.currentLuck': newLuck });
+      await VagabondChatCard.luckGain(actor, newLuck, maxLuck, reason);
+      return 'luck';
+    } else {
+      // Forgo luck for benefit
+      await VagabondChatCard._postCritChoiceCard(actor, 'benefit', reason, benefitLabel);
+      return 'benefit';
+    }
+  }
+
+  /**
+   * Post a chat card announcing the crit benefit choice
+   */
+  static async _postCritChoiceCard(actor, choice, reason, benefitLabel) {
+    const card = new VagabondChatCard()
+      .setType('generic')
+      .setActor(actor)
+      .setTitle(`${reason} — Crit Benefit`)
+      .setSubtitle(actor.name)
+      .setDescription(`<p><i class="fas fa-star"></i> <strong>${actor.name}</strong> forgoes Luck for: <strong>${benefitLabel}</strong></p>`);
+    await card.send();
   }
 
   /**

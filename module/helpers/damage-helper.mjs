@@ -232,13 +232,26 @@ export class VagabondDamageHelper {
     // Get roll data WITH item effects applied (important for on-use effects)
     const rollData = item ? actor.getRollDataWithItemEffects(item) : actor.getRollData();
 
-    // Add stat bonus on critical hit (positive or negative)
+    // Add stat bonus on critical hit ONLY if player chose to forgo luck for benefit
     let finalFormula = damageFormula;
     if (context.isCritical && context.statKey) {
-      // Use roll data (includes item effects) instead of actor.system directly
-      const statValue = rollData.stats?.[context.statKey]?.value || 0;
-      if (statValue !== 0) {  // ✅ FIX: Include negative stats too (they reduce damage)
-        finalFormula += ` + ${statValue}`;
+      const parentMessage = game.messages.get(messageId);
+      const critChoice = parentMessage?.getFlag('vagabond', 'critChoice');
+      // Only add stat bonus if they chose 'benefit' (forgo luck)
+      if (critChoice === 'benefit') {
+        const statValue = rollData.stats?.[context.statKey]?.value || 0;
+        if (statValue !== 0) {
+          finalFormula += ` + ${statValue}`;
+        }
+      }
+    }
+
+    // Brutal: crits deal 1 extra damage die
+    if (context.isCritical && item?.system?.properties?.includes('Brutal')) {
+      // Extract base die size from formula (e.g., "2d10" → "d10", "1d6" → "d6")
+      const dieMatch = damageFormula.match(/d(\d+)/);
+      if (dieMatch) {
+        finalFormula += ` + 1d${dieMatch[1]}`;
       }
     }
 
@@ -345,16 +358,19 @@ export class VagabondDamageHelper {
     // Get attack type from context (defaults to 'melee' if not provided)
     const attackType = context.attackType || 'melee';
 
+    // Retrieve stored targets from the button
+    const storedTargets = this._getTargetsFromButton(button);
+
     // Post a SEPARATE damage message instead of updating the attack card
     // This prevents double-rolling issues and matches the save result flow
-    await this.postDamageResult(damageRoll, damageTypeLabel, context.isCritical, actor, item, finalDamageTypeKey, attackType);
+    await this.postDamageResult(damageRoll, damageTypeLabel, context.isCritical, actor, item, finalDamageTypeKey, attackType, storedTargets);
   }
 
   /**
    * Post a separate damage result message with save buttons
    * Uses existing createActionCard() to avoid code duplication
    */
-  static async postDamageResult(damageRoll, damageType, isCritical, actor, item, damageTypeKey = null, attackType = 'melee') {
+  static async postDamageResult(damageRoll, damageType, isCritical, actor, item, damageTypeKey = null, attackType = 'melee', targetsAtRollTime = []) {
     const { VagabondChatCard } = await import('./chat-card.mjs');
 
     return await VagabondChatCard.createActionCard({
@@ -365,6 +381,7 @@ export class VagabondDamageHelper {
       damageType: damageTypeKey || damageType,
       hasDefenses: !this.isRestorativeDamageType(damageTypeKey || damageType),
       attackType,
+      targetsAtRollTime,
       rollData: isCritical ? { isCritical: true } : null
     });
   }
@@ -1138,7 +1155,7 @@ export class VagabondDamageHelper {
   /**
    * Create save buttons (Reflex, Endure, Will, Apply Direct)
    */
-  static createSaveButtons(damageAmount, damageType, damageRoll, actorId, itemId, attackType, targetsAtRollTime = []) {
+  static createSaveButtons(damageAmount, damageType, damageRoll, actorId, itemId, attackType, targetsAtRollTime = [], isCleave = false) {
     // Encode the damage roll terms
     const rollTermsData = JSON.stringify({
       terms: damageRoll.terms.map(t => {
@@ -1160,11 +1177,14 @@ export class VagabondDamageHelper {
     const reflexLabel = game.i18n.localize('VAGABOND.Saves.Reflex.name');
     const endureLabel = game.i18n.localize('VAGABOND.Saves.Endure.name');
     const willLabel = game.i18n.localize('VAGABOND.Saves.Will.name');
-    
+
     // FIX: Ensure Apply Direct key exists or fallback to English
     const applyKey = 'VAGABOND.Chat.ApplyDirect';
     let applyDirectLabel = game.i18n.localize(applyKey);
     if (applyDirectLabel === applyKey) applyDirectLabel = "Apply Direct";
+
+    // Cleave attribute (halve damage when applied)
+    const cleaveAttr = isCleave ? ' data-cleave="true"' : '';
 
     // LAYOUT FIX: Two rows. Top: Apply Direct. Bottom: Saves.
     return `
@@ -1175,7 +1195,7 @@ export class VagabondDamageHelper {
               data-damage-type="${damageType}"
               data-actor-id="${actorId}"
               data-item-id="${itemId || ''}"
-              data-targets="${targetsJson}">
+              data-targets="${targetsJson}"${cleaveAttr}>
               <i class="fas fa-burst"></i> ${applyDirectLabel}
             </button>
         </div>
@@ -1189,7 +1209,7 @@ export class VagabondDamageHelper {
               data-actor-id="${actorId}"
               data-item-id="${itemId || ''}"
               data-attack-type="${attackType}"
-              data-targets="${targetsJson}">
+              data-targets="${targetsJson}"${cleaveAttr}>
               <i class="fas fa-running"></i> ${reflexLabel}
             </button>
             <button class="vagabond-save-button save-endure"
@@ -1200,7 +1220,7 @@ export class VagabondDamageHelper {
               data-actor-id="${actorId}"
               data-item-id="${itemId || ''}"
               data-attack-type="${attackType}"
-              data-targets="${targetsJson}">
+              data-targets="${targetsJson}"${cleaveAttr}>
               <i class="fas fa-shield-alt"></i> ${endureLabel}
             </button>
             <button class="vagabond-save-button save-will"
@@ -1211,7 +1231,7 @@ export class VagabondDamageHelper {
               data-actor-id="${actorId}"
               data-item-id="${itemId || ''}"
               data-attack-type="${attackType}"
-              data-targets="${targetsJson}">
+              data-targets="${targetsJson}"${cleaveAttr}>
               <i class="fas fa-brain"></i> ${willLabel}
             </button>
         </div>
@@ -1272,6 +1292,17 @@ export class VagabondDamageHelper {
       actorsToRoll = targetTokens.map(t => t.actor).filter(a => a);
     }
 
+    // Cleave: pre-calculate per-actor damage shares from raw damage
+    const isCleave = button.dataset.cleave === 'true';
+    const cleaveShares = new Map();
+    if (isCleave && actorsToRoll.length >= 2) {
+      const pseudoTokens = actorsToRoll.map(a => ({ actor: a }));
+      const shares = this._distributeCleave(damageAmount, pseudoTokens);
+      for (const { target, share } of shares) {
+        cleaveShares.set(target.actor, share);
+      }
+    }
+
     // Roll save for each actor
     for (const targetActor of actorsToRoll) {
       if (!targetActor) continue;
@@ -1287,6 +1318,9 @@ export class VagabondDamageHelper {
         ui.notifications.warn(game.i18n.localize('VAGABOND.Saves.NPCNoSaves'));
         continue;
       }
+
+      // Use cleave share or full damage
+      const effectiveDamage = cleaveShares.get(targetActor) ?? damageAmount;
 
       // Determine if save is Hindered by conditions (heavy armor, ranged attack, etc.)
       const isHindered = this._isSaveHindered(saveType, attackType, targetActor);
@@ -1313,19 +1347,32 @@ export class VagabondDamageHelper {
       const critNumber = VagabondRollBuilder.calculateCritThreshold(targetActor.getRollData());
       const isCritical = VagabondChatCard.isRollCritical(saveRoll, critNumber);
 
+      // Crit save choice: luck or full negate
+      let critSaveBenefit = false;
+      if (isCritical) {
+        const critChoice = await VagabondChatCard._grantLuckOnCrit(targetActor, null, 'Critical Save');
+        critSaveBenefit = (critChoice === 'benefit');
+      }
+
       // Calculate damage breakdown for display
-      let damageAfterSave = damageAmount;
+      let damageAfterSave = effectiveDamage;
       let saveReduction = 0;
-      if (isSuccess) {
-        // Remove highest damage die from original roll
+      if (critSaveBenefit) {
+        // Crit benefit: fully negate damage + gain an Action
+        damageAfterSave = 0;
+        saveReduction = effectiveDamage;
+      } else if (isSuccess) {
+        // Normal save: remove highest damage die from original roll
         damageAfterSave = this._removeHighestDie(rollTermsData);
-        saveReduction = damageAmount - damageAfterSave;
+        // For cleave, cap save-reduced damage at the cleave share
+        if (isCleave) damageAfterSave = Math.min(damageAfterSave, effectiveDamage);
+        saveReduction = effectiveDamage - damageAfterSave;
       }
 
       // Apply armor/immune/weak modifiers and track armor reduction
       // sourceActor already declared above for outgoingSavesModifier check
       const sourceItem = sourceActor?.items.get(itemId);
-      const finalDamage = this.calculateFinalDamage(targetActor, damageAfterSave, damageType, sourceItem);
+      const finalDamage = critSaveBenefit ? 0 : this.calculateFinalDamage(targetActor, damageAfterSave, damageType, sourceItem);
       const armorReduction = damageAfterSave - finalDamage;
 
       // Auto-apply damage if setting enabled
@@ -1334,8 +1381,8 @@ export class VagabondDamageHelper {
         const currentHP = targetActor.system.health?.value || 0;
         const newHP = Math.max(0, currentHP - finalDamage);
         await targetActor.update({ 'system.health.value': newHP });
-        // On-Hit Burning: apply burning/status from weapon properties or relic power
-        if (sourceActor) await this.checkOnHitBurning(targetActor, sourceActor, null, null, sourceItem);
+        // On-Hit Burning: apply burning/status from weapon properties or relic power (skip if crit negated)
+        if (sourceActor && !critSaveBenefit) await this.checkOnHitBurning(targetActor, sourceActor, null, null, sourceItem);
       }
 
       // Post save result to chat
@@ -1347,14 +1394,13 @@ export class VagabondDamageHelper {
         isSuccess,
         isCritical,
         isHindered,
-        damageAmount,
+        effectiveDamage,
         saveReduction,
         armorReduction,
         finalDamage,
         damageType,
         autoApply
       );
-      if (isCritical) await VagabondChatCard._grantLuckOnCrit(targetActor, saveMessage, 'Critical Save');
     }
 
     // Button remains active so multiple players can roll saves
@@ -1583,6 +1629,38 @@ export class VagabondDamageHelper {
    * @returns {number} New damage total with highest die removed
    * @private
    */
+  /**
+   * Distribute cleave damage across targets using smart split.
+   * Ceil half goes to the lower-HP target, floor half to the other.
+   * The lower-HP target's share is capped at their current HP so damage isn't wasted;
+   * any excess is given to the other target, preserving total damage.
+   * @param {number} totalDamage - Raw damage to split (pre-armor)
+   * @param {Array} targets - Array of objects with .actor property
+   * @returns {Array<{target, share}>} Each target with its damage share
+   * @private
+   */
+  static _distributeCleave(totalDamage, targets) {
+    if (targets.length < 2) {
+      return targets.map(t => ({ target: t, share: totalDamage }));
+    }
+
+    // Sort by current HP ascending (lower HP first); ties keep original order
+    const sorted = [...targets].map((t, i) => ({ target: t, hp: t.actor?.system.health?.value || 0, idx: i }));
+    sorted.sort((a, b) => a.hp - b.hp || a.idx - b.idx);
+
+    const lowerEntry = sorted[0];
+    const higherEntry = sorted[1];
+
+    // Ceil to lower-HP target, but cap at their current HP
+    let lowerShare = Math.min(Math.ceil(totalDamage / 2), lowerEntry.hp);
+    let higherShare = totalDamage - lowerShare;
+
+    return [
+      { target: lowerEntry.target, share: lowerShare },
+      { target: higherEntry.target, share: higherShare },
+    ];
+  }
+
   static _removeHighestDie(rollTermsData) {
     let total = rollTermsData.total;
     let highestDieValue = 0;
@@ -1953,27 +2031,50 @@ export class VagabondDamageHelper {
       return;
     }
 
-    // Apply damage to each resolved target
-    for (const target of targetedTokens) {
-      const targetActor = target.actor;
-      if (!targetActor) continue;
+    // Cleave: smart damage distribution across targets
+    const isCleave = button.dataset.cleave === 'true';
 
-      // Check permissions
-      if (!targetActor.isOwner && !game.user.isGM) {
-        ui.notifications.warn(`You don't have permission to modify ${targetActor.name}.`);
-        continue;
+    if (isCleave && targetedTokens.length >= 2) {
+      // Distribute raw damage using smart split, then apply armor per-target
+      const shares = this._distributeCleave(damageAmount, targetedTokens);
+      for (const { target, share } of shares) {
+        const targetActor = target.actor;
+        if (!targetActor) continue;
+        if (!targetActor.isOwner && !game.user.isGM) {
+          ui.notifications.warn(`You don't have permission to modify ${targetActor.name}.`);
+          continue;
+        }
+        const finalDamage = this.calculateFinalDamage(targetActor, share, damageType, sourceItem);
+        const currentHP = targetActor.system.health?.value || 0;
+        const newHP = Math.max(0, currentHP - finalDamage);
+        await targetActor.update({ 'system.health.value': newHP });
+        ui.notifications.info(`Applied ${finalDamage} (Cleave) damage to ${targetActor.name}`);
+        // On-Hit Burning: apply burning/status from weapon properties or relic power
+        if (sourceActor) await this.checkOnHitBurning(targetActor, sourceActor, null, null, sourceItem);
       }
+    } else {
+      // Normal (non-cleave) damage application
+      for (const target of targetedTokens) {
+        const targetActor = target.actor;
+        if (!targetActor) continue;
 
-      // Calculate final damage (armor/immune/weak)
-      const finalDamage = this.calculateFinalDamage(targetActor, damageAmount, damageType, sourceItem);
+        // Check permissions
+        if (!targetActor.isOwner && !game.user.isGM) {
+          ui.notifications.warn(`You don't have permission to modify ${targetActor.name}.`);
+          continue;
+        }
 
-      const currentHP = targetActor.system.health?.value || 0;
-      const newHP = Math.max(0, currentHP - finalDamage);
-      await targetActor.update({ 'system.health.value': newHP });
+        // Calculate final damage (armor/immune/weak)
+        const finalDamage = this.calculateFinalDamage(targetActor, damageAmount, damageType, sourceItem);
 
-      ui.notifications.info(`Applied ${finalDamage} damage to ${targetActor.name}`);
-      // On-Hit Burning: apply burning/status from weapon properties or relic power
-      if (sourceActor) await this.checkOnHitBurning(targetActor, sourceActor, null, null, sourceItem);
+        const currentHP = targetActor.system.health?.value || 0;
+        const newHP = Math.max(0, currentHP - finalDamage);
+        await targetActor.update({ 'system.health.value': newHP });
+
+        ui.notifications.info(`Applied ${finalDamage} damage to ${targetActor.name}`);
+        // On-Hit Burning: apply burning/status from weapon properties or relic power
+        if (sourceActor) await this.checkOnHitBurning(targetActor, sourceActor, null, null, sourceItem);
+      }
     }
 
     // Button remains active so damage can be applied to different tokens
