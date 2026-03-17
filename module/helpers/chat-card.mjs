@@ -287,7 +287,8 @@ export class VagabondChatCard {
     propertyDetails = null, damageFormula = null,
     targetsAtRollTime = [], metadata = [],
     rerollData = null,
-    brawlIntent = 'damage'
+    brawlIntent = 'damage',
+    imbueData = null
   }) {
       const card = new VagabondChatCard();
       const iconStyle = game.settings.get('vagabond', 'chatCardIconStyle');
@@ -595,6 +596,69 @@ export class VagabondChatCard {
 
       if (footerActions.length) footerActions.forEach(a => card.addFooterAction(a));
 
+      // ── Imbue Spell Delivery on Hit ──────────────────────────────────────
+      if (imbueData && rollData?.isHit) {
+        const imbueHtml = [];
+
+        // Spell damage info
+        const hasDamage = imbueData.damageDice > 0 && imbueData.damageType && imbueData.damageType !== '-';
+        const hasEffect = imbueData.useFx && imbueData.statusCondition;
+
+        if (hasDamage || hasEffect) {
+          imbueHtml.push('<div class="imbue-delivery-section">');
+          imbueHtml.push(`<h4><i class="fas fa-wand-sparkles"></i> Imbue: ${imbueData.spellName}</h4>`);
+
+          // Spell damage button — rolls spell damage on click
+          if (hasDamage) {
+            const baseDieSize = imbueData.damageDieSize || 6;
+            const spellFormula = `${imbueData.damageDice}d${baseDieSize}`;
+            const dTypeLabel = game.i18n.localize(CONFIG.VAGABOND.damageTypes?.[imbueData.damageType] || imbueData.damageType);
+            const targetData = JSON.stringify(targetsAtRollTime).replace(/"/g, '&quot;');
+            imbueHtml.push(`
+              <button class="vagabond-imbue-damage-button vagabond-save-button"
+                data-vagabond-button="true"
+                data-formula="${spellFormula}"
+                data-damage-type="${imbueData.damageType}"
+                data-caster-id="${imbueData.casterActorId}"
+                data-attack-type="${attackType}"
+                data-is-critical="${rollData.isCritical || false}"
+                data-can-explode="${imbueData.canExplode || false}"
+                data-explode-values="${imbueData.explodeValues || ''}"
+                data-targets='${targetData}'>
+                <i class="fas fa-dice"></i> Roll ${spellFormula} ${dTypeLabel} Spell Damage
+              </button>
+            `);
+          }
+
+          // Status effect button — applies status to targets
+          if (hasEffect) {
+            const condLabel = game.i18n.localize(CONFIG.VAGABOND.onHitStatusConditions?.[imbueData.statusCondition] || imbueData.statusCondition);
+            const targetIds = targetsAtRollTime.map(t => t.tokenId).join(',');
+            const isContinual = (rollData.isCritical || false) && imbueData.critContinual;
+            const countdownDie = imbueData.countdownDie || '';
+            const countdownDmgType = imbueData.countdownDamageType || imbueData.damageType || '';
+            imbueHtml.push(`
+              <button class="vagabond-imbue-status-button vagabond-save-button"
+                data-vagabond-button="true"
+                data-status="${imbueData.statusCondition}"
+                data-caster-id="${imbueData.casterActorId}"
+                data-spell-id="${imbueData.spellId}"
+                data-spell-name="${imbueData.spellName}"
+                data-caster-name="${imbueData.casterName}"
+                data-continual="${isContinual}"
+                data-countdown-die="${countdownDie}"
+                data-countdown-damage-type="${countdownDmgType}"
+                data-target-ids="${targetIds}">
+                <i class="fas fa-bolt"></i> Apply ${condLabel}${countdownDie ? ' (' + countdownDie + ')' : ''}
+              </button>
+            `);
+          }
+
+          imbueHtml.push('</div>');
+          card.addFooterAction(imbueHtml.join(''));
+        }
+      }
+
       // Add defend options if requested (independent of damage)
       if (hasDefenses) {
         const { VagabondDamageHelper } = await import('./damage-helper.mjs');
@@ -855,6 +919,12 @@ export class VagabondChatCard {
         tags.push({ label: intentLabel, icon: 'fas fa-hand-fist', cssClass: 'tag-property' });
       }
 
+      // Imbue spell tag
+      const imbueData = attackResult.imbue || null;
+      if (imbueData) {
+        tags.push({ label: `Imbue: ${imbueData.spellName}`, icon: 'fas fa-wand-sparkles', cssClass: 'tag-property' });
+      }
+
       // Enrich description with countdown dice parsing
       let description = '';
       if (weapon.system.description) {
@@ -879,6 +949,7 @@ export class VagabondChatCard {
           attackType,  // ✅ FIX: Pass attackType for save hinder logic
           targetsAtRollTime,
           brawlIntent,
+          imbueData,
           rerollData: {
             type: 'attack',
             itemId: weapon.id,

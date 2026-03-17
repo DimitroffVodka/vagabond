@@ -1,5 +1,121 @@
 # Changelog
 
+## Phase 6: Spell Status Conditions, Imbue Delivery & Focus Mechanics
+
+### New Features
+
+#### Spell Status Condition System
+- **Spell effect automation** — spells can now apply status conditions (Blinded, Dazed, Frightened, Burning, etc.) to targets on a successful cast.
+- **Effect Type field** — each spell declares its effect type: `flavor` (descriptive only) or `statusEffect` (applies a condition).
+- **Status Condition selector** — dropdown on the spell sheet to pick which condition is applied, using the shared `onHitStatusConditions` config.
+- **Crit Continual** — checkbox flag: if enabled and the cast is a critical success, the status becomes Continual (persists indefinitely without Focus).
+- **Burning spells with countdown dice** — spells with `statusCondition: 'burning'` and a `countdownDie` (d4–d12) create a countdown die through the existing burning system (`VagabondDamageHelper.checkOnHitBurning()`).
+- **Non-burning countdown statuses** — spells with a countdown die but a non-burning status (e.g., Blinded d6) create a countdown die that removes the status on expiry.
+- **Immunity checks** — respects target `statusImmunities` before applying conditions.
+
+#### Imbue Spell Delivery
+- **Imbue delivery type** — casters can store a spell on an equipped weapon of a willing target. The spell resolves when the weapon hits.
+- **Self-imbue on hostile target** — if the caster has a hostile NPC selected, Imbue targets the caster's own weapon (never imbues enemy weapons).
+- **Ally imbue on friendly target** — if a friendly token is selected, prompts to pick one of that ally's equipped weapons to imbue.
+- **Multi-weapon dialog** — if the target has multiple equipped weapons, a dialog lets you choose which one to imbue.
+- **Imbue flag on weapon** — stores spell data (`spellId`, `casterId`, `damageType`, `damageDice`, `statusCondition`, `countdownDie`, etc.) as `flags.vagabond.imbue` on the weapon item.
+- **Imbue delivery on hit** — when attacking with an imbued weapon, the chat card shows imbue damage and/or status effect buttons. Non-Focused imbues are one-shot (flag cleared after hit); Focused imbues persist.
+- **Imbue tag in chat** — weapon attack cards display an "Imbue: SpellName" tag when the weapon is imbued.
+
+#### Focus Maintenance System
+- **Interactive Focus upkeep** — at each round start, the system posts chat cards for casters Focusing spells on hostile NPCs, with "Roll Cast Check" and "Drop Focus" buttons.
+- **Per-spell Cast Checks** — each focused spell gets its own Cast Check and 1 mana cost, regardless of how many targets that spell affects.
+- **Friendly/self Focus is free** — Focus on friendly targets (character type) persists silently with no mana or check required.
+- **Hostile Focus requires Cast Check** — d20 vs casting skill difficulty. Pass = 1 mana deducted + effects maintained. Fail = all effects from that spell removed.
+- **Optional extra damage** — on a passed Focus check, an optional "Spend Mana for Damage" button appears (1d6 per mana spent, up to remaining mana).
+- **Automatic mana check** — if the caster has no mana, Focus and its statuses are auto-removed with a chat notification.
+- **Continual statuses** — statuses marked Continual bypass all Focus processing (no cost, no check, persist until manually ended).
+- **Combat end cleanup** — all spell-inflicted statuses and tracking flags are cleared when combat ends.
+
+#### Remote/Imbue Target Count Validation
+- **Target count enforcement** — for count-based deliveries (Remote, Imbue), the system validates that the number of selected targets doesn't exceed what the caster has paid for (base + delivery increases).
+- **Clear feedback** — warns with the exact count mismatch and tells the player to increase delivery to add more targets.
+
+### Technical Details
+
+#### New Schema Fields (`item-spell.mjs`)
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `effectType` | StringField | `'flavor'` or `'statusEffect'` — categorizes spell effect for automation |
+| `statusCondition` | StringField | Which condition to apply (from `onHitStatusConditions` config) |
+| `critContinual` | BooleanField | If true + crit, status becomes Continual (no Focus needed) |
+| `countdownDie` | StringField | Die type for countdown (d4–d12), used for burning and timed statuses |
+| `countdownDamageType` | StringField | Damage type for countdown die (if different from spell's damage type) |
+
+#### Modified Files (7 files)
+
+| File | Changes |
+|------|---------|
+| `module/data/item-spell.mjs` | Added 5 new schema fields for spell status automation |
+| `module/sheets/handlers/spell-handler.mjs` | Imbue delivery handler, `_applySpellStatusCondition()`, target count validation for count-based deliveries |
+| `module/documents/combat.mjs` | `_cleanupAllSpellStatuses()`, `_processSpellStatuses()` (interactive Focus per-spell), `_dropFocusStatuses()` static method |
+| `module/vagabond.mjs` | Button handlers: Imbue Damage, Imbue Status, Focus Maintain (Cast Check), Focus Drop, Focus Damage |
+| `module/sheets/handlers/roll-handler.mjs` | Imbue detection on weapon attack, imbue data attached to `attackResult`, one-shot vs Focused imbue cleanup |
+| `module/helpers/chat-card.mjs` | Imbue tag display, imbue damage/status buttons in weapon attack cards |
+| `templates/item/details-parts/spell-details.hbs` | Effect Type, Status Condition, Crit Continual, Countdown Die UI (locked + unlocked views) |
+| `lang/en.json` | Localization strings for all new spell fields |
+
+#### Data Flow
+```
+Spell Cast (Status Effect)
+  → _applySpellStatusCondition(spell, targets, isCritical)
+  → Burning + countdownDie? → VagabondDamageHelper.checkOnHitBurning()
+  → Non-burning + countdownDie? → checkOnHitBurning() with fake item
+  → Simple status? → toggleStatusEffect() + track in spellStatuses flag
+
+Imbue Cast
+  → Hostile target selected → self-imbue caster's weapon
+  → Friendly target selected → imbue ally's weapon (dialog if multiple)
+  → Stores flags.vagabond.imbue on weapon item
+  → On weapon hit: chat card shows imbue damage/status buttons
+  → Non-Focused: imbue cleared after hit (one-shot)
+  → Focused: imbue persists across hits
+
+Focus at Round Start (_processSpellStatuses)
+  → Continual → silently persist
+  → Focused + friendly → silently persist, no cost
+  → Focused + hostile → post interactive chat card per spell
+    → "Roll Cast Check" → d20 vs DC, 1 mana, optional extra damage
+    → "Drop Focus" → _dropFocusStatuses() removes statuses + Focus
+  → Not Focused → auto-remove status
+  → No mana → auto-remove status + Focus
+```
+
+#### Flag Structures
+```javascript
+// On target actor — tracks spell-inflicted statuses for Focus/cleanup:
+flags.vagabond.spellStatuses = [{
+  statusCondition: 'blinded',
+  spellId: 'itemId123',
+  spellName: 'Blind',
+  casterId: 'actorId456',
+  casterName: 'Wizard',
+  continual: false,
+  roundApplied: 3
+}]
+
+// On weapon item — imbued spell data:
+flags.vagabond.imbue = {
+  spellId: 'itemId123',
+  spellName: 'Flame Blade',
+  casterId: 'actorId456',
+  damageType: 'fire',
+  damageDice: 2,
+  useFx: true,
+  statusCondition: 'burning',
+  countdownDie: 'd6',
+  countdownDamageType: 'fire'
+}
+```
+
+---
+
 ## Phase 4: Game Mechanics & Brawl/Grapple/Shove
 
 ### New Features

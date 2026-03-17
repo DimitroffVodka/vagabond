@@ -382,6 +382,12 @@ export class RollHandler {
       if (rangeHinder) attackResult.rangeHinder = true;
       attackResult.brawlIntent = brawlIntent;
 
+      // Check for Imbue spell on this weapon
+      const imbueData = item.getFlag('vagabond', 'imbue');
+      if (imbueData) {
+        attackResult.imbue = imbueData;
+      }
+
       await VagabondChatCard.weaponAttack(
         this.actor,
         item,
@@ -389,6 +395,19 @@ export class RollHandler {
         damageRoll,
         targetsAtRollTime
       );
+
+      // Consume Imbue on hit — clear the flag so it doesn't fire again
+      // (unless caster is Focusing the spell, in which case it persists)
+      if (imbueData && attackResult.isHit) {
+        const caster = game.actors.get(imbueData.casterActorId);
+        const focusedSpells = caster?.system?.focus?.spellIds || [];
+        const isFocused = focusedSpells.includes(imbueData.spellId);
+
+        if (!isFocused) {
+          await item.unsetFlag('vagabond', 'imbue');
+        }
+      }
+
       // Handle consumption after successful attack (regardless of hit/miss)
       await item.handleConsumption();
       return attackResult.roll;

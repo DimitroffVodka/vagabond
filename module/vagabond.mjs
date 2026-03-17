@@ -2060,6 +2060,381 @@ Hooks.on('renderChatMessageHTML', (message, html) => {
       }
     });
   });
+
+  // ---------------------------------------------------------
+  // 16. Imbue — Spell Damage Roll Button Handler
+  // ---------------------------------------------------------
+  const imbueDamageButtons = html.querySelectorAll('.vagabond-imbue-damage-button');
+
+  imbueDamageButtons.forEach(button => {
+    button.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      button.disabled = true;
+
+      const formula = button.dataset.formula;
+      const damageType = button.dataset.damageType;
+      const casterId = button.dataset.casterId;
+      const isCritical = button.dataset.isCritical === 'true';
+      const canExplode = button.dataset.canExplode === 'true';
+      const explodeValues = button.dataset.explodeValues;
+      const attackType = button.dataset.attackType || 'melee';
+
+      let targetsAtRollTime = [];
+      try { targetsAtRollTime = JSON.parse(button.dataset.targets || '[]'); } catch (e) { /* ignore */ }
+
+      const caster = game.actors.get(casterId);
+      if (!caster) { button.disabled = false; return; }
+
+      // Roll the spell damage
+      const roll = new Roll(formula, caster.getRollData());
+      await roll.evaluate();
+
+      // Manual explosion if enabled
+      if (canExplode && explodeValues) {
+        const vals = explodeValues.split(',').map(v => parseInt(v.trim())).filter(n => !isNaN(n));
+        if (vals.length > 0) {
+          const { VagabondDamageHelper } = await import('./helpers/damage-helper.mjs');
+          await VagabondDamageHelper._manuallyExplodeDice(roll, vals);
+        }
+      }
+
+      // Create damage chat card with save buttons
+      const { VagabondDamageHelper } = await import('./helpers/damage-helper.mjs');
+      const { VagabondChatCard } = await import('./helpers/chat-card.mjs');
+
+      const dLabel = game.i18n.localize(CONFIG.VAGABOND.damageTypes?.[damageType] || damageType);
+      const btns = VagabondDamageHelper.createSaveButtons(roll.total, damageType, roll, casterId, null, attackType, targetsAtRollTime);
+
+      const card = new VagabondChatCard()
+        .setType('generic')
+        .setActor(caster)
+        .setTitle('Imbue — Spell Damage')
+        .setSubtitle(caster.name);
+      card.addDamage(roll, dLabel, isCritical, damageType);
+      card.addFooterAction(btns);
+
+      if (targetsAtRollTime.length > 0) card.setTargets(targetsAtRollTime);
+      await card.send();
+    });
+  });
+
+  // ---------------------------------------------------------
+  // 17. Imbue — Spell Status Effect Button Handler
+  // ---------------------------------------------------------
+  const imbueStatusButtons = html.querySelectorAll('.vagabond-imbue-status-button');
+
+  imbueStatusButtons.forEach(button => {
+    button.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      button.disabled = true;
+
+      const statusCondition = button.dataset.status;
+      const casterId = button.dataset.casterId;
+      const spellId = button.dataset.spellId;
+      const spellName = button.dataset.spellName;
+      const casterName = button.dataset.casterName;
+      const isContinual = button.dataset.continual === 'true';
+      const countdownDie = button.dataset.countdownDie || '';
+      const countdownDamageType = button.dataset.countdownDamageType || '';
+      const targetIds = button.dataset.targetIds?.split(',').filter(Boolean) || [];
+
+      const caster = game.actors.get(casterId);
+      const appliedNames = [];
+
+      for (const tokenId of targetIds) {
+        const token = canvas.tokens.get(tokenId);
+        const targetActor = token?.actor;
+        if (!targetActor) continue;
+
+        // Skip dead
+        if (targetActor.statuses?.has('dead')) continue;
+
+        // Check immunity
+        const immunities = targetActor.system.immunities || [];
+        const statusImmunities = targetActor.system.statusImmunities ?? [];
+        if (immunities.includes(statusCondition) || statusImmunities.includes(statusCondition)) {
+          ui.notifications.info(`${targetActor.name} is immune to ${statusCondition}.`);
+          continue;
+        }
+
+        // Burning with countdown die — use the burning/countdown system
+        if (statusCondition === 'burning' && countdownDie) {
+          const { VagabondDamageHelper } = await import('./helpers/damage-helper.mjs');
+          await VagabondDamageHelper.checkOnHitBurning(
+            targetActor,
+            caster,
+            countdownDamageType || 'fire',
+            countdownDie,
+            null // no sourceItem — spell-driven
+          );
+          appliedNames.push(targetActor.name);
+          continue;
+        }
+
+        // Non-burning status: use checkOnHitBurning for statuses with countdown dice too
+        if (statusCondition !== 'burning' && countdownDie) {
+          // Status with countdown die (e.g., Sickened with Cd4)
+          const { VagabondDamageHelper } = await import('./helpers/damage-helper.mjs');
+          // Build a fake sourceItem with the right flags for _applyStatusDie
+          const fakeItem = {
+            system: { properties: ['Status'] },
+            flags: {
+              vagabond: {
+                onHitBurning: {
+                  dieType: countdownDie,
+                  statusCondition: statusCondition
+                }
+              }
+            }
+          };
+          await VagabondDamageHelper.checkOnHitBurning(
+            targetActor,
+            caster,
+            null,
+            null,
+            fakeItem
+          );
+          appliedNames.push(targetActor.name);
+          continue;
+        }
+
+        // Simple status toggle (no countdown die)
+        if (!targetActor.statuses?.has(statusCondition)) {
+          await targetActor.toggleStatusEffect(statusCondition);
+
+          // Track for Focus/round-start cleanup
+          const existing = targetActor.getFlag('vagabond', 'spellStatuses') || [];
+          const entry = {
+            statusCondition,
+            spellId,
+            spellName,
+            casterId,
+            casterName,
+            continual: isContinual,
+            roundApplied: game.combat?.round ?? 0
+          };
+          await targetActor.setFlag('vagabond', 'spellStatuses', [...existing, entry]);
+          appliedNames.push(targetActor.name);
+        }
+      }
+
+      if (appliedNames.length > 0) {
+        const condLabel = game.i18n.localize(CONFIG.VAGABOND.onHitStatusConditions?.[statusCondition] || statusCondition);
+        const continualText = isContinual ? ' <em>(Continual)</em>' : '';
+        const dieText = countdownDie ? ` (${countdownDie})` : '';
+        ChatMessage.create({
+          content: `<p><i class="fas fa-bolt"></i> <strong>${appliedNames.join(', ')}</strong> ${appliedNames.length === 1 ? 'is' : 'are'} now <strong>${condLabel}</strong>${dieText} from Imbue!${continualText}</p>`,
+          speaker: { alias: casterName }
+        });
+      }
+    });
+  });
+  // ---------------------------------------------------------
+  // 18. Focus Maintenance — Cast Check for Hostile Targets
+  // ---------------------------------------------------------
+  const focusMaintainButtons = html.querySelectorAll('.vagabond-focus-maintain-button');
+
+  focusMaintainButtons.forEach(button => {
+    button.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      button.disabled = true;
+
+      const casterId = button.dataset.casterId;
+      const manaSkill = button.dataset.manaSkill;
+      const difficulty = parseInt(button.dataset.difficulty) || 10;
+      let prompts = [];
+      try { prompts = JSON.parse(button.dataset.prompts || '[]'); } catch (e) { /* ignore */ }
+
+      const caster = game.actors.get(casterId);
+      if (!caster) return;
+
+      // Check mana
+      const currentMana = caster.system.mana?.current ?? 0;
+      if (currentMana < 1) {
+        ui.notifications.warn(`${caster.name} doesn't have enough mana to maintain Focus!`);
+        // Drop all statuses
+        await VagabondCombat._dropFocusStatuses(caster, prompts);
+        return;
+      }
+
+      // Roll Cast Check: d20 vs difficulty
+      const roll = new Roll('1d20');
+      await roll.evaluate();
+      const isSuccess = roll.total >= difficulty;
+
+      const { VagabondChatCard } = await import('./helpers/chat-card.mjs');
+
+      if (isSuccess) {
+        // Deduct 1 mana
+        const newMana = caster.system.mana.current - 1;
+        await caster.update({ 'system.mana.current': newMana });
+
+        const targetNames = prompts.map(p => p.targetName).join(', ');
+        const condLabels = prompts.map(p => {
+          return game.i18n.localize(CONFIG.VAGABOND.onHitStatusConditions?.[p.statusCondition] || p.statusCondition);
+        }).join(', ');
+
+        // Build the result card with optional extra damage
+        const card = new VagabondChatCard()
+          .setType('generic')
+          .setActor(caster)
+          .setTitle('Focus Maintained')
+          .setSubtitle(caster.name);
+        card.addRoll(roll, difficulty).setOutcome('PASS', false);
+        card.setDescription(`
+          <p><i class="fas fa-magic"></i> Focus maintained on <strong>${targetNames}</strong> (${condLabels})</p>
+          <p>1 mana spent (${newMana} remaining)</p>
+        `);
+
+        // Add optional extra damage button if caster has mana left
+        if (newMana > 0) {
+          const targetData = JSON.stringify(prompts.map(p => ({
+            tokenId: p.targetTokenId,
+            sceneId: p.sceneId,
+            actorId: p.targetActorId,
+            actorName: p.targetName
+          }))).replace(/"/g, '&quot;');
+
+          card.addFooterAction(`
+            <div class="save-buttons-row">
+              <button class="vagabond-focus-damage-button vagabond-save-button"
+                data-vagabond-button="true"
+                data-caster-id="${casterId}"
+                data-mana-remaining="${newMana}"
+                data-targets="${targetData}">
+                <i class="fas fa-dice"></i> Spend Mana for Damage (1d6 per mana)
+              </button>
+            </div>
+          `);
+        }
+
+        await card.send();
+      } else {
+        // Failed — remove all spell statuses from these targets
+        await VagabondCombat._dropFocusStatuses(caster, prompts);
+
+        const card = new VagabondChatCard()
+          .setType('generic')
+          .setActor(caster)
+          .setTitle('Focus Lost')
+          .setSubtitle(caster.name);
+        card.addRoll(roll, difficulty).setOutcome('FAIL', false);
+
+        const droppedLines = prompts.map(p => {
+          const condLabel = game.i18n.localize(CONFIG.VAGABOND.onHitStatusConditions?.[p.statusCondition] || p.statusCondition);
+          return `<strong>${p.targetName}</strong> is no longer <strong>${condLabel}</strong>`;
+        });
+        card.setDescription(droppedLines.join('<br>'));
+        await card.send();
+      }
+    });
+  });
+
+  // ---------------------------------------------------------
+  // 19. Focus Drop — Voluntarily Drop Focus on Hostile Targets
+  // ---------------------------------------------------------
+  const focusDropButtons = html.querySelectorAll('.vagabond-focus-drop-button');
+
+  focusDropButtons.forEach(button => {
+    button.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      button.disabled = true;
+
+      const casterId = button.dataset.casterId;
+      let prompts = [];
+      try { prompts = JSON.parse(button.dataset.prompts || '[]'); } catch (e) { /* ignore */ }
+
+      const caster = game.actors.get(casterId);
+      if (!caster) return;
+
+      await VagabondCombat._dropFocusStatuses(caster, prompts);
+
+      const droppedNames = prompts.map(p => p.targetName).join(', ');
+      ChatMessage.create({
+        content: `<p><i class="fas fa-times"></i> <strong>${caster.name}</strong> dropped Focus. Effects removed from <strong>${droppedNames}</strong>.</p>`,
+        speaker: ChatMessage.getSpeaker({ actor: caster })
+      });
+    });
+  });
+
+  // ---------------------------------------------------------
+  // 20. Focus Damage — Spend Extra Mana for Damage on Maintained Focus
+  // ---------------------------------------------------------
+  const focusDamageButtons = html.querySelectorAll('.vagabond-focus-damage-button');
+
+  focusDamageButtons.forEach(button => {
+    button.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      button.disabled = true;
+
+      const casterId = button.dataset.casterId;
+      const manaRemaining = parseInt(button.dataset.manaRemaining) || 0;
+      let targets = [];
+      try { targets = JSON.parse(button.dataset.targets || '[]'); } catch (e) { /* ignore */ }
+
+      const caster = game.actors.get(casterId);
+      if (!caster || manaRemaining < 1) return;
+
+      // Ask how many mana to spend (1d6 per mana)
+      const maxMana = Math.min(manaRemaining, caster.system.mana?.castingMax ?? 99);
+      const buttons = [];
+      for (let i = 1; i <= Math.min(maxMana, 6); i++) {
+        buttons.push({ action: String(i), label: `${i} mana (${i}d6)`, icon: 'fas fa-dice' });
+      }
+      buttons.push({ action: '0', label: 'Cancel', icon: 'fas fa-times' });
+
+      const choice = await foundry.applications.api.DialogV2.wait({
+        window: { title: 'Focus Damage — Spend Mana' },
+        content: `<p>Spend mana to deal damage (1d6 per mana). You have ${manaRemaining} mana remaining.</p>`,
+        buttons
+      });
+
+      if (!choice || choice === '0') {
+        button.disabled = false;
+        return;
+      }
+
+      const manaSpent = parseInt(choice);
+      if (isNaN(manaSpent) || manaSpent < 1) { button.disabled = false; return; }
+
+      // Deduct mana
+      const newMana = Math.max(0, caster.system.mana.current - manaSpent);
+      await caster.update({ 'system.mana.current': newMana });
+
+      // Roll damage
+      const formula = `${manaSpent}d6`;
+      const roll = new Roll(formula);
+      await roll.evaluate();
+
+      // Post damage card with save buttons
+      const { VagabondDamageHelper } = await import('./helpers/damage-helper.mjs');
+      const { VagabondChatCard } = await import('./helpers/chat-card.mjs');
+
+      // Use the spell's damage type from the caster's focused spell
+      const focusedSpellIds = caster.system.focus?.spellIds || [];
+      let damageType = 'fire'; // fallback
+      for (const spellId of focusedSpellIds) {
+        const spell = caster.items.get(spellId);
+        if (spell?.system?.damageType && spell.system.damageType !== '-') {
+          damageType = spell.system.damageType;
+          break;
+        }
+      }
+
+      const dLabel = game.i18n.localize(CONFIG.VAGABOND.damageTypes?.[damageType] || damageType);
+      const btns = VagabondDamageHelper.createSaveButtons(roll.total, damageType, roll, casterId, null, 'melee', targets);
+
+      const card = new VagabondChatCard()
+        .setType('generic')
+        .setActor(caster)
+        .setTitle('Focus Damage')
+        .setSubtitle(caster.name);
+      card.addDamage(roll, dLabel, false, damageType);
+      card.addFooterAction(btns);
+      if (targets.length > 0) card.setTargets(targets);
+      await card.send();
+    });
+  });
 });
 
 // ---------------------------------------------------------

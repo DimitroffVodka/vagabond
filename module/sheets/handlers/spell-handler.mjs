@@ -446,6 +446,19 @@ export class SpellHandler {
       return;
     }
 
+    // Validation: Target count for count-based deliveries (Remote, Imbue)
+    const baseRange = CONFIG.VAGABOND.deliveryBaseRanges[state.deliveryType];
+    if (baseRange?.type === 'count') {
+      const maxTargets = baseRange.value + (CONFIG.VAGABOND.deliveryIncrement[state.deliveryType] * state.deliveryIncrease);
+      const selectedCount = game.user.targets.size;
+      if (selectedCount > maxTargets) {
+        ui.notifications.warn(
+          `Too many targets! You've paid for ${maxTargets} target${maxTargets > 1 ? 's' : ''} but have ${selectedCount} selected. Increase delivery to add more targets (+1 mana each).`
+        );
+        return;
+      }
+    }
+
     // Capture targeted tokens at cast time
     const targetsAtRollTime = Array.from(game.user.targets).map((token) => ({
       tokenId: token.id,
@@ -491,6 +504,13 @@ export class SpellHandler {
     let isSuccess = false;
     let isCritical = false;
 
+    // ── Imbue Delivery: special path ─────────────────────────────────────────
+    // Imbue targets a willing being's weapon — no cast check, spell resolves on hit
+    if (state.deliveryType === 'imbue') {
+      await this._handleImbueCast(spell, state, costs, targetsAtRollTime);
+      return;
+    }
+
     if (spell.system.noRollRequired || event.altKey) {
       // BYPASS PATH: No roll needed (noRollRequired flag or Alt+Click), always succeeds, no criticals
       isSuccess = true;
@@ -534,6 +554,11 @@ export class SpellHandler {
     }
     // Failed - no mana cost (chat card will show failure)
     // Note: Bypass spells always succeed, so mana is always deducted
+
+    // Apply spell status condition to targets on successful cast
+    if (isSuccess && spell.system.statusCondition) {
+      await this._applySpellStatusCondition(spell, targetsAtRollTime, isCritical);
+    }
 
     // Create chat message
     await this._createSpellChatCard(
@@ -860,6 +885,293 @@ export class SpellHandler {
         });
       }
     });
+  }
+
+  /**
+   * Handle Imbue delivery: store spell data on a target's equipped weapon.
+   * No cast check needed (willing target). Spell resolves when weapon hits.
+   * @param {Item} spell - The spell being cast
+   * @param {Object} state - Spell state (damageDice, deliveryType, useFx, etc.)
+   * @param {Object} costs - Mana cost breakdown
+   * @param {Array} targetsAtRollTime - Targets captured at cast time
+   * @private
+   */
+  async _handleImbueCast(spell, state, costs, targetsAtRollTime) {
+    // Determine which actors get imbued weapons:
+    // - Hostile/no target → imbue the caster's own weapon (self-imbue)
+    // - Friendly target → imbue that ally's weapon
+    const imbueTargets = [];
+
+    if (!targetsAtRollTime || targetsAtRollTime.length === 0) {
+      // No target selected — default to self
+      imbueTargets.push({ actorId: this.actor.id, actorName: this.actor.name });
+    } else {
+      for (const t of targetsAtRollTime) {
+        // Check token disposition to determine friendly vs hostile
+        const token = canvas.tokens.placeables.find(tk =>
+          tk.id === t.tokenId || tk.actor?.id === t.actorId
+        );
+        const disposition = token?.document?.disposition ?? CONST.TOKEN_DISPOSITIONS.HOSTILE;
+
+        if (disposition === CONST.TOKEN_DISPOSITIONS.FRIENDLY || disposition === CONST.TOKEN_DISPOSITIONS.NEUTRAL) {
+          // Friendly/neutral — imbue their weapon
+          imbueTargets.push(t);
+        } else {
+          // Hostile — imbue the caster's own weapon instead
+          if (!imbueTargets.some(it => it.actorId === this.actor.id)) {
+            imbueTargets.push({ actorId: this.actor.id, actorName: this.actor.name });
+          }
+        }
+      }
+    }
+
+    if (imbueTargets.length === 0) {
+      imbueTargets.push({ actorId: this.actor.id, actorName: this.actor.name });
+    }
+
+    // Process each target (Imbue can target multiple with scaling)
+    const imbuedNames = [];
+
+    for (const t of imbueTargets) {
+      const targetActor = game.actors.get(t.actorId);
+      if (!targetActor) continue;
+
+      // Find all equipped weapons on the target
+      const equippedWeapons = targetActor.items.filter(i =>
+        i.type === 'equipment' &&
+        i.system.equipmentType === 'weapon' &&
+        i.system.equipped
+      );
+
+      if (equippedWeapons.length === 0) {
+        ui.notifications.warn(`${t.actorName} has no equipped weapons to imbue!`);
+        continue;
+      }
+
+      // If multiple weapons, let caster choose which one
+      let weaponToImbue;
+      if (equippedWeapons.length === 1) {
+        weaponToImbue = equippedWeapons[0];
+      } else {
+        const buttons = equippedWeapons.map(w => ({
+          action: w.id,
+          label: w.name,
+          icon: 'fas fa-sword'
+        }));
+
+        const chosenId = await foundry.applications.api.DialogV2.wait({
+          window: { title: `Imbue — ${t.actorName}'s Weapon` },
+          content: `<p>Choose which weapon to imbue with <strong>${spell.name}</strong>:</p>`,
+          buttons
+        });
+
+        if (!chosenId) continue; // cancelled
+        weaponToImbue = targetActor.items.get(chosenId);
+        if (!weaponToImbue) continue;
+      }
+
+      // Store imbue data as flags on the weapon
+      const imbueData = {
+        spellId: spell.id,
+        spellName: spell.name,
+        casterId: this.actor.id,
+        casterName: this.actor.name,
+        casterActorId: this.actor.id,
+        damageType: spell.system.damageType,
+        damageDice: state.damageDice,
+        useFx: state.useFx,
+        effectType: spell.system.effectType,
+        statusCondition: spell.system.statusCondition || '',
+        critContinual: spell.system.critContinual || false,
+        canExplode: spell.system.canExplode || false,
+        explodeValues: spell.system.explodeValues || '',
+        damageDieSize: spell.system.damageDieSize || null,
+        countdownDie: spell.system.countdownDie || '',
+        countdownDamageType: spell.system.countdownDamageType || '',
+        fxSchool: spell.system.fxSchool || '',
+        timestamp: Date.now()
+      };
+
+      await weaponToImbue.setFlag('vagabond', 'imbue', imbueData);
+      imbuedNames.push(`${t.actorName}'s ${weaponToImbue.name}`);
+    }
+
+    if (imbuedNames.length === 0) return;
+
+    // Deduct mana (imbue always succeeds — willing target)
+    const newMana = this.actor.system.mana.current - costs.totalCost;
+    await this.actor.update({ 'system.mana.current': newMana });
+
+    // Post imbue chat notification
+    const modeLabel = state.useFx
+      ? (state.damageDice > 0 && spell.system.damageType !== '-' ? 'Damage + Effect' : 'Effect Only')
+      : (state.damageDice > 0 ? 'Damage Only' : 'Effect Only');
+
+    const diceText = state.damageDice > 0 && spell.system.damageType !== '-'
+      ? `${state.damageDice}d6 ${spell.system.damageType}`
+      : '';
+
+    const statusText = state.useFx && spell.system.statusCondition
+      ? ` + ${game.i18n.localize(CONFIG.VAGABOND.onHitStatusConditions?.[spell.system.statusCondition] || spell.system.statusCondition)}`
+      : '';
+
+    const { VagabondChatCard } = await import('../../helpers/chat-card.mjs');
+    const card = new VagabondChatCard()
+      .setType('generic')
+      .setActor(this.actor)
+      .setTitle(`${spell.name} — Imbue`)
+      .setSubtitle(this.actor.name)
+      .setDescription(`
+        <p><i class="fas fa-wand-sparkles"></i> Imbued <strong>${imbuedNames.join(', ')}</strong> with <strong>${spell.name}</strong></p>
+        <p class="imbue-details">${modeLabel}${diceText ? ': ' + diceText : ''}${statusText}</p>
+        <p class="notes"><em>Spell delivers on next weapon hit. Attack check = Cast check.</em></p>
+      `);
+    card.setMetadataTags([
+      { label: `${costs.totalCost} Mana`, cssClass: 'tag-skill' },
+      { label: 'Imbue', cssClass: 'tag-property' }
+    ]);
+    await card.send();
+
+    // Play Sequencer FX
+    const VagabondSpellSequencer = (await import('../../helpers/spell-sequencer.mjs')).VagabondSpellSequencer;
+    const casterToken = this.actor.token?.object ?? this.actor.getActiveTokens(true)[0];
+    const liveTargets = Array.from(game.user.targets);
+    VagabondSpellSequencer.play(spell, 'imbue', state.deliveryIncrease, casterToken, liveTargets);
+
+    // Reset spell state
+    const defaultUseFx = spell?.system?.damageType === '-';
+    this.spellStates[spell.id] = {
+      damageDice: 1,
+      deliveryType: state.deliveryType,
+      deliveryIncrease: 0,
+      useFx: defaultUseFx,
+    };
+    this._saveSpellStates();
+    this._updateSpellDisplay(spell.id);
+  }
+
+  /**
+   * Apply a spell's status condition to all targets on successful cast.
+   * Respects the spell's effectType, statusCondition, and critContinual fields.
+   * @param {Item} spell - The spell being cast
+   * @param {Array} targetsAtRollTime - Targets captured at cast time
+   * @param {boolean} isCritical - Whether the cast was a critical success
+   * @private
+   */
+  async _applySpellStatusCondition(spell, targetsAtRollTime, isCritical) {
+    const statusCondition = spell.system.statusCondition;
+    if (!statusCondition) return;
+
+    const { VagabondDamageHelper } = await import('../../helpers/damage-helper.mjs');
+    const targetTokens = VagabondDamageHelper._resolveStoredTargets(targetsAtRollTime);
+
+    if (targetTokens.length === 0) {
+      const liveTargets = Array.from(game.user.targets);
+      for (const token of liveTargets) {
+        targetTokens.push(token);
+      }
+    }
+
+    if (targetTokens.length === 0) return;
+
+    const appliedNames = [];
+
+    for (const token of targetTokens) {
+      const targetActor = token.actor;
+      if (!targetActor) continue;
+
+      // Skip dead targets
+      if (targetActor.statuses?.has('dead')) continue;
+
+      // Check if target is immune to this status
+      const immunities = targetActor.system.immunities || [];
+      if (immunities.includes(statusCondition)) {
+        ui.notifications.info(`${targetActor.name} is immune to ${statusCondition}.`);
+        continue;
+      }
+
+      // Burning with countdown die — use the burning/countdown system
+      const countdownDie = spell.system.countdownDie || '';
+      if (statusCondition === 'burning' && countdownDie) {
+        const burningDmgType = spell.system.countdownDamageType || spell.system.damageType || 'fire';
+        await VagabondDamageHelper.checkOnHitBurning(
+          targetActor,
+          this.actor,
+          burningDmgType,
+          countdownDie,
+          null
+        );
+        appliedNames.push(targetActor.name);
+        continue;
+      }
+
+      // Non-burning status with countdown die
+      if (statusCondition !== 'burning' && countdownDie) {
+        const fakeItem = {
+          system: { properties: ['Status'] },
+          flags: {
+            vagabond: {
+              onHitBurning: {
+                dieType: countdownDie,
+                statusCondition: statusCondition
+              }
+            }
+          }
+        };
+        await VagabondDamageHelper.checkOnHitBurning(
+          targetActor,
+          this.actor,
+          null,
+          null,
+          fakeItem
+        );
+        appliedNames.push(targetActor.name);
+        continue;
+      }
+
+      // Simple status toggle (no countdown die)
+      if (!targetActor.statuses?.has(statusCondition)) {
+        await targetActor.toggleStatusEffect(statusCondition);
+
+        // Track spell-inflicted status for Focus/round-start cleanup
+        const isContinual = isCritical && spell.system.critContinual;
+        const existing = targetActor.getFlag('vagabond', 'spellStatuses') || [];
+        const entry = {
+          statusCondition,
+          spellId: spell.id,
+          spellName: spell.name,
+          casterId: this.actor.id,
+          casterName: this.actor.name,
+          continual: isContinual,
+          roundApplied: game.combat?.round ?? 0
+        };
+        await targetActor.setFlag('vagabond', 'spellStatuses', [...existing, entry]);
+
+        appliedNames.push(targetActor.name);
+      }
+    }
+
+    // Notify in chat
+    if (appliedNames.length > 0) {
+      const conditionLabel = CONFIG.VAGABOND.onHitStatusConditions?.[statusCondition]
+        ? game.i18n.localize(CONFIG.VAGABOND.onHitStatusConditions[statusCondition])
+        : statusCondition;
+
+      const continualText = (isCritical && spell.system.critContinual)
+        ? ' <em>(Continual — lasts until ended)</em>'
+        : '';
+
+      const { VagabondChatCard } = await import('../../helpers/chat-card.mjs');
+      const card = new VagabondChatCard()
+        .setType('generic')
+        .setActor(this.actor)
+        .setTitle(`${spell.name} — ${conditionLabel}`)
+        .setSubtitle(this.actor.name)
+        .setDescription(`
+          <p><i class="fas fa-bolt"></i> <strong>${appliedNames.join(', ')}</strong> ${appliedNames.length === 1 ? 'is' : 'are'} now <strong>${conditionLabel}</strong>!${continualText}</p>
+        `);
+      await card.send();
+    }
   }
 
   /**

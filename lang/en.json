@@ -765,6 +765,26 @@
           "crit": {
             "label": "Crit",
             "hint": "Effect on a critical success"
+          },
+          "effectType": {
+            "label": "Effect Type",
+            "hint": "What the spell's effect does mechanically"
+          },
+          "statusCondition": {
+            "label": "Status Condition",
+            "hint": "The status condition applied by this spell's effect"
+          },
+          "critContinual": {
+            "label": "Crit: Continual",
+            "hint": "On a critical success, the effect becomes continual (lasts until ended, no Focus required)"
+          },
+          "countdownDie": {
+            "label": "Countdown Die",
+            "hint": "Die type for burning spells (e.g., d4, d6). Creates a countdown die instead of toggling status."
+          },
+          "countdownDamageType": {
+            "label": "Burning Damage Type",
+            "hint": "Damage type for the burning countdown die (leave blank to use spell's damage type)"
           }
         },
         "AddSpell": "Add Spell",

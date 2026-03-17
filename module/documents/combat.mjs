@@ -16,6 +16,11 @@ export class VagabondCombat extends Combat {
       await this._cleanupAllCountdownDice();
     } catch (e) { console.warn('Vagabond | Error clearing countdown dice:', e); }
 
+    // Clean up all spell-inflicted statuses and remove tracking flags
+    try {
+      await this._cleanupAllSpellStatuses();
+    } catch (e) { console.warn('Vagabond | Error clearing spell statuses:', e); }
+
     return super.endCombat();
   }
 
@@ -36,6 +41,13 @@ export class VagabondCombat extends Combat {
       try {
         await this._autoRollAllCountdownDice();
       } catch (e) { console.warn('Vagabond | Error auto-rolling countdown dice:', e); }
+    }
+
+    // Process spell-inflicted status conditions: Focus upkeep or expiry
+    if (game.user.isGM) {
+      try {
+        await this._processSpellStatuses();
+      } catch (e) { console.warn('Vagabond | Error processing spell statuses:', e); }
     }
 
     const advanceTime = CONFIG.time.roundTime;
@@ -392,6 +404,273 @@ export class VagabondCombat extends Combat {
         overlay.removeDice(dice.id);
       }
       await dice.delete();
+    }
+  }
+
+  /**
+   * Remove all spell-inflicted status conditions and tracking flags when combat ends.
+   * @private
+   */
+  async _cleanupAllSpellStatuses() {
+    const scene = game.scenes.current;
+    if (!scene) return;
+
+    for (const tokenDoc of scene.tokens) {
+      const actor = tokenDoc.actor;
+      if (!actor) continue;
+
+      const spellStatuses = actor.getFlag('vagabond', 'spellStatuses') || [];
+      if (spellStatuses.length === 0) continue;
+
+      // Remove each spell-inflicted status condition
+      for (const entry of spellStatuses) {
+        if (actor.statuses?.has(entry.statusCondition)) {
+          await actor.toggleStatusEffect(entry.statusCondition, { active: false });
+        }
+      }
+
+      // Clear the tracking flag
+      await actor.unsetFlag('vagabond', 'spellStatuses');
+    }
+  }
+
+  /**
+   * Process spell-inflicted status conditions at round start.
+   * Focus rules:
+   * - Continual statuses persist indefinitely (no Focus or mana needed)
+   * - Focused + friendly/self target: silently persists, no cost
+   * - Focused + hostile target (NPC): requires Cast Check + 1 mana, posted as interactive chat card
+   * - Not focused: status expires automatically
+   * @private
+   */
+  async _processSpellStatuses() {
+    const scene = game.scenes.current;
+    if (!scene) return;
+
+    const expiredStatuses = [];
+    // Collect hostile focus prompts per caster: Map<casterId, Array<{entry, targetActor, tokenDoc}>>
+    const hostileFocusPrompts = new Map();
+
+    // Check all tokens on the scene for spell-inflicted statuses
+    for (const tokenDoc of scene.tokens) {
+      const actor = tokenDoc.actor;
+      if (!actor) continue;
+
+      const spellStatuses = actor.getFlag('vagabond', 'spellStatuses') || [];
+      if (spellStatuses.length === 0) continue;
+
+      const remaining = [];
+
+      for (const entry of spellStatuses) {
+        const { statusCondition, spellId, spellName, casterId, casterName, continual } = entry;
+
+        // Continual statuses never expire from round processing
+        if (continual) {
+          remaining.push(entry);
+          continue;
+        }
+
+        // Check if the caster is Focusing on this spell
+        const caster = game.actors.get(casterId);
+        const focusedSpells = caster?.system?.focus?.spellIds || [];
+        const isFocused = focusedSpells.includes(spellId);
+
+        if (!isFocused) {
+          // Not focused — remove the status condition
+          if (actor.statuses?.has(statusCondition)) {
+            await actor.toggleStatusEffect(statusCondition, { active: false });
+          }
+          expiredStatuses.push({ targetName: actor.name, statusCondition, spellName, casterName, reason: 'no focus' });
+          continue;
+        }
+
+        // Focused — determine if target is hostile or friendly
+        // NPC type = hostile (requires Cast Check + mana), character = friendly (free)
+        const isHostileTarget = actor.type === 'npc';
+
+        if (!isHostileTarget) {
+          // Friendly/self target: Focus is free, silently persists
+          remaining.push(entry);
+          continue;
+        }
+
+        // Hostile target: needs Cast Check — collect for interactive prompt
+        // Check mana first — if caster can't pay, auto-expire
+        const currentMana = caster.system.mana?.current ?? 0;
+        if (currentMana < 1) {
+          // Can't pay — remove Focus and status
+          const newFocused = focusedSpells.filter(id => id !== spellId);
+          await caster.update({ 'system.focus.spellIds': newFocused });
+          if (newFocused.length === 0 && caster.statuses?.has('focusing')) {
+            await caster.toggleStatusEffect('focusing', { active: false });
+          }
+          if (actor.statuses?.has(statusCondition)) {
+            await actor.toggleStatusEffect(statusCondition, { active: false });
+          }
+          expiredStatuses.push({ targetName: actor.name, statusCondition, spellName, casterName, reason: 'no mana' });
+          continue;
+        }
+
+        // Has mana — queue the interactive prompt (don't remove yet)
+        remaining.push(entry); // Keep for now; the button handler will remove on fail
+        if (!hostileFocusPrompts.has(casterId)) {
+          hostileFocusPrompts.set(casterId, []);
+        }
+        hostileFocusPrompts.get(casterId).push({
+          entry,
+          targetActorId: actor.id,
+          targetName: actor.name,
+          targetTokenId: tokenDoc.id,
+          sceneId: scene.id
+        });
+      }
+
+      // Update the flag with remaining statuses
+      if (remaining.length !== spellStatuses.length) {
+        if (remaining.length === 0) {
+          await actor.unsetFlag('vagabond', 'spellStatuses');
+        } else {
+          await actor.setFlag('vagabond', 'spellStatuses', remaining);
+        }
+      }
+    }
+
+    // Post expiry notifications for auto-removed statuses
+    if (expiredStatuses.length > 0) {
+      const lines = expiredStatuses.map(expired => {
+        const condLabel = CONFIG.VAGABOND.onHitStatusConditions?.[expired.statusCondition]
+          ? game.i18n.localize(CONFIG.VAGABOND.onHitStatusConditions[expired.statusCondition])
+          : expired.statusCondition;
+        const reason = expired.reason === 'no mana' ? '(out of mana)' : '(not Focused)';
+        return `<strong>${expired.targetName}</strong> is no longer <strong>${condLabel}</strong> ${reason}`;
+      });
+
+      await ChatMessage.create({
+        content: `<div class="vagabond-spell-status-update">
+          <h3><i class="fas fa-magic"></i> Spell Status Update</h3>
+          ${lines.map(l => `<p>${l}</p>`).join('')}
+        </div>`,
+        speaker: { alias: 'Spell System' }
+      });
+    }
+
+    // Post interactive "Maintain Focus" chat cards — one per caster+spell combination
+    // Re-group prompts by casterId + spellId so each focused spell gets its own check
+    const perSpellPrompts = new Map(); // key: "casterId|spellId"
+    for (const [casterId, prompts] of hostileFocusPrompts) {
+      for (const p of prompts) {
+        const key = `${casterId}|${p.entry.spellId}`;
+        if (!perSpellPrompts.has(key)) {
+          perSpellPrompts.set(key, { casterId, spellId: p.entry.spellId, spellName: p.entry.spellName, targets: [] });
+        }
+        perSpellPrompts.get(key).targets.push(p);
+      }
+    }
+
+    for (const [, group] of perSpellPrompts) {
+      const caster = game.actors.get(group.casterId);
+      if (!caster) continue;
+
+      const manaSkill = caster.system.classData?.manaSkill;
+      const skill = manaSkill ? caster.system.skills[manaSkill] : null;
+      const difficulty = skill?.difficulty ?? 10;
+      const skillLabel = skill?.label || 'Magic';
+
+      // Build a list of targets for this spell
+      const targetLines = group.targets.map(p => {
+        const condLabel = CONFIG.VAGABOND.onHitStatusConditions?.[p.entry.statusCondition]
+          ? game.i18n.localize(CONFIG.VAGABOND.onHitStatusConditions[p.entry.statusCondition])
+          : p.entry.statusCondition;
+        return `<strong>${p.targetName}</strong> — ${condLabel}`;
+      });
+
+      // Encode prompt data for the button handler
+      const promptData = JSON.stringify(group.targets.map(p => ({
+        statusCondition: p.entry.statusCondition,
+        spellId: p.entry.spellId,
+        spellName: p.entry.spellName,
+        targetActorId: p.targetActorId,
+        targetName: p.targetName,
+        targetTokenId: p.targetTokenId,
+        sceneId: p.sceneId
+      }))).replace(/"/g, '&quot;');
+
+      await ChatMessage.create({
+        content: `<div class="vagabond-spell-status-update">
+          <h3><i class="fas fa-magic"></i> Focus Maintenance — ${caster.name}</h3>
+          <p><strong>${group.spellName}</strong>: Cast Check required (${skillLabel}, DC ${difficulty}) to maintain Focus:</p>
+          ${targetLines.map(l => `<p>${l}</p>`).join('')}
+          <div class="save-buttons-row">
+            <button class="vagabond-focus-maintain-button vagabond-save-button"
+              data-vagabond-button="true"
+              data-caster-id="${group.casterId}"
+              data-mana-skill="${manaSkill}"
+              data-difficulty="${difficulty}"
+              data-prompts="${promptData}">
+              <i class="fas fa-magic"></i> Roll Cast Check (1 mana)
+            </button>
+            <button class="vagabond-focus-drop-button vagabond-save-button"
+              data-vagabond-button="true"
+              data-caster-id="${group.casterId}"
+              data-prompts="${promptData}">
+              <i class="fas fa-times"></i> Drop Focus
+            </button>
+          </div>
+        </div>`,
+        speaker: ChatMessage.getSpeaker({ actor: caster })
+      });
+    }
+  }
+
+  /**
+   * Drop Focus on spell statuses for specific targets.
+   * Removes status conditions from targets, cleans up spellStatuses flags,
+   * and removes spells from caster's Focus list.
+   * @param {Actor} caster - The caster actor dropping Focus
+   * @param {Array<Object>} prompts - Array of {statusCondition, spellId, spellName, targetActorId, targetName, targetTokenId, sceneId}
+   * @static
+   */
+  static async _dropFocusStatuses(caster, prompts) {
+    if (!caster || !prompts?.length) return;
+
+    const spellIdsToRemove = new Set();
+
+    // Remove status conditions from each target
+    for (const prompt of prompts) {
+      const targetActor = game.actors.get(prompt.targetActorId);
+      if (!targetActor) continue;
+
+      // Remove the status condition
+      if (targetActor.statuses?.has(prompt.statusCondition)) {
+        await targetActor.toggleStatusEffect(prompt.statusCondition, { active: false });
+      }
+
+      // Remove this entry from the target's spellStatuses flag
+      const spellStatuses = targetActor.getFlag('vagabond', 'spellStatuses') || [];
+      const updated = spellStatuses.filter(entry =>
+        !(entry.statusCondition === prompt.statusCondition &&
+          entry.spellId === prompt.spellId &&
+          entry.casterId === caster.id)
+      );
+      if (updated.length === 0) {
+        await targetActor.unsetFlag('vagabond', 'spellStatuses');
+      } else if (updated.length !== spellStatuses.length) {
+        await targetActor.setFlag('vagabond', 'spellStatuses', updated);
+      }
+
+      spellIdsToRemove.add(prompt.spellId);
+    }
+
+    // Remove spells from caster's Focus list
+    const focusedSpells = caster.system?.focus?.spellIds || [];
+    const newFocused = focusedSpells.filter(id => !spellIdsToRemove.has(id));
+    if (newFocused.length !== focusedSpells.length) {
+      await caster.update({ 'system.focus.spellIds': newFocused });
+    }
+
+    // Remove Focusing status if no more focused spells
+    if (newFocused.length === 0 && caster.statuses?.has('focusing')) {
+      await caster.toggleStatusEffect('focusing', { active: false });
     }
   }
 
