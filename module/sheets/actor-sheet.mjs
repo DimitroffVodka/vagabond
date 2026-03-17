@@ -82,6 +82,7 @@ export class VagabondActorSheet extends api.HandlebarsApplicationMixin(
       removeWeakness: this._onRemoveWeakness,
       toggleStatusImmunity: this._onToggleStatusImmunity,
       removeStatusImmunity: this._onRemoveStatusImmunity,
+      removeResistance: this._onRemoveResistance,
       selectZone: this._onSelectZone,
       clearZone: this._onClearZone,
       // NPC action/ability actions - delegated to actionHandler
@@ -836,6 +837,10 @@ export class VagabondActorSheet extends api.HandlebarsApplicationMixin(
 
   static async _onRemoveStatusImmunity(event, target) {
     return this.immunityHandler?.removeStatusImmunity(event, target);
+  }
+
+  static async _onRemoveResistance(event, target) {
+    return this.immunityHandler?.removeResistance(event, target);
   }
 
   static async _onSelectZone(event, target) {

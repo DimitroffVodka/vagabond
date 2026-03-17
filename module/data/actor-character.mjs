@@ -394,13 +394,19 @@ export default class VagabondCharacter extends VagabondActorBase {
       }, {})
     );
 
-    // Damage immunities and weaknesses
+    // Damage immunities, weaknesses, and resistances
     schema.immunities = new fields.ArrayField(
       new fields.StringField({ required: true }),
       { required: true, initial: [] }
     );
 
     schema.weaknesses = new fields.ArrayField(
+      new fields.StringField({ required: true }),
+      { required: true, initial: [] }
+    );
+
+    // Resistances — half damage from these types BEFORE armor
+    schema.resistances = new fields.ArrayField(
       new fields.StringField({ required: true }),
       { required: true, initial: [] }
     );
@@ -450,6 +456,68 @@ export default class VagabondCharacter extends VagabondActorBase {
     schema.autoFailAllRolls = new fields.BooleanField({
       initial: false,
       label: "Auto-Fail All Rolls"
+    });
+
+    // Auto-fail saves vs specific conditions (relic cursed powers)
+    schema.autoFailSaveVs = new fields.SchemaField({
+      berserk: new fields.BooleanField({ initial: false }),
+      frightened: new fields.BooleanField({ initial: false }),
+      charmed: new fields.BooleanField({ initial: false })
+    });
+
+    // Favor on saves vs specific conditions (relic resistance powers)
+    schema.favorOnSaveVs = new fields.SchemaField({
+      frightened: new fields.BooleanField({ initial: false }),
+      confused: new fields.BooleanField({ initial: false }),
+      charmed: new fields.BooleanField({ initial: false })
+    });
+
+    // Healing capped at N per die (relic cursed power — Doom)
+    schema.healingCappedPerDie = new fields.NumberField({
+      ...requiredInteger,
+      initial: 0,
+      label: "Healing Capped Per Die (0 = no cap)"
+    });
+
+    // Cannot be surprised (relic Warning power)
+    schema.cannotBeSurprised = new fields.BooleanField({
+      initial: false,
+      label: "Cannot Be Surprised"
+    });
+
+    // Movement types granted by relic powers
+    schema.movement = new fields.SchemaField({
+      blink: new fields.BooleanField({ initial: false }),
+      climb: new fields.BooleanField({ initial: false }),
+      cling: new fields.BooleanField({ initial: false }),
+      fly: new fields.BooleanField({ initial: false }),
+      levitate: new fields.BooleanField({ initial: false }),
+      waterwalk: new fields.BooleanField({ initial: false }),
+      webwalk: new fields.BooleanField({ initial: false })
+    });
+
+    // Senses granted by relic powers
+    schema.senses = new fields.SchemaField({
+      detection: new fields.BooleanField({ initial: false }),
+      darksight: new fields.BooleanField({ initial: false }),
+      echolocation: new fields.BooleanField({ initial: false }),
+      senseLife: new fields.BooleanField({ initial: false }),
+      senseValuables: new fields.BooleanField({ initial: false }),
+      tremorsense: new fields.BooleanField({ initial: false }),
+      telepathy: new fields.BooleanField({ initial: false }),
+      allsight: new fields.BooleanField({ initial: false })
+    });
+
+    // Speak all languages (relic Ambassador power)
+    schema.speakAllLanguages = new fields.BooleanField({
+      initial: false,
+      label: "Speak All Languages"
+    });
+
+    // Breathe underwater (relic Aqua Lung power)
+    schema.breatheUnderwater = new fields.BooleanField({
+      initial: false,
+      label: "Breathe Underwater"
     });
 
     // Brawl Check Favor — grants Favor on Grapple/Shove checks (e.g., Orc Beefy trait)

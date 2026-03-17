@@ -976,6 +976,7 @@ VAGABOND.armorTypeDescriptions = {
  */
 VAGABOND.metalTypes = {
   'common': 'VAGABOND.Metal.Common',
+  'magical': 'VAGABOND.Metal.Magical',
   'adamant': 'VAGABOND.Metal.Adamant',
   'coldIron': 'VAGABOND.Metal.ColdIron',
   'silver': 'VAGABOND.Metal.Silver',
@@ -989,6 +990,7 @@ VAGABOND.metalTypes = {
  */
 VAGABOND.metalData = {
   'common': { multiplier: 1, effect: 'VAGABOND.MetalDescriptions.Common' },
+  'magical': { multiplier: 1, effect: 'VAGABOND.MetalDescriptions.Magical' },
   'adamant': { multiplier: 50, effect: 'VAGABOND.MetalDescriptions.Adamant' },
   'coldIron': { multiplier: 20, effect: 'VAGABOND.MetalDescriptions.ColdIron' },
   'silver': { multiplier: 10, effect: 'VAGABOND.MetalDescriptions.Silver' },

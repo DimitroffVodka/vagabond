@@ -224,13 +224,19 @@ export default class VagabondNPC extends VagabondActorBase {
       initial: false,
     });
 
-    // Damage immunities and weaknesses
+    // Damage immunities, weaknesses, and resistances
     schema.immunities = new fields.ArrayField(
       new fields.StringField({ required: true }),
       { required: true, initial: [] }
     );
 
     schema.weaknesses = new fields.ArrayField(
+      new fields.StringField({ required: true }),
+      { required: true, initial: [] }
+    );
+
+    // Resistances — half damage from these types BEFORE armor
+    schema.resistances = new fields.ArrayField(
       new fields.StringField({ required: true }),
       { required: true, initial: [] }
     );

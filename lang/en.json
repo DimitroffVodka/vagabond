@@ -1030,6 +1030,7 @@
     },
     "Metal": {
       "Common": "Common",
+      "Magical": "Magical",
       "Adamant": "Adamant",
       "ColdIron": "Cold Iron",
       "Silver": "Silver",
@@ -1038,6 +1039,7 @@
     },
     "MetalDescriptions": {
       "Common": "",
+      "Magical": "Bypasses Physical immunity and resistance.",
       "Adamant": "Occupies +1 Slot. +1 to Armor (if Armor) or Weapon damage.",
       "ColdIron": "Situational weakness (Fae).",
       "Silver": "Blesses weapons against the accursed.",

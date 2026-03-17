@@ -47,6 +47,16 @@
           </div>
         </div>
       {{/if}}
+      {{#if system.resistances.length}}
+        <div class='npc-detail-row'>
+          <label class='npc-field-label'>Resistances</label>
+          <div class='npc-immunity-text'>
+            {{#each system.resistances as |res index|}}
+              <i class='{{lookup ../config.damageTypeIcons res}} damage-type-icon-prefix'></i>{{localize (lookup ../config.damageTypes res)}}{{#unless @last}}, {{/unless}}
+            {{/each}}
+          </div>
+        </div>
+      {{/if}}
       {{#if system.statusImmunities.length}}
         <div class='npc-detail-row'>
           <label class='npc-field-label'>{{localize "VAGABOND.Actor.NPC.FIELDS.statusImmunities.label"}}</label>
@@ -95,6 +105,20 @@
             {{/each}}
           </div>
 
+          {{! Damage Resistances }}
+          <div class='npc-resistance-group' data-save-target='system.resistances'>
+            <h5 class='npc-resistance-group-header'>Resistances (½ Damage)</h5>
+            {{#each config.damageTypes as |label key|}}
+              {{#unless (eq key '-')}}
+                <label class='npc-immunity-checkbox-item'>
+                  <input type='checkbox' value='{{key}}' {{#if (contains ../system.resistances key)}}checked{{/if}}>
+                  <i class='{{lookup ../config.damageTypeIcons key}} damage-type-icon-prefix'></i>
+                  <span>{{localize label}}</span>
+                </label>
+              {{/unless}}
+            {{/each}}
+          </div>
+
           {{! Status Immunities }}
           <div class='npc-resistance-group' data-save-target='system.statusImmunities'>
             <h5 class='npc-resistance-group-header'>{{localize "VAGABOND.Actor.NPC.FIELDS.statusImmunities.label"}}</h5>
@@ -131,6 +155,18 @@
               <i class='{{lookup ../config.damageTypeIcons weakness}} damage-type-icon-prefix'></i>
               {{localize (lookup ../config.allWeaknessTypes weakness)}}
               <i class='fas fa-times' data-action='removeWeakness' data-weakness='{{weakness}}'></i>
+            </span>
+          {{/each}}
+        </div>
+      {{/if}}
+      {{#if system.resistances.length}}
+        <div class='npc-tag-group'>
+          <span class='npc-tag-group-label'>Resistances</span>
+          {{#each system.resistances as |res index|}}
+            <span class='npc-immunity-tag npc-resistance-tag'>
+              <i class='{{lookup ../config.damageTypeIcons res}} damage-type-icon-prefix'></i>
+              {{localize (lookup ../config.damageTypes res)}}
+              <i class='fas fa-times' data-action='removeResistance' data-resistance='{{res}}'></i>
             </span>
           {{/each}}
         </div>

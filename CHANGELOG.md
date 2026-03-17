@@ -1,5 +1,67 @@
 # Changelog
 
+## Phase 8: Relic Forge Overhaul, Resistance System & Magical Weapons
+
+### New Features
+
+#### Relic Forge Overhaul — Matches Official Naming Procedure
+- **Removed tier selector** — no more Minor/None/Major. Each power tier is now its own entry (e.g. Lifesteal I, Lifesteal II, Lifesteal III) matching the official spreadsheet exactly.
+- **99 powers across 11 categories** — Ace (6), Bane (3), Bonus (12), Cursed (10), Movement (14), Protection (3), Resistance (4), Senses (8), Strike (3), Utility (29). Removed Fabled (pre-made relics, not forge powers).
+- **Per-power cost system** — each power has a gold cost. Total item cost = base item cost + sum of power costs. Displayed in the forge header and per power card.
+- **Official naming convention** — prefix (`"Brutal Longsword"`), suffix (`"Longsword of Climbing"`), and wrap (`"Dragon's Bane Longsword"`) patterns with `{input}` placeholder replacement. Metal suffix appended for special metals.
+- **Dropdown inputs for Bane/Protection** — Niche (bestiary compendium actors), Specific (29 hardcoded subtypes), General (8 Being Types). Store Spell uses spell compendium dropdown.
+- **Compendium cache** — bestiary + spell names loaded once per forge session for dropdown population.
+- **Forge auto-sets magical metal** — weapons forged with common/no metal are upgraded to `'magical'` automatically.
+
+#### Resistance System (Game-Wide)
+- **New `system.resistances` ArrayField** on both character and NPC data models.
+- **Damage pipeline integration** — resistance halves damage (`Math.floor(damage / 2)`) after immunity check, before armor.
+- **Equipment AE flag support** — relic resistance powers store `flags.vagabond.damageResistance` on Active Effects since Foundry AE mode ADD doesn't append to arrays. The damage pipeline scans all equipped item effects for these flags.
+- **NPC sheet UI** — locked mode shows resistance tags with damage type icons. Unlocked mode shows checkbox group under "Resistances (½ Damage)" with tag display and remove buttons.
+
+#### Physical Immunity & Resistance — Magical Weapon Bypass
+- **Physical defined** — Blunt, Piercing, or Slashing damage from non-magical weapons.
+- **`_isWeaponMagical()` helper** — a weapon is magical if it has: (1) special metal (not none/common), (2) any Active Effects, or (3) `relicForge` flag from the forge.
+- **Bypasses both immunity and resistance** — magical weapons ignore Physical immunity and Physical resistance entirely.
+- **New `'magical'` metal type** — 1× cost multiplier, no stat changes, exists solely to mark items as magical. The forge sets this automatically.
+
+#### Relic Power Functionality (37 powers wired up)
+- **Bane (Niche/Specific/General)** — bonus damage dice vs matching NPC creature types.
+- **Cursed (Anger/Cowardice/Gullibility)** — `autoFailSaveVs` schema fields for auto-failing specific save types.
+- **Cursed (Doom)** — `healingCappedPerDie` schema field caps healing per die rolled.
+- **Movement (8 types)** — Blinking, Climbing, Clinging, Flying, Levitation, Waterwalk, Webwalk set `movement.*` schema fields.
+- **Protection (Niche/Specific/General)** — grants Favor on saves vs matching creature types.
+- **Resistance (Bravery/Clarity/Repulsing)** — `favorOnSaveVs` schema fields for Favor on specific save types.
+- **Senses (all 8)** — Nightvision, Echolocation, Telepathy, True-Seeing, Detection, Sense Life, Sense Valuables, Tremors set `senses.*` schema fields.
+- **Utility (Lifesteal I/II/III)** — heals on kill via `onKillHealDice` flag (1d8/2d8/3d8).
+- **Utility (Manasteal I/II/III)** — restores mana on kill via `onKillManaDice` flag.
+- **Utility (Ambassador)** — `speakAllLanguages` schema field.
+- **Utility (Aqua Lung)** — `breatheUnderwater` schema field.
+- **Utility (Warning)** — `cannotBeSurprised` schema field.
+
+### Technical Details
+
+#### Modified Files (14 files)
+
+| File | Changes |
+|------|---------|
+| `module/helpers/relic-powers.mjs` | Complete rewrite — 99 powers, 11 categories, per-power costs, nameFormat system, dropdown inputs, `requiresInput`/`inputType`/`inputSource` |
+| `module/applications/relic-forge.mjs` | Removed tier selector, added compendium cache, `_computeName()` with prefix/suffix/wrap, `_computeCostDisplay()`, dropdown resolution, auto-magical metal |
+| `templates/apps/relic-forge.hbs` | Removed tier section, added cost display, power cost tags, conditional select/input for dropdown powers |
+| `module/helpers/damage-helper.mjs` | `_isWeaponMagical()`, Physical immunity bypass, resistance system (halve before armor), equipped item AE flag scanning |
+| `module/data/actor-character.mjs` | Added `system.resistances` ArrayField, movement/senses/save modifier schema fields |
+| `module/data/actor-npc.mjs` | Added `system.resistances` ArrayField |
+| `module/data/base-equipment.mjs` | Added `'magical'` to metal choices with 1× multiplier |
+| `module/helpers/config.mjs` | Added `'magical'` to damage type/metal configs |
+| `module/sheets/actor-sheet.mjs` | Registered `removeResistance` action |
+| `module/sheets/handlers/npc-immunity-handler.mjs` | Added `removeResistance()` method |
+| `templates/actor/npc-content.hbs` | Resistance UI — locked display + unlocked checkboxes + tag remove buttons |
+| `templates/item/header.hbs` | Added magical metal display |
+| `css/vagabond.css` | Forge font size bump (0.7→0.85-1rem), preview-cost, power-cost-tag, power-input-row, item-meta styles |
+| `lang/en.json` | Added resistance/magical metal localization strings |
+
+---
+
 ## Phase 7: Weapon Properties, Crit Choice, Dice Tooltips & Relic Forge
 
 ### New Features

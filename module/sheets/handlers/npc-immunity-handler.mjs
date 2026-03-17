@@ -130,6 +130,24 @@ export class NPCImmunityHandler {
   }
 
   /**
+   * Remove damage resistance
+   * @param {Event} event - The triggering event
+   * @param {HTMLElement} target - The target element
+   */
+  async removeResistance(event, target) {
+    event.preventDefault();
+    const resistance = target.dataset.resistance;
+
+    const resistances = [...(this.actor.system.resistances || [])];
+    const index = resistances.indexOf(resistance);
+
+    if (index > -1) {
+      resistances.splice(index, 1);
+      await this.actor.update({ 'system.resistances': resistances });
+    }
+  }
+
+  /**
    * Toggle speed type
    * @param {Event} event - The triggering event
    * @param {HTMLElement} target - The target element

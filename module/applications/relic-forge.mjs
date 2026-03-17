@@ -1,4 +1,4 @@
-import { RELIC_POWERS, RELIC_POWER_CATEGORIES, getRelicPower, getPowersByCategory } from '../helpers/relic-powers.mjs';
+import { RELIC_POWERS, RELIC_POWER_CATEGORIES, METAL_DISPLAY_NAMES, getRelicPower, getPowersByCategory } from '../helpers/relic-powers.mjs';
 
 const { api } = foundry.applications;
 
@@ -13,8 +13,7 @@ export class RelicForge extends api.HandlebarsApplicationMixin(api.ApplicationV2
 
   #actor;
   #baseItem = null;
-  #selectedTier = 'minor';
-  #selectedPowers = new Map();
+  #selectedPowers = new Map();   // id → { ...powerDef, _userInput?: string }
   #customPowers = [];
   #categoryFilter = 'all';
 
@@ -29,7 +28,6 @@ export class RelicForge extends api.HandlebarsApplicationMixin(api.ApplicationV2
     },
     position: { width: 960, height: 780 },
     actions: {
-      setTier: RelicForge.prototype._onSetTier,
       togglePower: RelicForge.prototype._onTogglePower,
       removePower: RelicForge.prototype._onRemovePower,
       addCustomPower: RelicForge.prototype._onAddCustomPower,
@@ -52,9 +50,11 @@ export class RelicForge extends api.HandlebarsApplicationMixin(api.ApplicationV2
     return new RelicForge(options).render(true);
   }
 
-  /* ─── Drag & Drop ─── */
+  /* ─── Drag & Drop + Input Listeners ─── */
   _onRender(context, options) {
     super._onRender(context, options);
+
+    // Drop zone
     const dropZone = this.element.querySelector('.drop-zone');
     if (dropZone) {
       dropZone.addEventListener('dragover', (ev) => {
@@ -65,6 +65,24 @@ export class RelicForge extends api.HandlebarsApplicationMixin(api.ApplicationV2
         ev.currentTarget.classList.remove('drag-hover');
       });
       dropZone.addEventListener('drop', (ev) => this._onDropItem(ev));
+    }
+
+    // User-input fields for powers that require text input
+    const inputs = this.element.querySelectorAll('.power-user-input');
+    for (const input of inputs) {
+      input.addEventListener('change', (ev) => {
+        const powerId = ev.target.dataset.powerId;
+        const power = this.#selectedPowers.get(powerId);
+        if (power) {
+          power._userInput = ev.target.value.trim();
+          // Re-render just the preview name
+          const nameEl = this.element.querySelector('.name-text');
+          if (nameEl) nameEl.textContent = this._computeName();
+          // Update cost display
+          const costEl = this.element.querySelector('.cost-text');
+          if (costEl) costEl.textContent = this._computeCostDisplay();
+        }
+      });
     }
   }
 
@@ -88,7 +106,6 @@ export class RelicForge extends api.HandlebarsApplicationMixin(api.ApplicationV2
       return;
     }
 
-    // Accept weapons and generic equipment
     if (item.type !== 'equipment') {
       ui.notifications.warn('Only equipment items (weapons, armor, gear) can be forged into relics.');
       return;
@@ -103,15 +120,46 @@ export class RelicForge extends api.HandlebarsApplicationMixin(api.ApplicationV2
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
 
+    // Load compendium names for dropdown powers (cached after first load)
+    if (!this._compendiumCache) {
+      this._compendiumCache = {};
+
+      // Bestiary names (for Bane/Protection Niche)
+      this._compendiumCache.bestiary = [];
+      for (const packId of ['vagabond.bestiary', 'vagabond.humanlike']) {
+        const pack = game.packs.get(packId);
+        if (pack) {
+          const index = await pack.getIndex();
+          for (const entry of index) {
+            if (!this._compendiumCache.bestiary.includes(entry.name)) {
+              this._compendiumCache.bestiary.push(entry.name);
+            }
+          }
+        }
+      }
+      this._compendiumCache.bestiary.sort();
+
+      // Spell names (for Store Spell)
+      this._compendiumCache.spells = [];
+      const spellPack = game.packs.get('vagabond.spells');
+      if (spellPack) {
+        const index = await spellPack.getIndex();
+        for (const entry of index) {
+          this._compendiumCache.spells.push(entry.name);
+        }
+        this._compendiumCache.spells.sort();
+      }
+    }
+
     // Base item
     context.baseItem = this.#baseItem;
-
-    // Tiers
-    context.tiers = [
-      { key: 'minor', label: 'Minor', active: this.#selectedTier === 'minor' },
-      { key: 'none', label: '(None)', active: this.#selectedTier === 'none' },
-      { key: 'major', label: 'Major', active: this.#selectedTier === 'major' }
-    ];
+    if (this.#baseItem) {
+      const metal = this.#baseItem.system?.metal || 'none';
+      context.baseMetalDisplay = (metal !== 'none' && metal !== 'common')
+        ? METAL_DISPLAY_NAMES[metal] || metal
+        : 'Common';
+      context.baseCostDisplay = this.#baseItem.system?.costDisplay || '-';
+    }
 
     // Categories
     context.categories = [
@@ -126,15 +174,36 @@ export class RelicForge extends api.HandlebarsApplicationMixin(api.ApplicationV2
     context.powers = filtered.map(p => ({
       ...p,
       selected: this.#selectedPowers.has(p.id),
+      costDisplay: p.cost > 0 ? `${p.cost.toLocaleString()}g` : (p.cost === 0 ? 'Free' : 'Special'),
       categoryLabel: RELIC_POWER_CATEGORIES[p.category]?.label || p.category
     }));
 
-    // Selected powers
-    context.selectedPowers = Array.from(this.#selectedPowers.values());
+    // Selected powers (with user input state + resolved options)
+    context.selectedPowers = Array.from(this.#selectedPowers.values()).map(p => {
+      const resolved = {
+        ...p,
+        costDisplay: p.cost > 0 ? `${p.cost.toLocaleString()}g` : (p.cost === 0 ? 'Free' : 'Special'),
+        userInput: p._userInput || ''
+      };
+      // Resolve input options as {value, label, selected} objects
+      if (p.inputType === 'compendium' && p.inputSource) {
+        const sourceNames = this._compendiumCache?.[p.inputSource] || [];
+        resolved.resolvedOptions = sourceNames.map(n => ({
+          value: n, label: n, selected: n === (p._userInput || '')
+        }));
+        resolved.inputType = 'select';
+      } else if (p.inputType === 'select' && p.inputOptions) {
+        resolved.resolvedOptions = p.inputOptions.map(o => ({
+          value: o, label: o, selected: o === (p._userInput || '')
+        }));
+      }
+      return resolved;
+    });
     context.customPowers = this.#customPowers.map((cp, i) => ({ ...cp, index: i }));
 
-    // Preview name
+    // Preview name & cost
     context.previewName = this._computeName();
+    context.totalCostDisplay = this._computeCostDisplay();
 
     // Can forge?
     context.canForge = this.#baseItem && (this.#selectedPowers.size > 0 || this.#customPowers.length > 0);
@@ -152,40 +221,71 @@ export class RelicForge extends api.HandlebarsApplicationMixin(api.ApplicationV2
 
   /* ─── Name computation ─── */
   _computeName() {
-    const parts = [];
+    const baseName = this.#baseItem?.name || '[Item]';
+    const metal = this.#baseItem?.system?.metal || 'none';
 
-    // Tier prefix
-    if (this.#selectedTier === 'minor') parts.push('Minor');
-    else if (this.#selectedTier === 'major') parts.push('Major');
+    const prefixes = [];
+    const suffixes = [];
+    let wrapTemplate = null;
 
-    // Power labels (use nameLabel to avoid "I" / "II" / "III" in name — tier handles that)
-    const usedLabels = new Set();
-    for (const power of this.#selectedPowers.values()) {
-      if (!usedLabels.has(power.nameLabel)) {
-        parts.push(power.nameLabel);
-        usedLabels.add(power.nameLabel);
+    const allPowers = [...this.#selectedPowers.values(), ...this.#customPowers];
+    for (const power of allPowers) {
+      const fmt = power.nameFormat;
+      if (!fmt) {
+        // Custom powers without nameFormat — use nameLabel as prefix
+        if (power.nameLabel) prefixes.push(power.nameLabel);
+        continue;
+      }
+
+      // Replace {input} placeholder
+      let text = fmt.text || fmt.template || '';
+      if (power.requiresInput && power._userInput) {
+        text = text.replace('{input}', power._userInput);
+      } else if (power.requiresInput) {
+        text = text.replace('{input}', '???');
+      }
+
+      if (fmt.position === 'prefix') {
+        prefixes.push(text);
+      } else if (fmt.position === 'suffix') {
+        suffixes.push(text);
+      } else if (fmt.position === 'wrap') {
+        // Wrap templates replace {item} with the base name
+        wrapTemplate = text;
       }
     }
-    for (const cp of this.#customPowers) {
-      if (cp.nameLabel) parts.push(cp.nameLabel);
-    }
 
-    // Base item name
-    if (this.#baseItem) {
-      parts.push(this.#baseItem.name);
+    let name;
+    if (wrapTemplate) {
+      // Wrap template gets priority — replace {item} with base name
+      name = wrapTemplate.replace('{item}', baseName);
+      // Still prepend other prefixes / append suffixes
+      if (prefixes.length) name = prefixes.join(' ') + ' ' + name;
+      if (suffixes.length) name = name + ' ' + suffixes.join(' ');
     } else {
-      parts.push('[Weapon]');
+      name = [...prefixes, baseName].join(' ');
+      if (suffixes.length) name = name + ' ' + suffixes.join(' ');
     }
 
-    return parts.join(' ');
+    // Append metal in parentheses if not common/none
+    if (metal && metal !== 'none' && metal !== 'common') {
+      name += ` (${METAL_DISPLAY_NAMES[metal] || metal})`;
+    }
+
+    return name;
+  }
+
+  /* ─── Cost computation ─── */
+  _computeCostDisplay() {
+    const baseCostGold = this.#baseItem?.system?.baseCost?.gold || 0;
+    const allPowers = [...this.#selectedPowers.values(), ...this.#customPowers];
+    const powerCost = allPowers.reduce((sum, p) => sum + (p.cost || 0), 0);
+    const metalMultiplier = this.#baseItem?.system?.metalMultiplier || 1;
+    const totalGold = (baseCostGold * metalMultiplier) + powerCost;
+    return totalGold > 0 ? `${totalGold.toLocaleString()}g` : '-';
   }
 
   /* ─── Action Handlers ─── */
-
-  _onSetTier(event, target) {
-    this.#selectedTier = target.dataset.tier;
-    this.render();
-  }
 
   _onTogglePower(event, target) {
     const id = target.dataset.powerId;
@@ -193,7 +293,7 @@ export class RelicForge extends api.HandlebarsApplicationMixin(api.ApplicationV2
       this.#selectedPowers.delete(id);
     } else {
       const power = getRelicPower(id);
-      if (power) this.#selectedPowers.set(id, power);
+      if (power) this.#selectedPowers.set(id, { ...power });
     }
     this.render();
   }
@@ -231,10 +331,10 @@ export class RelicForge extends api.HandlebarsApplicationMixin(api.ApplicationV2
       description: `${key} ${mode === 2 ? '+' : '→'} ${value}`,
       applicationMode: 'when-equipped',
       changes: [{ key, mode, value }],
+      cost: 0,
       flags: { relicPower: `custom-${name.slugify()}` }
     });
 
-    // Clear inputs
     if (nameInput) nameInput.value = '';
     if (nameLabelInput) nameLabelInput.value = '';
     if (keyInput) keyInput.value = '';
@@ -285,6 +385,13 @@ export class RelicForge extends api.HandlebarsApplicationMixin(api.ApplicationV2
     // Set relic name (keep original equipmentType — weapons stay weapons, armor stays armor)
     itemData.name = this._computeName();
 
+    // Calculate and set new cost (base cost + power costs)
+    const baseCostGold = this.#baseItem.system?.baseCost?.gold || 0;
+    const powerCost = allPowers.reduce((sum, p) => sum + (p.cost || 0), 0);
+    if (itemData.system.baseCost) {
+      itemData.system.baseCost.gold = baseCostGold + powerCost;
+    }
+
     // Merge Ace properties into weapon properties
     const existingProps = new Set(itemData.system.properties || []);
     for (const power of allPowers) {
@@ -296,6 +403,12 @@ export class RelicForge extends api.HandlebarsApplicationMixin(api.ApplicationV2
     }
     itemData.system.properties = Array.from(existingProps);
 
+    // Upgrade metal to 'magical' if currently none/common — relic-forged weapons are magical
+    const currentMetal = itemData.system.metal || 'none';
+    if (currentMetal === 'none' || currentMetal === 'common') {
+      itemData.system.metal = 'magical';
+    }
+
     // Auto-generate lore
     const powerNames = allPowers.map(p => p.name).join(', ');
     itemData.system.lore = `Forged with: ${powerNames}`;
@@ -306,44 +419,45 @@ export class RelicForge extends api.HandlebarsApplicationMixin(api.ApplicationV2
     itemData.flags.vagabond.relicForge = {
       baseItemName: this.#baseItem.name,
       baseItemUuid: this.#baseItem._sourceUuid || null,
-      tier: this.#selectedTier,
-      powerIds: allPowers.map(p => p.id)
+      powerIds: allPowers.map(p => p.id),
+      powerCostGold: powerCost,
+      userInputs: Object.fromEntries(
+        allPowers.filter(p => p._userInput).map(p => [p.id, p._userInput])
+      )
     };
 
-    // Build Active Effects — apply tier scaling
-    const tierKey = this.#selectedTier; // 'minor' | 'none' | 'major'
+    // Build Active Effects
     const effects = [];
     for (const power of allPowers) {
-      // Resolve tier-scaled changes
-      let changes = power.changes || [];
-      if (power.tierValues && power.tierValues[tierKey]) {
-        changes = power.tierValues[tierKey];
-      }
-
+      const changes = power.changes || [];
+      const userInput = power._userInput || '';
       const effectData = {
         name: power.name,
         icon: power.icon?.startsWith('fas ') ? 'icons/svg/aura.svg' : (power.icon || 'icons/svg/aura.svg'),
         changes: changes.map(c => ({
-          key: c.key,
+          key: c.key.replace('{input}', userInput.toLowerCase()),
           mode: c.mode,
-          value: String(c.value)
+          value: String(c.value).replace('{input}', userInput.toLowerCase())
         })),
         flags: {
           vagabond: {
             applicationMode: power.applicationMode || 'when-equipped',
-            tier: tierKey,
-            ...(power.flags || {})
+            // Replace {input} in flag values with user input
+            ...Object.fromEntries(
+              Object.entries(power.flags || {}).map(([k, v]) => [
+                k, typeof v === 'string' ? v.replace('{input}', userInput.toLowerCase()) : v
+              ])
+            ),
+            ...(power._userInput ? { userInput: power._userInput } : {})
           }
         }
       };
-      // Add statuses if defined
       if (power.statuses) {
         effectData.statuses = power.statuses;
       }
       effects.push(effectData);
     }
 
-    // Include effects in item data for creation
     itemData.effects = effects;
 
     // Create the item
@@ -364,11 +478,13 @@ export class RelicForge extends api.HandlebarsApplicationMixin(api.ApplicationV2
     ui.notifications.info(`Forged: ${itemData.name}`);
 
     // Post to chat
+    const costText = this._computeCostDisplay();
     const card = `<div class="vagabond-chat-card">
       <div class="card-header"><h3><i class="fas fa-gem"></i> Relic Forged</h3></div>
       <div class="card-content">
         <p><strong>${itemData.name}</strong></p>
         <p><em>Powers:</em> ${powerNames}</p>
+        <p><em>Value:</em> ${costText}</p>
       </div>
     </div>`;
     await ChatMessage.create({ content: card, speaker: ChatMessage.getSpeaker() });

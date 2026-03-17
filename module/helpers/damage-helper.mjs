@@ -1,4 +1,26 @@
 /**
+ * Determine if a weapon is "magical" for purposes of bypassing Physical immunity/resistance.
+ * A weapon is magical if:
+ *  - It has a special metal (anything other than 'none' or 'common')
+ *  - It has Active Effects (e.g. relic powers like +1 Weapon)
+ * @param {Item} weapon - The attacking weapon item
+ * @returns {boolean}
+ */
+function _isWeaponMagical(weapon) {
+  // Special or magical metal bypasses (anything other than none/common)
+  const metal = weapon.system?.metal || 'common';
+  if (metal !== 'none' && metal !== 'common') return true;  // includes 'magical', 'adamant', etc.
+
+  // Has Active Effects (relic enchantments) — any AE makes it magical
+  if (weapon.effects?.size > 0) return true;
+
+  // Was forged with the Relic Forge (has forge metadata)
+  if (weapon.flags?.vagabond?.relicForge) return true;
+
+  return false;
+}
+
+/**
  * Universal Damage Helper
  * Handles damage rolling for weapons, spells, and any other damage sources
  */
@@ -986,7 +1008,7 @@ export class VagabondDamageHelper {
    * @param {string} damageType - Type of damage
    * @returns {string} HTML button string
    */
-  static createApplySaveDamageButton(actorId, actorName, finalDamage, damageType) {
+  static createApplySaveDamageButton(actorId, actorName, finalDamage, damageType, sourceActorId = null, sourceItemId = null) {
     return `
       <div class="save-apply-button-container">
         <button
@@ -995,6 +1017,8 @@ export class VagabondDamageHelper {
           data-actor-name="${actorName}"
           data-damage-amount="${finalDamage}"
           data-damage-type="${damageType}"
+          ${sourceActorId ? `data-source-actor-id="${sourceActorId}"` : ''}
+          ${sourceItemId ? `data-source-item-id="${sourceItemId}"` : ''}
         >
           <i class="fas fa-burst"></i> Apply ${finalDamage} to ${actorName}
         </button>
@@ -1069,8 +1093,59 @@ export class VagabondDamageHelper {
     }
 
     // RAW: Immune - Unharmed by the damage type
-    if (immunities.includes(normalizedType)) {
+    // Check direct immunity first
+    let isImmune = immunities.includes(normalizedType);
+
+    // Physical immunity: covers blunt/piercing/slashing from non-magical weapons
+    // A weapon is "magical" if it has a special metal OR has Active Effects (relic powers)
+    if (!isImmune && immunities.includes('physical')) {
+      const physicalTypes = ['blunt', 'piercing', 'slashing'];
+      if (physicalTypes.includes(normalizedType)) {
+        if (!attackingWeapon || !_isWeaponMagical(attackingWeapon)) {
+          isImmune = true;
+        }
+      }
+    }
+
+    if (isImmune) {
       return 0;
+    }
+
+    // Resistances — half damage BEFORE armor
+    // Gather from actor schema + equipped item AE flags (relic powers)
+    const resistances = new Set(actor.system.resistances || []);
+
+    // Check equipped items for relic resistance AEs
+    if (actor.items) {
+      for (const item of actor.items) {
+        if (item.type !== 'equipment' || !item.system.equipped) continue;
+        for (const ae of item.effects) {
+          const dr = ae.flags?.vagabond?.damageResistance;
+          if (dr) resistances.add(dr.toLowerCase());
+        }
+      }
+    }
+
+    let isResisted = false;
+
+    if (resistances.has(normalizedType)) {
+      // Direct resistance match (e.g. target resists 'fire' and damage is 'fire')
+      isResisted = true;
+    }
+
+    // Physical resistance: applies to blunt/piercing/slashing from non-magical weapons
+    // Magical weapons (special metal OR has Active Effects/relic powers) bypass physical resistance
+    if (!isResisted && resistances.has('physical')) {
+      const physicalTypes = ['blunt', 'piercing', 'slashing'];
+      if (physicalTypes.includes(normalizedType)) {
+        if (!attackingWeapon || !_isWeaponMagical(attackingWeapon)) {
+          isResisted = true;
+        }
+      }
+    }
+
+    if (isResisted) {
+      finalDamage = Math.floor(finalDamage / 2);
     }
 
     // RAW: Armor - Subtracted from ALL incoming damage
@@ -1327,7 +1402,15 @@ export class VagabondDamageHelper {
 
       // Check if attacker has outgoingSavesModifier (e.g., Confused: saves vs its attacks have Favor)
       const sourceActor = actorId ? game.actors.get(actorId) : null;
-      const attackerModifier = sourceActor?.system?.outgoingSavesModifier || 'none';
+      let attackerModifier = sourceActor?.system?.outgoingSavesModifier || 'none';
+
+      // Protection ward: if defender has a relic Protection ward matching the attacker, grant Favor on save
+      if (sourceActor?.type === 'npc') {
+        const protectionFavor = this._checkProtectionWard(targetActor, sourceActor);
+        if (protectionFavor && attackerModifier !== 'favor') {
+          attackerModifier = attackerModifier === 'hinder' ? 'none' : 'favor';
+        }
+      }
 
       // Extract keyboard modifiers from event
       const shiftKey = event?.shiftKey || false;
@@ -1372,8 +1455,14 @@ export class VagabondDamageHelper {
       // Apply armor/immune/weak modifiers and track armor reduction
       // sourceActor already declared above for outgoingSavesModifier check
       const sourceItem = sourceActor?.items.get(itemId);
-      const finalDamage = critSaveBenefit ? 0 : this.calculateFinalDamage(targetActor, damageAfterSave, damageType, sourceItem);
-      const armorReduction = damageAfterSave - finalDamage;
+      let finalDamage = critSaveBenefit ? 0 : this.calculateFinalDamage(targetActor, damageAfterSave, damageType, sourceItem);
+      // Bane: bonus damage dice vs matching creature types
+      let baneDamage = 0;
+      if (!critSaveBenefit && sourceActor) {
+        baneDamage = await this.checkBaneDamage(targetActor, sourceActor, sourceItem);
+        finalDamage += baneDamage;
+      }
+      const armorReduction = damageAfterSave - (finalDamage - baneDamage);
 
       // Auto-apply damage if setting enabled
       const autoApply = game.settings.get('vagabond', 'autoApplySaveDamage');
@@ -1383,6 +1472,8 @@ export class VagabondDamageHelper {
         await targetActor.update({ 'system.health.value': newHP });
         // On-Hit Burning: apply burning/status from weapon properties or relic power (skip if crit negated)
         if (sourceActor && !critSaveBenefit) await this.checkOnHitBurning(targetActor, sourceActor, null, null, sourceItem);
+        // On-Kill: Lifesteal/Manasteal triggers
+        if (newHP <= 0 && currentHP > 0 && sourceActor) await this.checkOnKillEffects(targetActor, sourceActor, sourceItem);
       }
 
       // Post save result to chat
@@ -1399,7 +1490,9 @@ export class VagabondDamageHelper {
         armorReduction,
         finalDamage,
         damageType,
-        autoApply
+        autoApply,
+        actorId,
+        itemId
       );
     }
 
@@ -1705,7 +1798,7 @@ export class VagabondDamageHelper {
    * @returns {Promise<ChatMessage>}
    * @private
    */
-  static async _postSaveResult(actor, saveType, roll, difficulty, isSuccess, isCritical, isHindered, originalDamage, saveReduction, armorReduction, finalDamage, damageType, autoApplied) {
+  static async _postSaveResult(actor, saveType, roll, difficulty, isSuccess, isCritical, isHindered, originalDamage, saveReduction, armorReduction, finalDamage, damageType, autoApplied, sourceActorId = null, sourceItemId = null) {
     const saveLabel = game.i18n.localize(`VAGABOND.Saves.${saveType.charAt(0).toUpperCase() + saveType.slice(1)}.name`);
 
     // Import VagabondChatCard
@@ -1749,7 +1842,7 @@ export class VagabondDamageHelper {
 
     // Add "Apply to Target" button if damage was not auto-applied
     if (!autoApplied && finalDamage > 0) {
-      const applyButton = this.createApplySaveDamageButton(actor.id, actor.name, finalDamage, damageType);
+      const applyButton = this.createApplySaveDamageButton(actor.id, actor.name, finalDamage, damageType, sourceActorId, sourceItemId);
       card.setDescription((card.data.description || '') + applyButton);
     }
 
@@ -1969,7 +2062,13 @@ export class VagabondDamageHelper {
         // Healing: Increase HP (up to max)
         // Apply incoming healing modifier (e.g., Sickened: -2)
         const healingModifier = targetActor.system.incomingHealingModifier || 0;
-        const modifiedAmount = Math.max(0, amount + healingModifier);
+        let modifiedAmount = Math.max(0, amount + healingModifier);
+
+        // Doom curse: cap healing (healingCappedPerDie > 0 means max healing = that value)
+        const healCap = targetActor.system.healingCappedPerDie || 0;
+        if (healCap > 0) {
+          modifiedAmount = Math.min(modifiedAmount, healCap);
+        }
 
         const currentHP = targetActor.system.health?.value || 0;
         const maxHP = targetActor.system.health?.max || 0;
@@ -2044,13 +2143,17 @@ export class VagabondDamageHelper {
           ui.notifications.warn(`You don't have permission to modify ${targetActor.name}.`);
           continue;
         }
-        const finalDamage = this.calculateFinalDamage(targetActor, share, damageType, sourceItem);
+        let finalDamage = this.calculateFinalDamage(targetActor, share, damageType, sourceItem);
+        const baneDamage = await this.checkBaneDamage(targetActor, sourceActor, sourceItem);
+        finalDamage += baneDamage;
         const currentHP = targetActor.system.health?.value || 0;
         const newHP = Math.max(0, currentHP - finalDamage);
         await targetActor.update({ 'system.health.value': newHP });
-        ui.notifications.info(`Applied ${finalDamage} (Cleave) damage to ${targetActor.name}`);
+        ui.notifications.info(`Applied ${finalDamage} (Cleave${baneDamage ? ` +${baneDamage} bane` : ''}) damage to ${targetActor.name}`);
         // On-Hit Burning: apply burning/status from weapon properties or relic power
         if (sourceActor) await this.checkOnHitBurning(targetActor, sourceActor, null, null, sourceItem);
+        // On-Kill: Lifesteal/Manasteal triggers
+        if (newHP <= 0 && currentHP > 0 && sourceActor) await this.checkOnKillEffects(targetActor, sourceActor, sourceItem);
       }
     } else {
       // Normal (non-cleave) damage application
@@ -2065,15 +2168,21 @@ export class VagabondDamageHelper {
         }
 
         // Calculate final damage (armor/immune/weak)
-        const finalDamage = this.calculateFinalDamage(targetActor, damageAmount, damageType, sourceItem);
+        let finalDamage = this.calculateFinalDamage(targetActor, damageAmount, damageType, sourceItem);
+
+        // Bane: bonus damage dice vs matching creature types (applied after armor)
+        const baneDamage = await this.checkBaneDamage(targetActor, sourceActor, sourceItem);
+        finalDamage += baneDamage;
 
         const currentHP = targetActor.system.health?.value || 0;
         const newHP = Math.max(0, currentHP - finalDamage);
         await targetActor.update({ 'system.health.value': newHP });
 
-        ui.notifications.info(`Applied ${finalDamage} damage to ${targetActor.name}`);
+        ui.notifications.info(`Applied ${finalDamage}${baneDamage ? ` (incl. ${baneDamage} bane)` : ''} damage to ${targetActor.name}`);
         // On-Hit Burning: apply burning/status from weapon properties or relic power
         if (sourceActor) await this.checkOnHitBurning(targetActor, sourceActor, null, null, sourceItem);
+        // On-Kill: Lifesteal/Manasteal triggers
+        if (newHP <= 0 && currentHP > 0 && sourceActor) await this.checkOnKillEffects(targetActor, sourceActor, sourceItem);
       }
     }
 
@@ -2109,6 +2218,15 @@ export class VagabondDamageHelper {
     const newHP = Math.max(0, currentHP - finalDamage);
     await actor.update({ 'system.health.value': newHP });
 
+    // On-Kill: Lifesteal/Manasteal triggers
+    if (newHP <= 0 && currentHP > 0) {
+      const sourceActorId = button.dataset.sourceActorId;
+      const sourceItemId = button.dataset.sourceItemId;
+      const sourceActor = sourceActorId ? game.actors.get(sourceActorId) : null;
+      const sourceItem = sourceActor?.items.get(sourceItemId);
+      if (sourceActor) await this.checkOnKillEffects(actor, sourceActor, sourceItem);
+    }
+
     // Update button text and disable
     const icon = button.querySelector('i');
     button.textContent = `Applied to ${actorName}`;
@@ -2116,6 +2234,244 @@ export class VagabondDamageHelper {
     button.disabled = true;
 
     ui.notifications.info(`Applied ${finalDamage} damage to ${actorName} (${currentHP} → ${newHP} HP)`);
+  }
+
+  /**
+   * Check and apply on-kill relic effects (Lifesteal, Manasteal).
+   * Scans the attacker's equipped weapon AE flags for onKillHealDice / onKillManaDice.
+   * @param {Actor} targetActor - The target that was killed (HP reached 0)
+   * @param {Actor} sourceActor - The attacker who dealt the killing blow
+   * @param {Item|null} sourceItem - The weapon/item used
+   */
+  static async checkOnKillEffects(targetActor, sourceActor, sourceItem) {
+    if (!sourceActor?.system) return;
+
+    // Gather on-kill flags from the weapon's Active Effects
+    let healDice = null;
+    let manaDice = null;
+
+    // Check source item AE flags first
+    if (sourceItem?.effects) {
+      for (const ae of sourceItem.effects) {
+        const flags = ae.flags?.vagabond;
+        if (!flags) continue;
+        if (flags.onKillHealDice && !healDice) healDice = flags.onKillHealDice;
+        if (flags.onKillManaDice && !manaDice) manaDice = flags.onKillManaDice;
+      }
+    }
+
+    // Also check all equipped items on the attacker (in case a non-weapon grants it)
+    if (!healDice || !manaDice) {
+      for (const item of sourceActor.items) {
+        if (!item.system.equipped) continue;
+        for (const ae of item.effects) {
+          const flags = ae.flags?.vagabond;
+          if (!flags) continue;
+          if (flags.onKillHealDice && !healDice) healDice = flags.onKillHealDice;
+          if (flags.onKillManaDice && !manaDice) manaDice = flags.onKillManaDice;
+        }
+      }
+    }
+
+    // Lifesteal: heal the attacker
+    if (healDice) {
+      const healRoll = new Roll(healDice);
+      await healRoll.evaluate();
+      const healAmount = healRoll.total;
+      const currentHP = sourceActor.system.health?.value || 0;
+      const maxHP = sourceActor.system.health?.max || currentHP;
+      const newHP = Math.min(maxHP, currentHP + healAmount);
+      const actualHeal = newHP - currentHP;
+      if (actualHeal > 0) {
+        await sourceActor.update({ 'system.health.value': newHP });
+      }
+      // Post chat message
+      ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: sourceActor }),
+        content: `<div class="vagabond-onkill-message">
+          <strong>⚔️ Lifesteal!</strong> ${sourceActor.name} slays ${targetActor.name} and heals
+          <span class="heal-amount">${actualHeal} HP</span> (rolled ${healDice} = ${healRoll.total})
+        </div>`,
+        type: CONST.CHAT_MESSAGE_STYLES.OTHER
+      });
+    }
+
+    // Manasteal: restore attacker's mana
+    if (manaDice) {
+      const manaRoll = new Roll(manaDice);
+      await manaRoll.evaluate();
+      const manaAmount = manaRoll.total;
+      const currentMana = sourceActor.system.mana?.value ?? 0;
+      const maxMana = sourceActor.system.mana?.max ?? currentMana;
+      const newMana = Math.min(maxMana, currentMana + manaAmount);
+      const actualRestore = newMana - currentMana;
+      if (actualRestore > 0) {
+        await sourceActor.update({ 'system.mana.value': newMana });
+      }
+      ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: sourceActor }),
+        content: `<div class="vagabond-onkill-message">
+          <strong>🔮 Manasteal!</strong> ${sourceActor.name} slays ${targetActor.name} and restores
+          <span class="mana-amount">${actualRestore} Mana</span> (rolled ${manaDice} = ${manaRoll.total})
+        </div>`,
+        type: CONST.CHAT_MESSAGE_STYLES.OTHER
+      });
+    }
+  }
+
+  /**
+   * Check if a defender has a Protection ward matching the attacker.
+   * Scans equipped item AE flags for wardType + wardTarget.
+   * @param {Actor} defender - The character making the save
+   * @param {Actor} attacker - The NPC whose attack triggered the save
+   * @returns {boolean} True if a protection ward matches the attacker
+   */
+  static _checkProtectionWard(defender, attacker) {
+    if (!defender?.items || !attacker) return false;
+
+    const attackerBeingType = attacker.system?.beingType || '';
+    const attackerName = attacker.name || '';
+
+    for (const item of defender.items) {
+      if (!item.system.equipped) continue;
+      for (const ae of item.effects) {
+        const flags = ae.flags?.vagabond;
+        if (!flags?.wardType || !flags?.wardTarget) continue;
+
+        const wardTarget = flags.wardTarget;
+        let matches = false;
+
+        switch (flags.wardType) {
+          case 'niche':
+            matches = attackerName.toLowerCase().includes(wardTarget.toLowerCase());
+            break;
+          case 'specific':
+            matches = attackerBeingType.toLowerCase() === wardTarget.toLowerCase() ||
+                      attackerName.toLowerCase().includes(wardTarget.toLowerCase());
+            break;
+          case 'general': {
+            const nt = attackerBeingType.toLowerCase().replace(/s$/, '');
+            const nw = wardTarget.toLowerCase().replace(/s$/, '');
+            matches = nt === nw;
+            break;
+          }
+        }
+
+        if (matches) return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Check if a weapon has bane properties matching the target and roll bonus dice.
+   * Scans the weapon's Active Effect flags for bane data (baneType + baneDice).
+   * Matching logic:
+   *   - Niche: target actor name matches the bane's stored creature name
+   *   - Specific: target's beingType or name matches the bane subtype list
+   *   - General: target's beingType matches the bane being type
+   * @param {Actor} targetActor - The NPC being attacked
+   * @param {Actor} sourceActor - The attacker
+   * @param {Item|null} sourceItem - The weapon used
+   * @returns {number} Bonus bane damage (0 if no match)
+   */
+  static async checkBaneDamage(targetActor, sourceActor, sourceItem) {
+    if (!targetActor || !sourceItem?.effects) return 0;
+    if (targetActor.type !== 'npc') return 0;
+
+    const targetBeingType = targetActor.system.beingType || '';
+    const targetName = targetActor.name || '';
+
+    let totalBaneDamage = 0;
+
+    for (const ae of sourceItem.effects) {
+      const flags = ae.flags?.vagabond;
+      if (!flags?.baneType || !flags?.baneDice) continue;
+
+      let matches = false;
+      const baneTarget = flags.baneTarget || ''; // The user-input creature/type
+
+      switch (flags.baneType) {
+        case 'niche':
+          // Match against actor name (case-insensitive)
+          matches = targetName.toLowerCase().includes(baneTarget.toLowerCase());
+          break;
+        case 'specific':
+          // Match against being subtype — check if target name or beingType contains the subtype
+          // NPCs don't have a subtype field yet, so check beingType and name
+          matches = targetBeingType.toLowerCase() === baneTarget.toLowerCase() ||
+                    targetName.toLowerCase().includes(baneTarget.toLowerCase());
+          break;
+        case 'general':
+          // Match against being type (case-insensitive, handle plurals)
+          const normalizedTarget = targetBeingType.toLowerCase().replace(/s$/, '');
+          const normalizedBane = baneTarget.toLowerCase().replace(/s$/, '');
+          matches = normalizedTarget === normalizedBane;
+          break;
+      }
+
+      if (matches) {
+        const baneRoll = new Roll(flags.baneDice);
+        await baneRoll.evaluate();
+        totalBaneDamage += baneRoll.total;
+
+        ChatMessage.create({
+          speaker: ChatMessage.getSpeaker({ actor: sourceActor }),
+          content: `<div class="vagabond-bane-message">
+            <strong>💀 Bane!</strong> ${sourceItem.name} deals +${baneRoll.total} bonus damage
+            vs ${targetName} (${flags.baneType}: ${baneTarget}, rolled ${flags.baneDice} = ${baneRoll.total})
+          </div>`,
+          type: CONST.CHAT_MESSAGE_STYLES.OTHER
+        });
+      }
+    }
+
+    // Also check equipped items on attacker (in case bane is on a non-weapon relic)
+    if (totalBaneDamage === 0 && sourceActor?.items) {
+      for (const item of sourceActor.items) {
+        if (item === sourceItem || !item.system.equipped) continue;
+        for (const ae of item.effects) {
+          const flags = ae.flags?.vagabond;
+          if (!flags?.baneType || !flags?.baneDice) continue;
+
+          let matches = false;
+          const baneTarget = flags.baneTarget || '';
+
+          switch (flags.baneType) {
+            case 'niche':
+              matches = targetName.toLowerCase().includes(baneTarget.toLowerCase());
+              break;
+            case 'specific':
+              matches = targetBeingType.toLowerCase() === baneTarget.toLowerCase() ||
+                        targetName.toLowerCase().includes(baneTarget.toLowerCase());
+              break;
+            case 'general': {
+              const nt = targetBeingType.toLowerCase().replace(/s$/, '');
+              const nb = baneTarget.toLowerCase().replace(/s$/, '');
+              matches = nt === nb;
+              break;
+            }
+          }
+
+          if (matches) {
+            const baneRoll = new Roll(flags.baneDice);
+            await baneRoll.evaluate();
+            totalBaneDamage += baneRoll.total;
+
+            ChatMessage.create({
+              speaker: ChatMessage.getSpeaker({ actor: sourceActor }),
+              content: `<div class="vagabond-bane-message">
+                <strong>💀 Bane!</strong> ${item.name} deals +${baneRoll.total} bonus damage
+                vs ${targetName} (${flags.baneType}: ${baneTarget}, rolled ${flags.baneDice} = ${baneRoll.total})
+              </div>`,
+              type: CONST.CHAT_MESSAGE_STYLES.OTHER
+            });
+          }
+        }
+      }
+    }
+
+    return totalBaneDamage;
   }
 
   /**

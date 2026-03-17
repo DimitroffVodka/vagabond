@@ -94,7 +94,7 @@ export default class VagabondEquipment extends VagabondItemBase {
       required: true,
       blank: false,
       initial: 'none',
-      choices: ['none', 'common', 'adamant', 'coldIron', 'silver', 'mythral', 'orichalcum']
+      choices: ['none', 'common', 'magical', 'adamant', 'coldIron', 'silver', 'mythral', 'orichalcum']
     });
 
     // Damage Type - universal damage/healing type
@@ -343,6 +343,7 @@ export default class VagabondEquipment extends VagabondItemBase {
     const metalDisplayMap = {
       'none': '-',
       'common': 'Common',
+      'magical': 'Magical',
       'adamant': 'Adamant',
       'coldIron': 'Cold Iron',
       'silver': 'Silver',
@@ -443,6 +444,7 @@ export default class VagabondEquipment extends VagabondItemBase {
     const metals = {
       'none': { multiplier: 1, effect: '-' },
       'common': { multiplier: 1, effect: '-' },
+      'magical': { multiplier: 1, effect: 'Bypasses Physical immunity and resistance.' },
       'adamant': { multiplier: 50, effect: 'Occupies +1 Slot. +1 to Armor (if Armor) or Weapon damage.' },
       'coldIron': { multiplier: 20, effect: 'Situational weakness (Fae).' },
       'silver': { multiplier: 10, effect: 'Blesses weapons against the accursed.' },
