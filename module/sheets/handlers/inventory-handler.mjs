@@ -266,6 +266,173 @@ export class InventoryHandler {
       });
     }
 
+    // ── Alchemy: Open Cookbook (on Alchemy Tools) ──
+    if (item.name.toLowerCase().includes("alchemy tools")) {
+      const { getAlchemistData } = globalThis.vagabond?.alchemy ?? {};
+      if (getAlchemistData) {
+        const alcData = getAlchemistData(this.actor);
+        if (alcData) {
+          menuItems.push({
+            label: 'Open Cookbook',
+            icon: 'fas fa-book-open',
+            enabled: true,
+            action: () => {
+              const { openCookbook } = globalThis.vagabond.alchemy;
+              if (openCookbook) openCookbook(this.actor);
+            },
+          });
+        }
+      }
+    }
+
+    // ── Alchemy: Coat Weapon (on oil items) ──
+    if (item.type === "equipment"
+      && item.system?.alchemicalType === "oil"
+      && !item.flags?.vagabond?.oilAppliedTo) {
+      const meleeWeapons = this.actor.items.filter(i =>
+        i.type === "equipment"
+        && i.system?.equipmentType === "weapon"
+        && i.system?.equipmentState !== "unequipped"
+        && !i.flags?.vagabond?.oilCoating
+      );
+      for (const w of meleeWeapons) {
+        menuItems.push({
+          label: `Coat: ${w.name}`,
+          icon: 'fas fa-flask',
+          enabled: true,
+          action: async () => {
+            const { getAlchemicalEffect } = await import('../helpers/alchemy-helpers.mjs');
+            const oilEffect = getAlchemicalEffect(item.name);
+            await w.setFlag("vagabond", "oilCoating", {
+              oilName: item.name,
+              oilItemId: item.id,
+              silvered: oilEffect?.silvered ?? false,
+              coatingDie: oilEffect?.coatingDie ?? "d6",
+              coatingDamage: oilEffect?.coatingDamage ?? "1d6",
+              coatingLight: oilEffect?.coatingLight ?? { dim: 5, bright: 0 },
+              burnsTarget: oilEffect?.burnsTarget ?? false,
+              burnsTargetDie: oilEffect?.burnsTargetDie ?? null,
+            });
+            await item.handleConsumption?.();
+            ui.notifications.info(`${item.name} applied to ${w.name}`);
+          },
+        });
+      }
+    }
+
+    // ── Alchemy: Ignite / Remove Coating (on coated weapon) ──
+    const coating = item.flags?.vagabond?.oilCoating;
+    if (coating && !item.flags?.vagabond?.oilIgnited) {
+      menuItems.push({
+        label: 'Ignite',
+        icon: 'fas fa-fire',
+        enabled: true,
+        action: async () => {
+          try {
+            const { CountdownDice } = globalThis.vagabond.documents;
+            const dieName = `Burning Oil - ${item.name}`;
+            const cdJournal = await CountdownDice.create({
+              name: dieName,
+              diceType: coating.coatingDie ?? "d6",
+              size: "S",
+            });
+            const isSilvered = coating.silvered ?? false;
+            await item.setFlag("vagabond", "oilIgnited", {
+              countdownId: cdJournal?.id ?? null,
+              damageFormula: coating.coatingDamage ?? "1d6",
+              damageType: "fire",
+              silvered: isSilvered,
+              burnsTarget: coating.burnsTarget ?? false,
+              burnsTargetDie: coating.burnsTargetDie ?? null,
+            });
+            if (isSilvered) {
+              const origMetal = item.system?.metal ?? "none";
+              await item.setFlag("vagabond", "oilOriginalMetal", origMetal);
+              await item.update({ "system.metal": "silver" });
+            }
+            // Add light to token
+            const token = this.actor.getActiveTokens(true)[0];
+            if (token?.document) {
+              const origLight = {
+                dim: token.document.light?.dim ?? 0,
+                bright: token.document.light?.bright ?? 0,
+                color: token.document.light?.color ?? null,
+                animation: token.document.light?.animation?.type ?? null,
+              };
+              await item.setFlag("vagabond", "oilOriginalLight", origLight);
+              const lightCfg = coating.coatingLight ?? { dim: 5, bright: 0 };
+              await token.document.update({
+                "light.dim": Math.max(token.document.light?.dim ?? 0, lightCfg.dim ?? 5),
+                "light.bright": Math.max(token.document.light?.bright ?? 0, lightCfg.bright ?? 0),
+                "light.color": "#ff6600",
+                "light.alpha": 0.3,
+                "light.animation.type": "torch",
+                "light.animation.speed": 3,
+                "light.animation.intensity": 3,
+              });
+            }
+            if (cdJournal) {
+              await cdJournal.setFlag("vagabond", "countdownDamage", {
+                oilWeaponId: item.id,
+                oilActorId: this.actor.id,
+              });
+            }
+            ui.notifications.info(`${item.name} is now burning!`);
+          } catch (err) {
+            console.error("Vagabond | Failed to ignite weapon:", err);
+          }
+        },
+      });
+      menuItems.push({
+        label: 'Remove Coating',
+        icon: 'fas fa-times',
+        enabled: true,
+        action: async () => {
+          await item.unsetFlag("vagabond", "oilCoating");
+          ui.notifications.info(`Coating removed from ${item.name}`);
+        },
+      });
+    }
+
+    // ── Alchemy: Douse (on ignited weapon) ──
+    if (item.flags?.vagabond?.oilIgnited) {
+      menuItems.push({
+        label: 'Douse Flame',
+        icon: 'fas fa-tint',
+        enabled: true,
+        action: async () => {
+          const ignited = item.flags.vagabond.oilIgnited;
+          if (ignited.countdownId) {
+            try {
+              const journal = game.journal.get(ignited.countdownId);
+              if (journal) await journal.delete();
+            } catch { /* already gone */ }
+          }
+          const origLight = item.flags?.vagabond?.oilOriginalLight;
+          const token = this.actor.getActiveTokens(true)[0];
+          if (token?.document && origLight) {
+            await token.document.update({
+              "light.dim": origLight.dim ?? 0,
+              "light.bright": origLight.bright ?? 0,
+              "light.color": origLight.color ?? null,
+              "light.alpha": 0.5,
+              "light.animation.type": origLight.animation ?? null,
+              "light.animation.speed": 5,
+              "light.animation.intensity": 5,
+            });
+          }
+          if (item.flags?.vagabond?.oilOriginalMetal !== undefined) {
+            await item.update({ "system.metal": item.flags.vagabond.oilOriginalMetal });
+            await item.unsetFlag("vagabond", "oilOriginalMetal");
+          }
+          await item.unsetFlag("vagabond", "oilOriginalLight");
+          await item.unsetFlag("vagabond", "oilIgnited");
+          await item.unsetFlag("vagabond", "oilCoating");
+          ui.notifications.info(`${item.name} flame doused, coating removed.`);
+        },
+      });
+    }
+
     // Edit
     menuItems.push({
       label: 'Edit',

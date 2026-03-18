@@ -329,11 +329,6 @@ export const LightTracker = {
   },
 
   init() {
-    // Skip if the vagabond-crawler module is active and has its own light tracker
-    if (game.modules.get('vagabond-crawler')?.active) {
-      console.log('Vagabond | Light Tracker: deferring to vagabond-crawler module');
-      return;
-    }
 
     for (const hookName of ["renderVagabondCharacterSheet", "renderVagabondActorSheet", "renderActorSheet"]) {
       Hooks.on(hookName, (app, html) => {

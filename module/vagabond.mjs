@@ -51,6 +51,16 @@ import { RelicForge } from './applications/relic-forge.mjs';
 import VagabondActiveEffectConfig from './applications/active-effect-config.mjs';
 import { VagabondSpellSequencer } from './helpers/spell-sequencer.mjs';
 import { VagabondItemSequencer } from './helpers/item-sequencer.mjs';
+// Alchemy system
+import { AlchemyCookbook, openCookbook } from './applications/alchemy-cookbook.mjs';
+import {
+  registerMaterialsHook, registerCountdownDamageHook, registerEffectExpirationHook,
+  registerCountdownLinkedAEHook, registerOilBonusDamageHook, registerAlchemicalAttackHook,
+  registerEurekaHook, registerConsumableUseHook, populateAlchemicalFolder,
+  useConsumable, getConsumableEffect, getAlchemistData, craftItem,
+} from './helpers/alchemy-helpers.mjs';
+// NPC Passive Abilities (Magic Ward, etc.)
+import { registerMagicWardHook, setCastCheckFlag } from './helpers/npc-abilities.mjs';
 
 const collections = foundry.documents.collections;
 const sheets = foundry.appv1.sheets;
@@ -781,6 +791,8 @@ Hooks.once('ready', () => {
 Hooks.once('ready', () => {
   LightTracker.init();
   LightTracker.registerSocketListeners();
+  // Expose for crawler crawl-bar integration
+  globalThis.vagabond.lightTracker = LightTracker;
 });
 
 // Pre-load JB2A animation defaults when both Sequencer and JB2A are installed.
@@ -831,6 +843,55 @@ Hooks.on('canvasReady', async () => {
 });
 
 /* -------------------------------------------- */
+/*  Alchemy — Consumable Use Buttons on Sheets  */
+/* -------------------------------------------- */
+
+/**
+ * Register a renderApplicationV2 hook that injects flask "Use" buttons
+ * for alchemical consumables (Potions, Antitoxin, etc.) on character sheets.
+ */
+function registerConsumableContextMenuOnSheets() {
+  Hooks.on("renderApplicationV2", (app, html) => {
+    if (!app.actor) return;
+    const el = html instanceof HTMLElement ? html : html?.[0] ?? app.element;
+    if (!el) return;
+    const actor = app.actor;
+
+    // Find all equipment items in the inventory panel
+    const itemRows = el.querySelectorAll("[data-item-id]");
+    for (const row of itemRows) {
+      const itemId = row.dataset.itemId;
+      const actorItem = actor.items.get(itemId);
+      if (!actorItem || actorItem.type !== "equipment") continue;
+      const effect = getConsumableEffect(actorItem.name);
+      if (!effect) continue;
+
+      // Add a "Use" button if not already present
+      if (row.querySelector(".vc-use-consumable")) continue;
+      const useBtn = document.createElement("a");
+      useBtn.className = "vc-use-consumable";
+      useBtn.title = `Use ${actorItem.name}`;
+      useBtn.innerHTML = '<i class="fas fa-flask"></i>';
+      useBtn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        await useConsumable(actor, actorItem);
+        app.render();
+      });
+
+      // Insert the button near the item controls
+      const controls = row.querySelector(".item-controls") ?? row.querySelector(".eq-controls");
+      if (controls) {
+        controls.prepend(useBtn);
+      } else {
+        row.appendChild(useBtn);
+      }
+    }
+  });
+  console.log("Vagabond | Consumable use buttons hook registered.");
+}
+
+/* -------------------------------------------- */
 /*  UI Hooks - Countdown Dice Overlay           */
 /* -------------------------------------------- */
 
@@ -865,6 +926,35 @@ Hooks.once('ready', () => {
   } else {
     console.warn("Vagabond | WARNING: Combat system not fully registered!");
   }
+
+  // ── Alchemy System Hooks ──
+  registerMaterialsHook();
+  registerCountdownDamageHook();
+  registerEffectExpirationHook();
+  registerCountdownLinkedAEHook();
+  registerOilBonusDamageHook();
+  registerAlchemicalAttackHook();
+  registerEurekaHook();
+  registerConsumableUseHook();
+  registerConsumableContextMenuOnSheets();
+
+  // Expose alchemy API for macros/console
+  globalThis.vagabond.alchemy = {
+    openCookbook,
+    populateAlchemicalFolder,
+    useConsumable,
+    getConsumableEffect,
+    getAlchemistData,
+    craftItem,
+  };
+
+  console.log("Vagabond | Alchemy system hooks registered.");
+
+  // ── NPC Passive Abilities (Magic Ward) ──
+  registerMagicWardHook();
+
+  // Expose setCastCheckFlag so external modules (e.g. crawler spell dialog) can use it
+  globalThis.vagabond.setCastCheckFlag = setCastCheckFlag;
 });
 
 /**

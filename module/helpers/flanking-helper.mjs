@@ -69,18 +69,6 @@ export const FlankingHelper = {
   _debounceTimer: null,
 
   init() {
-    // Skip if the vagabond-crawler module is active and has its own flanking
-    if (game.modules.get('vagabond-crawler')?.active) {
-      try {
-        if (game.settings.get('vagabond-crawler', 'flankingEnabled')) {
-          console.log('Vagabond | Flanking: deferring to vagabond-crawler module');
-          return;
-        }
-      } catch {
-        // Setting doesn't exist — crawler doesn't have flanking, proceed
-      }
-    }
-
     // Re-evaluate flanking whenever any token document is updated
     // This fires once after movement completes (including WASD movement)
     Hooks.on("updateToken", (doc, changes) => {
