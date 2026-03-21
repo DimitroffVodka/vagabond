@@ -327,6 +327,23 @@ export default class VagabondNPC extends VagabondActorBase {
       { required: true, initial: [] }
     );
 
+    // Loot system
+    schema.lootTable = new fields.StringField({
+      required: false,
+      nullable: false,
+      initial: '',
+      label: 'Loot Table UUID',
+    });
+    schema.lootDropChance = new fields.NumberField({
+      required: true,
+      nullable: false,
+      integer: true,
+      initial: -1,
+      min: -1,
+      max: 100,
+      label: 'Loot Drop Chance (-1 = use global default)',
+    });
+
     return schema;
   }
 

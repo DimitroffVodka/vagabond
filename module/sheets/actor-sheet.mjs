@@ -72,6 +72,7 @@ export class VagabondActorSheet extends api.HandlebarsApplicationMixin(
       dismissCharBuilder: this._onDismissCharBuilder,
       // NPC-specific UI actions (handled in base class)
       toggleEffectsAccordion: this._onToggleEffectsAccordion,
+      toggleLootAccordion: this._onToggleLootAccordion,
       toggleLock: this._onToggleLock,
       // NPC immunity actions - delegated to immunityHandler
       toggleSpeedType: this._onToggleSpeedType,
@@ -445,6 +446,9 @@ export class VagabondActorSheet extends api.HandlebarsApplicationMixin(
         } catch (error) {
           console.error("Vagabond | Error enriching NPC actions/abilities:", error);
         }
+
+        // Provide RollTables for the loot table dropdown
+        partContext.rollTables = game.tables.map(t => ({ uuid: t.uuid, name: t.name }));
         break;
     }
 
@@ -1356,6 +1360,14 @@ export class VagabondActorSheet extends api.HandlebarsApplicationMixin(
    */
   static async _onToggleEffectsAccordion(event, target) {
     const accordion = target.closest('.npc-effects.accordion-item');
+    AccordionHelper.toggle(accordion);
+  }
+
+  /**
+   * Toggle NPC loot settings accordion
+   */
+  static async _onToggleLootAccordion(event, target) {
+    const accordion = target.closest('.npc-loot.accordion-item');
     AccordionHelper.toggle(accordion);
   }
 

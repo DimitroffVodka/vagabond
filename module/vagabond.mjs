@@ -25,6 +25,7 @@ import { VagabondDiceAppearance } from './helpers/dice-appearance.mjs';
 import { EquipmentHelper } from './helpers/equipment-helper.mjs';
 import { performWeaponAttack } from './helpers/attack-pipeline.mjs';
 import { ItemDropHelper } from './helpers/item-drop-helper.mjs';
+import { LootDropHelper } from './helpers/loot-drop-helper.mjs';
 import { ContextMenuHelper } from './helpers/context-menu-helper.mjs';
 import { AccordionHelper } from './helpers/accordion-helper.mjs';
 import { EnrichmentHelper } from './helpers/enrichment-helper.mjs';
@@ -418,6 +419,28 @@ function registerGameSettings() {
     requiresReload: false,
   });
 
+  // Setting: Loot Drops
+  game.settings.register('vagabond', 'lootDropEnabled', {
+    name: 'Loot Drops',
+    hint: 'Defeated NPCs automatically drop loot bags after combat ends. Each player gets personal loot they can take or pass to others.',
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: false,
+    requiresReload: false,
+  });
+
+  game.settings.register('vagabond', 'lootDropChance', {
+    name: 'Loot Drop Chance (%)',
+    hint: 'Global chance (0-100) that a defeated NPC drops loot. Individual NPCs can override this value. Set to 100 for guaranteed drops.',
+    scope: 'world',
+    config: true,
+    type: Number,
+    default: 50,
+    range: { min: 0, max: 100, step: 5 },
+    requiresReload: false,
+  });
+
   // Setting: Light Tracking
   game.settings.register('vagabond', 'lightTrackingEnabled', {
     name: 'Light Tracking',
@@ -804,6 +827,8 @@ Hooks.once('ready', () => {
   LightTracker.registerSocketListeners();
   ItemDropHelper.init();
   ItemDropHelper.registerSocketListeners();
+  LootDropHelper.init();
+  LootDropHelper.registerSocketListeners();
   // Expose for crawler crawl-bar integration
   globalThis.vagabond.lightTracker = LightTracker;
 });
@@ -989,29 +1014,45 @@ Hooks.on('canvasReady', async () => {
 /**
  * Auto-mark NPCs as defeated in combat when HP reaches 0.
  * Also clean up any countdown/burning dice linked to the dead NPC.
+ * Handles both linked actors (updateActor) and unlinked tokens (updateToken).
  */
+async function _checkNPCDefeated(combatant) {
+  if (!combatant || combatant.defeated) return;
+  const tokenActor = combatant.token?.actor ?? combatant.actor;
+  if (!tokenActor || tokenActor.type !== 'npc') return;
+  const hp = tokenActor.system?.health;
+  if (!hp || hp.value > 0) return;
+
+  await combatant.update({ defeated: true });
+  const token = combatant.token?.object;
+  if (token?.actor && !token.actor.statuses?.has('dead')) {
+    await token.actor.toggleStatusEffect('dead', { active: true });
+  }
+
+  if (combatant.token?.id && canvas?.scene?.id) {
+    try {
+      const { VagabondCombat } = await import('./documents/combat.mjs');
+      await VagabondCombat.cleanupDiceForToken(combatant.token.id, canvas.scene.id, tokenActor.name);
+    } catch (e) { console.warn('Vagabond | Error cleaning up NPC countdown dice:', e); }
+  }
+}
+
+// Auto-mark NPCs as defeated when HP reaches 0.
+// Works for both linked and unlinked tokens by checking every NPC combatant's
+// current HP after any actor update, matching by token actor identity.
 Hooks.on('updateActor', async (actor, changes) => {
   if (!game.user.isGM || !game.combat) return;
   if (actor.type !== 'npc') return;
   const newHP = changes?.system?.health?.value;
   if (newHP === undefined || newHP > 0) return;
 
-  // Find this actor's combatant and mark defeated
-  const combatant = game.combat.combatants.find(c => c.actorId === actor.id || c.actor?.id === actor.id);
-  if (combatant && !combatant.defeated) {
-    await combatant.update({ defeated: true });
-    // Also apply the dead status to the token
-    const token = combatant.token?.object;
-    if (token?.actor && !token.actor.statuses?.has('dead')) {
-      await token.actor.toggleStatusEffect('dead', { active: true });
-    }
-
-    // Clean up countdown/burning dice linked to this NPC's token
-    if (combatant.token?.id && canvas?.scene?.id) {
-      try {
-        const { VagabondCombat } = await import('./documents/combat.mjs');
-        await VagabondCombat.cleanupDiceForToken(combatant.token.id, canvas.scene.id, actor.name);
-      } catch (e) { console.warn('Vagabond | Error cleaning up NPC countdown dice:', e); }
+  // Find the combatant whose token's actor IS this actor (handles unlinked synthetic actors)
+  for (const combatant of game.combat.combatants) {
+    if (combatant.defeated) continue;
+    const tokenActor = combatant.token?.actor;
+    if (tokenActor === actor || (combatant.token?.actorLink && combatant.actorId === actor.id)) {
+      await _checkNPCDefeated(combatant);
+      break;
     }
   }
 });

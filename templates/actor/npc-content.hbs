@@ -384,6 +384,35 @@
     </div>
   </section>
 
+  {{! Loot Settings Section - Edit Mode Only }}
+  {{#unless system.locked}}
+  <section class='npc-section npc-loot accordion-item' data-accordion-id='npc-loot'>
+    <h4 class='npc-section-title accordion-header' data-action='toggleLootAccordion'>
+      <i class='fas fa-coins' style='color:#DAA520; margin-right:4px;'></i> Loot Settings
+      <i class='fas fa-chevron-right accordion-icon'></i>
+    </h4>
+    <div class='npc-section-content accordion-content collapsed'>
+      <div class='npc-loot-settings' style='display:flex; flex-direction:column; gap:6px; padding:4px 0;'>
+        <div style='display:flex; align-items:center; gap:8px;'>
+          <label style='flex:0 0 120px; font-size:12px;'>Drop Chance</label>
+          <input type='number' name='system.lootDropChance' value='{{system.lootDropChance}}' min='-1' max='100' data-dtype='Number'
+            style='width:60px; text-align:center;' title='-1 = use global setting' />
+          <span style='font-size:11px; color:#a89272;'>(-1 = global default)</span>
+        </div>
+        <div style='display:flex; align-items:center; gap:8px;'>
+          <label style='flex:0 0 120px; font-size:12px;'>Loot Table</label>
+          <select name='system.lootTable' style='flex:1;'>
+            <option value=''>— Use Default (TL-based) —</option>
+            {{#each @root.rollTables}}
+              <option value='{{this.uuid}}' {{#if (eq this.uuid @root.system.lootTable)}}selected{{/if}}>{{this.name}}</option>
+            {{/each}}
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+  {{/unless}}
+
   {{! Effects Section - Accordion }}
   <section class='npc-section npc-effects accordion-item' data-accordion-id='npc-effects'>
     <h4 class='npc-section-title accordion-header' data-action='toggleEffectsAccordion'>

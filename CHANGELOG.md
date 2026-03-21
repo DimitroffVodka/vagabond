@@ -1,5 +1,28 @@
 # Changelog
 
+## Phase 12: Loot Drop System, NPC Defeat Fixes
+
+### Loot Drop System
+- **Automatic loot drops** — defeated NPCs drop loot bags after combat ends
+- **Per-NPC loot tables** — assign a Foundry RollTable to any NPC via the Loot Settings section (unlocked mode)
+- **TL-based default loot** — NPCs without a custom table use built-in tier-based generation (currency + random items scaled by Threat Level)
+- **Configurable drop chance** — global setting (0-100%) with per-NPC override (-1 = use global default)
+- **Personal loot bags** — each player gets their own items from the same bag; items tagged with player ID
+- **Take / Pass / Take All** — Take adds item to inventory; Pass makes it available to all players; Take All grabs everything
+- **Currency drops** — gold/silver/copper parsed from RollTable text results (supports "Coins (d100) silver" format)
+- **Loot bag tokens** — 0.5-size chest icons placed at defeated NPC positions, double-click to open loot popup
+- **Loot folder** — temporary loot bag actors stored in a "Loot" folder in the Actors sidebar
+- **Auto-cleanup** — empty loot bags (all items claimed) auto-delete token and actor
+- **Socket relay** — players can take/pass loot via socket to GM client
+- **NPC sheet UI** — Loot Settings accordion section with drop chance input and RollTable dropdown
+
+### Bug Fixes
+- **NPC defeated marking** — fixed wrong NPC being marked dead when multiple copies of the same actor are in combat (now matches by token actor identity, not base actor ID)
+- **Light tracker safety** — `createToken` hook now skips character-type actors (prevents player actors from being flagged as dropped lights and accidentally deleted)
+- **Light tracker pickup safety** — `_doPickup` blocks deletion of character-type actors as a second layer of protection
+
+---
+
 ## Phase 11: Item Drop System, Light Tracker Multiplayer, Crawler Bar Overhaul
 
 ### Item Drop System

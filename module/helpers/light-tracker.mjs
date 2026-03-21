@@ -251,6 +251,11 @@ async function _pickupLight(lightActor, token) {
 const _pickingUp = new Set();
 
 async function _doPickup(lightActor, token, targetActor) {
+  // SAFETY: never delete player characters
+  if (lightActor.type === 'character') {
+    console.error('Vagabond | BLOCKED: attempted to pick up a character actor as a light source');
+    return;
+  }
   if (_pickingUp.has(lightActor.id)) return;
   _pickingUp.add(lightActor.id);
   try {
@@ -422,10 +427,16 @@ export const LightTracker = {
 
     // Item Piles integration: when a token is created (e.g. player drops item via Item Piles),
     // check if it contains a light source and apply light settings to the token.
+    // IMPORTANT: Skip player characters — only apply to NPC/dropped-item actors.
     Hooks.on("createToken", async (tokenDoc, _options, _userId) => {
       if (!game.user.isGM) return;
       const actor = tokenDoc.actor;
       if (!actor) return;
+
+      // NEVER flag player characters as dropped lights
+      if (actor.type === 'character') return;
+      // Skip actors that are already flagged as dropped lights
+      if (actor.getFlag(SYSTEM_ID, VLT_LIGHT_ACTOR_FLAG)) return;
 
       // Check if the token's actor has any light source items
       const lightItem = actor.items?.find(i => _isLightSource(i));
