@@ -24,6 +24,7 @@ import { VagabondChatCard } from './helpers/chat-card.mjs';
 import { VagabondDiceAppearance } from './helpers/dice-appearance.mjs';
 import { EquipmentHelper } from './helpers/equipment-helper.mjs';
 import { performWeaponAttack } from './helpers/attack-pipeline.mjs';
+import { ItemDropHelper } from './helpers/item-drop-helper.mjs';
 import { ContextMenuHelper } from './helpers/context-menu-helper.mjs';
 import { AccordionHelper } from './helpers/accordion-helper.mjs';
 import { EnrichmentHelper } from './helpers/enrichment-helper.mjs';
@@ -797,10 +798,12 @@ Hooks.once('ready', () => {
   MoraleHelper.init();
 });
 
-// Initialize light tracker
+// Initialize light tracker and item drop helper
 Hooks.once('ready', () => {
   LightTracker.init();
   LightTracker.registerSocketListeners();
+  ItemDropHelper.init();
+  ItemDropHelper.registerSocketListeners();
   // Expose for crawler crawl-bar integration
   globalThis.vagabond.lightTracker = LightTracker;
 });

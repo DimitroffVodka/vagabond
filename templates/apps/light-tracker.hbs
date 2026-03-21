@@ -25,9 +25,15 @@
           <div class="vlt-time-fill {{#if (lt pct 20)}}low{{/if}}" style="width:{{pct}}%"></div>
         </div>
         <span>{{formattedTime}}</span>
+        {{#if isLit}}
         <button class="vlt-douse" data-actor-id="{{../actorId}}" data-item-id="{{id}}" title="Douse {{name}}" aria-label="Douse {{name}}">
           <i class="fas fa-wind"></i>
         </button>
+        {{else}}
+        <button class="vlt-douse" data-actor-id="{{../actorId}}" data-item-id="{{id}}" title="Light {{name}}" aria-label="Light {{name}}">
+          <i class="fas fa-fire"></i>
+        </button>
+        {{/if}}
       </div>
       {{/each}}
 

@@ -15545,6 +15545,7 @@ details[open] .vagabond .npc-immunity-toggle i {
 /* Context menu entry */
 .vlt-ctx-item {
   cursor: pointer;
+  color: #ffea27;
 }
 .vlt-ctx-item i {
   margin-right: 4px;

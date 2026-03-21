@@ -90,10 +90,12 @@ function _injectContextEntry(card, item) {
   card.addEventListener("contextmenu", () => {
     let attempts = 0;
     const poll = setInterval(() => {
-      const menu = document.querySelector(".inventory-context-menu");
+      const menu = document.querySelector(".vagabond-context-menu");
       if (menu) {
         clearInterval(poll);
         if (menu.querySelector(".vlt-ctx-item")) return;
+
+        // Light / Extinguish toggle
         const isLit = !!item.getFlag(SYSTEM_ID, "lit");
         const secs  = item.getFlag(SYSTEM_ID, "remainingSecs") ?? 0;
         const li = document.createElement("li");
@@ -105,6 +107,7 @@ function _injectContextEntry(card, item) {
           await LightTracker._toggleLight(item);
         });
         menu.insertBefore(li, menu.firstChild);
+
       } else if (++attempts >= 10) {
         clearInterval(poll);
       }
@@ -186,7 +189,7 @@ async function _dropLightOnCanvas(item, dropX, dropY) {
       light:       tokenLight,
       disposition: CONST.TOKEN_DISPOSITIONS.NEUTRAL,
     },
-    ownership: { default: CONST.DOCUMENT_OWNERSHIP_LEVELS.OBSERVER },
+    ownership: { default: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER },
   });
 
   await canvas.scene.createEmbeddedDocuments("Token", [{
@@ -355,17 +358,97 @@ export const LightTracker = {
       try { await this.advanceTime(delta); } finally { _ticking = false; }
     });
 
+    // GM path: use Foundry's built-in hook
     Hooks.on("dropCanvasData", async (_canvasObj, data) => {
       if (data.type !== "Item") return;
+      if (!game.user.isGM) return; // Players use the custom drop listener below
       let item;
       try { item = await fromUuid(data.uuid); } catch(e) { return; }
       if (!item || !_isLightSource(item) || !item.parent) return;
-      if (game.user.isGM) {
-        await _dropLightOnCanvas(item, data.x, data.y);
-      } else {
-        game.socket.emit(`system.${SYSTEM_ID}`, { action: "dropLight", itemUuid: data.uuid, x: data.x, y: data.y });
-      }
+      await _dropLightOnCanvas(item, data.x, data.y);
       return false;
+    });
+
+    // Player path: direct drop listener on canvas that bypasses Foundry's permission checks
+    // Players can't create actors/tokens, so we relay via socket to the GM client
+    if (!game.user.isGM) {
+      const _attachCanvasDropListener = () => {
+        const board = document.getElementById("board");
+        if (!board || board.dataset.vltDropBound) return;
+        board.dataset.vltDropBound = "1";
+
+        board.addEventListener("dragover", (e) => {
+          // Check if this is an item drag
+          try {
+            // Can't read data during dragover, just allow all drops
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+          } catch {}
+        }, true); // capture phase to fire before Foundry
+
+        board.addEventListener("drop", async (e) => {
+          let data;
+          try { data = JSON.parse(e.dataTransfer.getData("text/plain")); } catch { return; }
+          if (data?.type !== "Item") return;
+
+          let item;
+          try { item = await fromUuid(data.uuid); } catch { return; }
+          if (!item || !_isLightSource(item) || !item.parent) return;
+
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+
+          // Convert screen coordinates to canvas coordinates
+          const t = canvas.stage.worldTransform;
+          const canvasPos = {
+            x: (e.clientX - t.tx) / t.a,
+            y: (e.clientY - t.ty) / t.d,
+          };
+
+          game.socket.emit(`system.${SYSTEM_ID}`, {
+            action: "dropLight",
+            itemUuid: data.uuid,
+            x: canvasPos.x,
+            y: canvasPos.y,
+          });
+          ui.notifications.info(`Dropping ${item.name} on the ground...`);
+        }, true); // capture phase
+      };
+      // Attach now if canvas exists, and on every canvasReady
+      _attachCanvasDropListener();
+      Hooks.on("canvasReady", _attachCanvasDropListener);
+    }
+
+    // Item Piles integration: when a token is created (e.g. player drops item via Item Piles),
+    // check if it contains a light source and apply light settings to the token.
+    Hooks.on("createToken", async (tokenDoc, _options, _userId) => {
+      if (!game.user.isGM) return;
+      const actor = tokenDoc.actor;
+      if (!actor) return;
+
+      // Check if the token's actor has any light source items
+      const lightItem = actor.items?.find(i => _isLightSource(i));
+      if (!lightItem) return;
+
+      // Check if the light source was lit before being dropped
+      const wasLit = !!lightItem.getFlag(SYSTEM_ID, "lit");
+      const match = _getLightDef(lightItem.name);
+      if (!match) return;
+
+      const { key, def } = match;
+      const tokenLight = wasLit ? _lightConfig(def) : DARK_LIGHT;
+
+      // Apply light config and set tracking flags on the actor
+      await tokenDoc.update({ light: tokenLight });
+      await actor.setFlag(SYSTEM_ID, VLT_LIGHT_ACTOR_FLAG, true);
+      await actor.setFlag(SYSTEM_ID, "itemName", lightItem.name);
+      await actor.setFlag(SYSTEM_ID, "itemImg", lightItem.img);
+      await actor.setFlag(SYSTEM_ID, "sourceKey", key);
+      await actor.setFlag(SYSTEM_ID, "lit", wasLit);
+      await actor.setFlag(SYSTEM_ID, "remainingSecs",
+        lightItem.getFlag(SYSTEM_ID, "remainingSecs") ?? def.longevitySecs
+      );
     });
 
     Hooks.on("renderTokenHUD", (hud, html, _data) => {
@@ -562,14 +645,18 @@ class LightTrackerApp extends HbsMixin(AppV2) {
     const entries = [];
     for (const actor of _getActiveActors()) {
       if (actor.getFlag(SYSTEM_ID, VLT_LIGHT_ACTOR_FLAG)) {
-        if (!actor.getFlag(SYSTEM_ID, "lit")) continue;
+        const isLit = actor.getFlag(SYSTEM_ID, "lit") ?? false;
         const secs = actor.getFlag(SYSTEM_ID, "remainingSecs") ?? 0;
+        const sourceKey = actor.getFlag(SYSTEM_ID, "sourceKey") ?? "torch";
+        const maxSecs = LIGHT_SOURCES[sourceKey]?.longevitySecs ?? 3600;
         entries.push({
-          actorId: actor.id, name: "🔦 Dropped",
+          actorId: actor.id, name: `🔦 ${isLit ? "Dropped" : "Dropped (doused)"}`,
           img: actor.getFlag(SYSTEM_ID, "itemImg") ?? actor.img,
+          isDropped: true, isLit,
           lights: [{ id: null, actorId: actor.id,
                      name: actor.getFlag(SYSTEM_ID, "itemName") ?? actor.name,
-                     remaining: secs, formattedTime: LightTracker._formatTime(secs), pct: 100 }],
+                     remaining: secs, formattedTime: LightTracker._formatTime(secs),
+                     pct: Math.round((secs / maxSecs) * 100), isLit }],
         });
         continue;
       }
@@ -582,7 +669,7 @@ class LightTrackerApp extends HbsMixin(AppV2) {
           const max  = LIGHT_SOURCES[i.getFlag(SYSTEM_ID, "sourceKey")]?.longevitySecs ?? 3600;
           return { id: i.id, actorId: actor.id, name: i.name,
                    remaining: secs, formattedTime: LightTracker._formatTime(secs),
-                   pct: Math.round((secs / max) * 100) };
+                   pct: Math.round((secs / max) * 100), isLit: true };
         }),
       });
     }
@@ -627,7 +714,37 @@ class LightTrackerApp extends HbsMixin(AppV2) {
     this.element.querySelectorAll(".vlt-douse").forEach(btn => {
       btn.addEventListener("click", async ev => {
         const { actorId, itemId } = ev.currentTarget.dataset;
-        const item = game.actors.get(actorId)?.items.get(itemId);
+        const actor = game.actors.get(actorId);
+        if (!actor) return;
+
+        // Dropped light source (no item, flags on actor)
+        if (!itemId || itemId === "null") {
+          const isLit = actor.getFlag(SYSTEM_ID, "lit") ?? false;
+          if (isLit) {
+            // Douse
+            await actor.setFlag(SYSTEM_ID, "lit", false);
+            for (const token of actor.getActiveTokens()) {
+              await token.document.update({ light: DARK_LIGHT });
+            }
+            ui.notifications.info(`${actor.getFlag(SYSTEM_ID, "itemName") ?? "Light"} doused.`);
+          } else {
+            // Re-light
+            const sourceKey = actor.getFlag(SYSTEM_ID, "sourceKey") ?? "torch";
+            const def = LIGHT_SOURCES[sourceKey];
+            if (def) {
+              await actor.setFlag(SYSTEM_ID, "lit", true);
+              for (const token of actor.getActiveTokens()) {
+                await token.document.update({ light: _lightConfig(def) });
+              }
+              ui.notifications.info(`${actor.getFlag(SYSTEM_ID, "itemName") ?? "Light"} re-lit.`);
+            }
+          }
+          if (LightTracker._trackerApp?.rendered) LightTracker._trackerApp.render();
+          return;
+        }
+
+        // Normal item on an actor
+        const item = actor.items.get(itemId);
         if (item) await LightTracker._douseLight(item);
       });
     });

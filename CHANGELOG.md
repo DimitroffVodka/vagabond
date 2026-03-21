@@ -1,5 +1,61 @@
 # Changelog
 
+## Phase 11: Item Drop System, Light Tracker Multiplayer, Crawler Bar Overhaul
+
+### Item Drop System
+- **Drag-and-drop items to canvas** — players can drag any item from their inventory onto the map to drop it on the ground
+- **Dropped item tokens** — items appear as small 0.5-size tokens with the item's icon, hoverable name
+- **Pick up items** — right-click a dropped item token, click the hand icon to add it to your character's inventory
+- **Full multiplayer support** — players relay actions via socket to the GM client; works for all permission levels
+- **Chat notifications** — "Player dropped Item" / "Player picked up Item" messages
+
+### Light Tracker Multiplayer
+- **Player torch drag-and-drop** — players can now drag torches from inventory onto the canvas (socket relay to GM)
+- **Player torch pickup** — players can pick up dropped torches via TokenHUD hand button
+- **Moveable dropped torches** — dropped light tokens now have Owner permission so all players can reposition them
+- **Douse/re-light dropped torches** — Light Tracker app now shows dropped torches with toggle button (wind to douse, fire to re-light)
+- **Doused torches persist in tracker** — doused dropped torches stay visible instead of disappearing
+- **Socket enabled** — system.json `socket: true` to enable client-to-client communication
+
+### Crawler Bar Overhaul
+- **Reorganized button layout** — Combat moved next to Add Tokens, Clock moved after Lights, before Rest
+- **Merged Encounter buttons** — Enc. Check and Encounter! combined into single "Encounter" button (left-click: roll d6, right-click: options menu with threshold, instant encounter, table builder)
+- **Instant Encounter** — right-click Encounter opens Random Encounter GUI on Roll Tables tab and auto-clicks Roll
+- **Combat bar improvements** — Add Tokens and Delete Encounter buttons added to combat state bar
+- **Font update** — all crawler UI now uses "Germania" serif font
+- **Removed Drop Table zone** — table management handled through Encounter right-click menu
+- **Removed Lights button** — now covered by Vagabond Tools in the base system
+- **WebM token fallback** — tokens using .webm textures fall back to actor portrait in crawl strip
+
+### Bug Fixes
+- **Morale chat card** — fixed white-on-white text (set explicit dark color)
+- **Consumable weapons** — items with `isConsumable: true` now properly consumed even if equipmentType is weapon (fixes Frigid Azote, etc.)
+- **Light tracker context menu** — fixed selector polling for wrong class name (`.inventory-context-menu` → `.vagabond-context-menu`)
+
+---
+
+## Phase 10: Classic Sheet, Class Features, Attack Pipeline Refactor
+
+### Classic Character Sheet
+- Alternative wide landscape layout registered via Sheet Configuration dialog
+- 3-column layout with collapsible sections (Skills, Attacks, Inventory, Features, Traits, Perks, Effects)
+- Resizable window, saves/quick-row positioning, fatigue visual indicators
+
+### Class Features
+- **Bard**: Virtuoso, Song of Rest, Starstruck, Bravado, Climax, Awe-Inspiring
+- **Dancer**: Step Up, Double Time, Choreographer (one-check Favor), Fleet of Foot, Don't Stop Me Now, Flash of Beauty
+
+### Attack Pipeline Refactor
+- Single `performWeaponAttack()` function shared by character sheet and crawler bar
+- All class features, favor modifiers, range validation, brawl intents, imbue, and consumption in one place
+- Eliminates "works on sheet but not crawler" bugs permanently
+
+---
+
+## Phase 9: Alchemy System Port, Magic Ward, Crawler Decouple
+
+---
+
 ## Phase 8: Relic Forge Overhaul, Resistance System & Magical Weapons
 
 ### New Features

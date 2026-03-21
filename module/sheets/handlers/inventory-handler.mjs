@@ -949,7 +949,17 @@ export class InventoryHandler {
       // Foundry's DragDrop calls stopPropagation() on .draggable elements,
       // so grid-level delegation never sees dragstart — bind directly instead.
       card.addEventListener('dragstart', (e) => {
-        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.effectAllowed = 'all';
+
+        // Set Foundry-compatible drag data so items can be dropped on the canvas
+        // (e.g. dropping a torch onto the map to place it as a light source)
+        const item = this.actor.items.get(itemId);
+        if (item) {
+          e.dataTransfer.setData('text/plain', JSON.stringify({
+            type: 'Item',
+            uuid: item.uuid,
+          }));
+        }
 
         this._dragState = {
           active: true,
