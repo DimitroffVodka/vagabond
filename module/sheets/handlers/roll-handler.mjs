@@ -68,17 +68,59 @@ export class RollHandler {
 
       // Apply favor/hinder based on system state and keyboard modifiers
       const systemFavorHinder = this.actor.system.favorHinder || 'none';
-      const favorHinder = VagabondRollBuilder.calculateEffectiveFavorHinder(
+      let favorHinder = VagabondRollBuilder.calculateEffectiveFavorHinder(
         systemFavorHinder,
         event.shiftKey,
         event.ctrlKey
       );
 
+      // Bravado: Will Saves can't be Hindered while not Incapacitated
+      if (rollType === 'save' && rollKey === 'will' && (this.actor.system.hasBravado || false) && !this.actor.statuses?.has('incapacitated')) {
+        if (favorHinder === 'hinder') { favorHinder = 'none'; }
+      }
+
+      // Evasive: Reflex Saves can't be Hindered (while not Incapacitated)
+      if (rollType === 'save' && rollKey === 'reflex' && (this.actor.system.hasEvasive || false) && !this.actor.statuses?.has('incapacitated')) {
+        if (favorHinder === 'hinder') { favorHinder = 'none'; }
+      }
+
+      // Don't Stop Me Now: Favor on Saves vs Paralyzed/Restrained/moved
+      if (rollType === 'save' && (this.actor.system.hasDontStopMeNow || false) &&
+          (this.actor.statuses?.has('paralyzed') || this.actor.statuses?.has('restrained'))) {
+        if (favorHinder === 'hinder') { favorHinder = 'none'; }
+        else if (favorHinder === 'none') { favorHinder = 'favor'; }
+      }
+
+      // Virtuoso Resolve: Favor on Saves (granted by Bard's Virtuoso performance)
+      if (rollType === 'save' && (this.actor.system.virtuosoSavesFavor || false)) {
+        if (favorHinder === 'hinder') { favorHinder = 'none'; }
+        else if (favorHinder === 'none') { favorHinder = 'favor'; }
+      }
+
+      // Dancer — Step Up Active: 2d20kh on Reflex Saves
+      let baseFormula = null;
+      if (rollType === 'save' && rollKey === 'reflex' && (this.actor.system.stepUpActive || false)) {
+        baseFormula = '2d20kh';
+      }
+
+      // Dancer — Choreographer: one-check Favor (consume after this roll)
+      const hasChoreographerFavor = this.actor.getFlag('vagabond', 'choreographerFavorOneCheck') || false;
+      if (hasChoreographerFavor) {
+        // Inject favor for this roll only
+        if (favorHinder === 'hinder') { favorHinder = 'none'; }
+        else { favorHinder = 'favor'; }
+      }
+
       const roll = await VagabondRollBuilder.buildAndEvaluateD20(
         this.actor,
-        favorHinder
-        // baseFormula intentionally omitted — uses homebrew dice.baseCheck config
+        favorHinder,
+        baseFormula
       );
+
+      // Consume choreographer one-check favor AFTER the roll completes
+      if (hasChoreographerFavor) {
+        await this.actor.unsetFlag('vagabond', 'choreographerFavorOneCheck');
+      }
 
       // For skills and saves, use the formatted chat cards
       if (rollType === 'skill' && rollKey) {
@@ -130,7 +172,6 @@ export class RollHandler {
   async rollWeapon(event, target = null) {
     event.preventDefault();
 
-    // 1. Target Safety
     const element = target || event.currentTarget;
     const itemId = element.dataset.itemId || element.closest('[data-item-id]')?.dataset.itemId;
     const item = this.actor.items.get(itemId);
@@ -140,298 +181,12 @@ export class RollHandler {
       return;
     }
 
-    // Import helpers
-    const { EquipmentHelper } = globalThis.vagabond.utils;
-    const { VagabondChatCard } = globalThis.vagabond.utils;
-
-    // 2. Define Item Types
-    const isWeapon = EquipmentHelper.isWeapon(item);
-    const isAlchemical = EquipmentHelper.isAlchemical(item);
-
-    if (!isWeapon && !isAlchemical) {
-      ui.notifications.warn(game.i18n.localize('VAGABOND.UI.Errors.ItemNotRollable'));
-      return;
-    }
-
-    // 3. Check consumable requirements
-    if (item.type === 'equipment') {
-      const canUse = await item.checkConsumableRequirements();
-      if (!canUse) {
-        return; // Notification already shown
-      }
-    }
-
-    // Capture targeted tokens at roll time
-    let targetsAtRollTime = TargetHelper.captureCurrentTargets();
-
-    // ── Target Requirement & Count Validation ────────────────────────────
-    // Weapons require at least 1 target, max 1 (or 2 with Cleave)
-    if (isWeapon) {
-      if (targetsAtRollTime.length === 0) {
-        ui.notifications.warn('You must target an enemy before attacking.');
-        return;
-      }
-      const hasCleave = item.system?.properties?.includes('Cleave');
-      const maxTargets = hasCleave ? 2 : 1;
-      if (targetsAtRollTime.length > maxTargets) {
-        ui.notifications.warn(`${item.name} can only target ${maxTargets} ${maxTargets === 1 ? 'enemy' : 'enemies'}. Targeting the first ${maxTargets}.`);
-        targetsAtRollTime = targetsAtRollTime.slice(0, maxTargets);
-      }
-    }
-
-    // ── Range Validation ──────────────────────────────────────────────────
-    // Check weapon range vs distance to targets and apply Hinder/block as needed
-    let rangeHinder = false;
-    let rangeBand = null;
-    if (isWeapon && targetsAtRollTime.length > 0) {
-      const attackerToken = this.actor.token?.object ?? this.actor.getActiveTokens(true)[0];
-      if (attackerToken) {
-        // Check the first (primary) target for range
-        const targetTokenObj = canvas.tokens?.get(targetsAtRollTime[0].tokenId);
-        if (targetTokenObj) {
-          const rangeResult = TargetHelper.validateWeaponRange(item, attackerToken, targetTokenObj);
-          rangeBand = rangeResult.band;
-
-          if (!rangeResult.allowed) {
-            ui.notifications.warn(`${item.name}: ${rangeResult.reason}`);
-            return;
-          }
-          if (rangeResult.hinder) {
-            rangeHinder = true;
-            ui.notifications.info(`${item.name}: ${rangeResult.reason}`);
-          }
-        }
-      }
-    }
-
-    try {
-      /* PATH A: ALCHEMICAL */
-      if (isAlchemical) {
-        // SMART CHECK: If no damage type or no formula, treat as generic "Use Item"
-        const hasDamage =
-          item.system.damageType &&
-          item.system.damageType !== '-' &&
-          item.system.damageAmount;
-
-        if (!hasDamage) {
-          // Redirect to the simple Gear Use card
-          await VagabondChatCard.gearUse(this.actor, item, targetsAtRollTime);
-          // Handle consumption after successful use
-          await item.handleConsumption();
-          return;
-        }
-
-        // Otherwise, proceed with the Roll logic
-        let damageFormula = item.system.damageAmount;
-        const roll = new Roll(damageFormula);
-        await roll.evaluate();
-
-        const damageTypeKey = item.system.damageType || 'physical';
-        const isRestorative = ['healing', 'recover', 'recharge'].includes(damageTypeKey);
-
-        // Build description
-        let description = '';
-        if (item.system.description) {
-          const parsedDescription = VagabondTextParser.parseCountdownDice(
-            item.system.description
-          );
-          description = await foundry.applications.ux.TextEditor.enrichHTML(parsedDescription, {
-            async: true,
-          });
-        }
-
-        // Play item FX animation (alchemicals always "hit" — no attack roll)
-        const alcCasterToken = this.actor.token?.object ?? this.actor.getActiveTokens(true)[0];
-        const alcTargets = TargetHelper.resolveTargets(targetsAtRollTime);
-        VagabondItemSequencer.play(item, alcCasterToken, alcTargets, true);
-
-        // Use createActionCard for consistency with other items
-        await VagabondChatCard.createActionCard({
-          actor: this.actor,
-          item: item,
-          title: item.name,
-          subtitle: this.actor.name,
-          damageRoll: roll,
-          damageType: damageTypeKey,
-          description: description,
-          attackType: isRestorative ? 'none' : 'melee',
-          hasDefenses: !isRestorative,
-          targetsAtRollTime: targetsAtRollTime,
-        });
-
-        // Handle consumption after successful use
-        await item.handleConsumption();
-        return roll;
-      }
-
-      /* PATH B: WEAPONS */
-      // Check for auto-fail conditions before rolling weapon attack
-      const autoFailAllRolls = this.actor.system.autoFailAllRolls || false;
-      if (autoFailAllRolls) {
-        // Import chat card helper
-        const { VagabondChatCard } = await import('../../helpers/chat-card.mjs');
-
-        // Post auto-fail message to chat
-        await VagabondChatCard.autoFailRoll(this.actor, 'weapon', item.name);
-
-        // Show notification
-        ui.notifications.warn(`${this.actor.name} cannot attack due to status conditions.`);
-        return;
-      }
-
-      const { VagabondDamageHelper } = await import('../../helpers/damage-helper.mjs');
-      const { VagabondRollBuilder } = await import('../../helpers/roll-builder.mjs');
-
-      const systemFavorHinder = this.actor.system.favorHinder || 'none';
-      let favorHinder = VagabondRollBuilder.calculateEffectiveFavorHinder(
-        systemFavorHinder,
-        event.shiftKey,
-        event.ctrlKey
-      );
-
-      // Apply range-based Hinder (Ranged at Close, Thrown at Far)
-      if (rangeHinder) {
-        if (favorHinder === 'favor') favorHinder = 'none';
-        else if (favorHinder === 'none') favorHinder = 'hinder';
-        // Already hinder stays hinder
-      }
-
-      // ── Brawl/Entangle/Shield property: pre-roll intent dialog ──────────
-      // Brawl: Damage / Grapple / Shove — Entangle: Damage / Grapple — Shield: Damage / Shove
-      let brawlIntent = 'damage';
-      const hasBrawl = item.system?.properties?.includes('Brawl');
-      const hasEntangle = item.system?.properties?.includes('Entangle');
-      const hasShield = item.system?.properties?.includes('Shield');
-
-      if ((hasBrawl || hasEntangle || hasShield) && targetsAtRollTime?.length >= 1) {
-        const sizeOrder = ['small', 'medium', 'large', 'huge', 'giant', 'colossal'];
-        const attackerSize = this.actor.system.ancestryData?.size || this.actor.system.size || 'medium';
-        const attackerSizeIdx = sizeOrder.indexOf(attackerSize);
-        const shoveSizeOverride = this.actor.system.shoveSizeOverride;
-        const shoveSizeIdx = shoveSizeOverride ? sizeOrder.indexOf(shoveSizeOverride) : attackerSizeIdx;
-        const effectiveShoveSizeIdx = Math.max(attackerSizeIdx, shoveSizeIdx);
-
-        const hasGrappleTarget = targetsAtRollTime.some(t => {
-          const targetActor = game.actors.get(t.actorId);
-          if (!targetActor) return false;
-          const targetSize = targetActor.system.ancestryData?.size || targetActor.system.size || 'medium';
-          return sizeOrder.indexOf(targetSize) <= attackerSizeIdx;
-        });
-
-        const hasShoveTarget = targetsAtRollTime.some(t => {
-          const targetActor = game.actors.get(t.actorId);
-          if (!targetActor) return false;
-          const targetSize = targetActor.system.ancestryData?.size || targetActor.system.size || 'medium';
-          return sizeOrder.indexOf(targetSize) <= effectiveShoveSizeIdx;
-        });
-
-        if (hasGrappleTarget || hasShoveTarget) {
-          const buttons = [
-            { action: 'damage', label: 'Damage', icon: 'fas fa-dice' }
-          ];
-          if ((hasBrawl || hasEntangle) && hasGrappleTarget) {
-            buttons.push({ action: 'grapple', label: 'Grapple', icon: 'fas fa-hand-fist' });
-          }
-          if ((hasBrawl || hasShield) && hasShoveTarget) {
-            buttons.push({ action: 'shove', label: 'Shove', icon: 'fas fa-hand-back-fist' });
-          }
-
-          const dialogTitle = hasBrawl ? 'Brawl Attack' : hasEntangle ? 'Entangle Attack' : 'Shield Attack';
-          const choice = await foundry.applications.api.DialogV2.wait({
-            window: { title: dialogTitle },
-            content: '<p>Choose your attack intent:</p>',
-            buttons
-          });
-
-          if (!choice) return; // dialog cancelled
-          brawlIntent = choice;
-
-          // Apply Favor for Grapple/Shove checks if actor has brawlCheckFavor
-          if (brawlIntent !== 'damage') {
-            const brawlCheckFavor = this.actor.system.brawlCheckFavor || false;
-            let favorApplied = false;
-            if (brawlCheckFavor) {
-              if (favorHinder === 'hinder') favorHinder = 'none';
-              else if (favorHinder === 'none') favorHinder = 'favor';
-              favorApplied = true;
-            }
-
-            // Bully perk: Favor on Grapple/Shove only when target is STRICTLY SMALLER
-            if (!favorApplied && (this.actor.system.hasBully || false)) {
-              const hasStrictlySmallerTarget = targetsAtRollTime.some(t => {
-                const tActor = game.actors.get(t.actorId);
-                if (!tActor) return false;
-                const tSize = tActor.system.ancestryData?.size || tActor.system.size || 'medium';
-                return sizeOrder.indexOf(tSize) < attackerSizeIdx;
-              });
-              if (hasStrictlySmallerTarget) {
-                if (favorHinder === 'hinder') favorHinder = 'none';
-                else if (favorHinder === 'none') favorHinder = 'favor';
-              }
-            }
-          }
-        }
-      }
-
-      const attackResult = await item.rollAttack(this.actor, favorHinder);
-      if (!attackResult) return;
-
-      // Reset check bonus to 0 after any attack roll
-      if (this.actor.system.manualCheckBonus !== 0) {
-        await this.actor.update({ 'system.manualCheckBonus': 0 });
-      }
-
-      // Play item FX animation immediately after attack result (before damage roll)
-      // Placed here so it always fires regardless of whether damage rolling succeeds.
-      const casterToken = this.actor.token?.object ?? this.actor.getActiveTokens(true)[0];
-      const resolvedTargets = TargetHelper.resolveTargets(targetsAtRollTime);
-      VagabondItemSequencer.play(item, casterToken, resolvedTargets, attackResult.isHit);
-
-      let damageRoll = null;
-      if (VagabondDamageHelper.shouldRollDamage(attackResult.isHit)) {
-        const statKey = attackResult.weaponSkill?.stat || null;
-        damageRoll = await item.rollDamage(this.actor, attackResult.isCritical, statKey);
-      }
-
-      // Attach range info and brawl intent to attack result for chat card display
-      if (rangeBand) attackResult.rangeBand = rangeBand;
-      if (rangeHinder) attackResult.rangeHinder = true;
-      attackResult.brawlIntent = brawlIntent;
-
-      // Check for Imbue spell on this weapon
-      const imbueData = item.getFlag('vagabond', 'imbue');
-      if (imbueData) {
-        attackResult.imbue = imbueData;
-      }
-
-      await VagabondChatCard.weaponAttack(
-        this.actor,
-        item,
-        attackResult,
-        damageRoll,
-        targetsAtRollTime
-      );
-
-      // Consume Imbue on hit — clear the flag so it doesn't fire again
-      // (unless caster is Focusing the spell, in which case it persists)
-      if (imbueData && attackResult.isHit) {
-        const caster = game.actors.get(imbueData.casterActorId);
-        const focusedSpells = caster?.system?.focus?.spellIds || [];
-        const isFocused = focusedSpells.includes(imbueData.spellId);
-
-        if (!isFocused) {
-          await item.unsetFlag('vagabond', 'imbue');
-        }
-      }
-
-      // Handle consumption after successful attack (regardless of hit/miss)
-      await item.handleConsumption();
-      return attackResult.roll;
-    } catch (error) {
-      console.error(error);
-      ui.notifications.warn(error.message);
-      return;
-    }
+    // Delegate to the shared attack pipeline — single source of truth
+    const { performWeaponAttack } = globalThis.vagabond.utils;
+    return performWeaponAttack(this.actor, item, {
+      shiftKey: event.shiftKey,
+      ctrlKey: event.ctrlKey,
+    });
   }
 
   /**
@@ -452,10 +207,24 @@ export class RollHandler {
       return;
     }
 
-    // 2. Capture targets at use time
+    // 2. Class feature intercepts — relic items trigger class features
+    const itemNameLower = (item.name || '').toLowerCase();
+    if (itemNameLower.includes('step up') && this.actor.system.hasStepUp) {
+      const { performStepUp } = await import('../../helpers/dancer-helper.mjs');
+      await performStepUp(this.actor);
+      return;
+    }
+    if (itemNameLower.includes('virtuoso') && this.actor.system.hasVirtuoso) {
+      const targetsAtRollTime = TargetHelper.captureCurrentTargets();
+      const { performVirtuoso } = await import('../../helpers/bard-helper.mjs');
+      await performVirtuoso(this.actor, targetsAtRollTime);
+      return;
+    }
+
+    // 3. Capture targets at use time
     const targetsAtRollTime = TargetHelper.captureCurrentTargets();
 
-    // 3. Delegate to item.roll() which handles consumables, chat cards, and all logic
+    // 4. Delegate to item.roll() which handles consumables, chat cards, and all logic
     if (typeof item.roll === 'function') {
       await item.roll(event, targetsAtRollTime);
     }

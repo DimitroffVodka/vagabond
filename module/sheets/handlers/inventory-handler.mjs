@@ -177,8 +177,10 @@ export class InventoryHandler {
       // Armor cannot be "used"
       showUseOption = false;
     } else if (isGear) {
-      // Gear can only be "used" if it's consumable
-      showUseOption = item.system.isConsumable === true;
+      // Gear can be "used" if it's consumable OR if it's a class feature trigger (e.g. Step Up, Virtuoso)
+      const nameLower = item.name.toLowerCase();
+      const isClassFeatureItem = nameLower.includes('step up') || nameLower.includes('virtuoso');
+      showUseOption = item.system.isConsumable === true || isClassFeatureItem;
     } else {
       // Alchemicals, relics, and other items can be used
       showUseOption = true;
@@ -301,10 +303,13 @@ export class InventoryHandler {
           icon: 'fas fa-flask',
           enabled: true,
           action: async () => {
-            const { getAlchemicalEffect } = await import('../helpers/alchemy-helpers.mjs');
+            const { getAlchemicalEffect } = await import('../../helpers/alchemy-helpers.mjs');
             const oilEffect = getAlchemicalEffect(item.name);
+            const oilName = item.name;
+            const oilImg = item.img ?? "icons/svg/aura.svg";
+            const oilDesc = item.system?.description ?? "";
             await w.setFlag("vagabond", "oilCoating", {
-              oilName: item.name,
+              oilName: oilName,
               oilItemId: item.id,
               silvered: oilEffect?.silvered ?? false,
               coatingDie: oilEffect?.coatingDie ?? "d6",
@@ -313,8 +318,33 @@ export class InventoryHandler {
               burnsTarget: oilEffect?.burnsTarget ?? false,
               burnsTargetDie: oilEffect?.burnsTargetDie ?? null,
             });
-            await item.handleConsumption?.();
-            ui.notifications.info(`${item.name} applied to ${w.name}`);
+
+            // Consume the oil (reduce qty or delete)
+            const qty = item.system?.quantity ?? 1;
+            if (qty <= 1) {
+              await item.delete();
+            } else {
+              await item.update({ "system.quantity": qty - 1 });
+            }
+
+            // Post chat card
+            const chatContent = `
+              <div class="vagabond chat-card" style="padding:6px;">
+                <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+                  <img src="${oilImg}" width="28" height="28" style="border:none;" />
+                  <strong style="font-size:14px;">${oilName}</strong>
+                </div>
+                ${oilDesc ? `<p style="font-size:12px; margin:2px 0 6px; opacity:0.85;">${oilDesc}</p>` : ""}
+                <div style="display:flex; align-items:center; gap:6px; border-top:1px solid rgba(197,164,114,0.3); padding-top:4px;">
+                  <img src="${w.img ?? "icons/svg/sword.svg"}" width="22" height="22" style="border:none;" />
+                  <span style="font-size:13px;">Coated <strong>${w.name}</strong></span>
+                  <span style="font-size:11px; opacity:0.7; margin-left:auto;">C${oilEffect?.coatingDie ?? "d6"}</span>
+                </div>
+              </div>`;
+            await ChatMessage.create({
+              content: chatContent,
+              speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+            });
           },
         });
       }

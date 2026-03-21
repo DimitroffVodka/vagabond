@@ -13,6 +13,7 @@ import {
   VagabondNPCSheet,
   VagabondPartySheet,
   VagabondConstructSheet,
+  VagabondClassicSheet,
 } from './sheets/_module.mjs';
 import { VagabondItemSheet } from './sheets/item-sheet.mjs';
 // Import helper/utility classes and constants.
@@ -22,6 +23,7 @@ import { loadJB2ADefaults } from './helpers/sequencer-config.mjs';
 import { VagabondChatCard } from './helpers/chat-card.mjs';
 import { VagabondDiceAppearance } from './helpers/dice-appearance.mjs';
 import { EquipmentHelper } from './helpers/equipment-helper.mjs';
+import { performWeaponAttack } from './helpers/attack-pipeline.mjs';
 import { ContextMenuHelper } from './helpers/context-menu-helper.mjs';
 import { AccordionHelper } from './helpers/accordion-helper.mjs';
 import { EnrichmentHelper } from './helpers/enrichment-helper.mjs';
@@ -535,6 +537,7 @@ globalThis.vagabond = {
     ContextMenuHelper,
     AccordionHelper,
     EnrichmentHelper,
+    performWeaponAttack,
   },
   models,
 };
@@ -682,6 +685,13 @@ Hooks.once('init', function () {
     types: ['character'],
     makeDefault: true,
     label: 'VAGABOND.SheetLabels.Character',
+  });
+
+  // Register classic character sheet (alternative wide layout)
+  collections.Actors.registerSheet('vagabond', VagabondClassicSheet, {
+    types: ['character'],
+    makeDefault: false,
+    label: 'Vagabond Classic Sheet',
   });
 
   // Register NPC sheet
@@ -1120,12 +1130,55 @@ Hooks.on('updateJournalEntry', async (journal, changes, options, userId) => {
  * Foundry V13 scenarios, journal.flags may be stripped before the hook fires.
  * Both removeClock() and removeDice() are no-ops if no element exists.
  */
-Hooks.on('deleteJournalEntry', (journal, options, userId) => {
+
+// Cache Starstruck link data before deletion, in case flags are stripped by the time
+// the deleteJournalEntry hook fires (Foundry V13 edge case).
+const _starstruckLinkCache = new Map();
+Hooks.on('preDeleteJournalEntry', (journal) => {
+  const starstruckLink = journal.flags?.vagabond?.starstruckLink;
+  if (starstruckLink) {
+    _starstruckLinkCache.set(journal.id, starstruckLink);
+  }
+});
+
+Hooks.on('deleteJournalEntry', async (journal, options, userId) => {
   if (clockOverlay) {
     clockOverlay.removeClock(journal.id);
   }
   if (diceOverlay) {
     diceOverlay.removeDice(journal.id);
+  }
+
+  // Starstruck auto-cleanup (fallback): remove linked status effects when countdown die expires.
+  // Primary cleanup happens in countdown-dice-overlay._cleanupLinkedEffects() before delete.
+  // This hook serves as a safety net in case the overlay path is bypassed.
+  if (game.user.isGM) {
+    const starstruckLink = journal.flags?.vagabond?.starstruckLink
+      || _starstruckLinkCache.get(journal.id);
+    _starstruckLinkCache.delete(journal.id);
+
+    if (starstruckLink) {
+      const { status, tokenIds, sceneId } = starstruckLink;
+      if (status && tokenIds?.length && sceneId) {
+        const scene = game.scenes.get(sceneId);
+        if (scene) {
+          const clearedNames = [];
+          for (const tokenId of tokenIds) {
+            const tokenDoc = scene.tokens.get(tokenId);
+            const actor = tokenDoc?.actor;
+            if (!actor) continue;
+            if (actor.statuses?.has(status)) {
+              await actor.toggleStatusEffect(status);
+              clearedNames.push(actor.name);
+            }
+          }
+          if (clearedNames.length > 0) {
+            const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+            ui.notifications.info(`Starstruck expired — ${statusLabel} removed from ${clearedNames.join(', ')}.`);
+          }
+        }
+      }
+    }
   }
 });
 
@@ -1152,6 +1205,86 @@ Hooks.on('createJournalEntry', async (journal, options, userId) => {
 /* -------------------------------------------- */
 /* Chat Message Hooks                           */
 /* -------------------------------------------- */
+
+// ---------------------------------------------------------
+// Bard — Virtuoso: /virtuoso chat command
+// ---------------------------------------------------------
+Hooks.on('chatMessage', async (_chatLog, message, _chatData) => {
+  const trimmed = message.trim().toLowerCase();
+  if (!trimmed.startsWith('/virtuoso')) return;
+
+  // Find the player's owned character with Virtuoso
+  const actor = canvas.tokens?.controlled?.[0]?.actor
+    || game.actors.find(a => a.type === 'character' && a.isOwner && a.system.hasVirtuoso);
+
+  if (!actor) {
+    ui.notifications.warn('No character with the Virtuoso feature found.');
+    return false;
+  }
+
+  if (!actor.system.hasVirtuoso) {
+    ui.notifications.warn(`${actor.name} does not have the Virtuoso feature.`);
+    return false;
+  }
+
+  const { performVirtuoso } = await import('./helpers/bard-helper.mjs');
+  await performVirtuoso(actor);
+  return false;
+});
+
+// ---------------------------------------------------------
+// Dancer — Step Up: /stepup chat command
+// ---------------------------------------------------------
+Hooks.on('chatMessage', async (_chatLog, message, _chatData) => {
+  const trimmed = message.trim().toLowerCase();
+  if (!trimmed.startsWith('/stepup')) return;
+
+  const actor = canvas.tokens?.controlled?.[0]?.actor
+    || game.actors.find(a => a.type === 'character' && a.isOwner && a.system.hasStepUp);
+
+  if (!actor) {
+    ui.notifications.warn('No character with the Step Up feature found.');
+    return false;
+  }
+
+  if (!actor.system.hasStepUp) {
+    ui.notifications.warn(`${actor.name} does not have the Step Up feature.`);
+    return false;
+  }
+
+  const { performStepUp } = await import('./helpers/dancer-helper.mjs');
+  await performStepUp(actor);
+  return false;
+});
+
+// ---------------------------------------------------------
+// Bard — Virtuoso: Auto-expire buffs at round change
+// Dancer — Step Up: Auto-expire buffs at round change
+// ---------------------------------------------------------
+Hooks.on('updateCombat', async (combat, changed) => {
+  if (!('round' in changed)) return;
+  if (!game.user.isGM) return;
+
+  const { expireVirtuosoBuffsByRound } = await import('./helpers/bard-helper.mjs');
+  await expireVirtuosoBuffsByRound(combat.round);
+
+  const { expireStepUpBuffsByRound } = await import('./helpers/dancer-helper.mjs');
+  await expireStepUpBuffsByRound(combat.round);
+});
+
+// ---------------------------------------------------------
+// Bard — Virtuoso: Clear buffs when combat ends
+// Dancer — Step Up: Clear buffs when combat ends
+// ---------------------------------------------------------
+Hooks.on('deleteCombat', async (combat) => {
+  if (!game.user.isGM) return;
+
+  const { expireVirtuosoBuffs } = await import('./helpers/bard-helper.mjs');
+  await expireVirtuosoBuffs();
+
+  const { expireStepUpBuffs } = await import('./helpers/dancer-helper.mjs');
+  await expireStepUpBuffs();
+});
 
 /* -------------------------------------------- */
 /*  Actor Creation Hooks                        */
@@ -2628,6 +2761,76 @@ Hooks.on('deleteActiveEffect', async (effect) => {
   }
 });
 
+
+// ---------------------------------------------------------
+// Fearmonger — Auto-expire Frightened effects from Fearmonger at round change
+// ---------------------------------------------------------
+Hooks.on('updateCombat', async (combat, changed) => {
+  if (!('round' in changed)) return;
+  if (!game.user.isGM) return;
+
+  const currentRound = combat.round;
+  for (const combatant of combat.combatants) {
+    const actor = combatant.actor;
+    if (!actor) continue;
+
+    const effectsToRemove = [];
+    for (const effect of actor.effects) {
+      if (!effect.statuses?.has('frightened')) continue;
+      const expireRound = effect.flags?.vagabond?.fearmongerExpireRound;
+      if (expireRound != null && currentRound > expireRound) {
+        effectsToRemove.push(effect.id);
+      }
+    }
+
+    if (effectsToRemove.length > 0) {
+      await actor.deleteEmbeddedDocuments('ActiveEffect', effectsToRemove);
+      ui.notifications.info(`Fearmonger Frightened expired on ${actor.name}`);
+    }
+  }
+});
+
+// ---------------------------------------------------------
+// Aggressor — Refresh actor data on combat round/start so speed updates
+// ---------------------------------------------------------
+Hooks.on('updateCombat', async (combat, changed) => {
+  if (!('round' in changed)) return;
+  for (const combatant of combat.combatants) {
+    const actor = combatant.actor;
+    if (!actor || actor.type !== 'character') continue;
+    if (actor.system.hasAggressor) {
+      actor.prepareData();
+      if (actor.sheet?.rendered) actor.sheet.render(false);
+    }
+  }
+});
+
+Hooks.on('combatStart', async (combat) => {
+  for (const combatant of combat.combatants) {
+    const actor = combatant.actor;
+    if (!actor || actor.type !== 'character') continue;
+    if (actor.system.hasAggressor) {
+      actor.prepareData();
+      if (actor.sheet?.rendered) actor.sheet.render(false);
+    }
+  }
+});
+
+// ---------------------------------------------------------
+// Rage — Auto-remove Berserk status when combat ends
+// ---------------------------------------------------------
+Hooks.on('deleteCombat', async (combat) => {
+  if (!game.user.isGM) return;
+
+  for (const combatant of combat.combatants) {
+    const actor = combatant.actor;
+    if (!actor) continue;
+    if (!actor.statuses?.has('berserk')) continue;
+
+    await actor.toggleStatusEffect('berserk');
+    ui.notifications.info(`${actor.name}'s Rage (Berserk) ended with combat.`);
+  }
+});
 
 /* -------------------------------------------- */
 /*  Active Effect Configuration Hook            */

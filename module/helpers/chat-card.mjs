@@ -399,7 +399,7 @@ export class VagabondChatCard {
 
           let btns = isHealing
             ? VagabondDamageHelper.createApplyDamageButton(damageRoll.total, dLabel, actor.id, item?.id, targetsAtRollTime)
-            : VagabondDamageHelper.createSaveButtons(damageRoll.total, damageType, damageRoll, actor.id, item?.id, attackType, targetsAtRollTime, isCleave);
+            : VagabondDamageHelper.createSaveButtons(damageRoll.total, damageType, damageRoll, actor.id, item?.id, attackType, targetsAtRollTime, isCleave, damageRoll.sneakAttackDice || 0);
 
           card.addFooterAction(btns);
 

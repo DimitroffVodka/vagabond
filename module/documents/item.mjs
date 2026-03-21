@@ -174,8 +174,11 @@ export class VagabondItem extends Item {
         }
       }
     }
-    // Otherwise, if this item is consumable, consume from itself
-    else if (this.system.isConsumable) {
+    // Otherwise, if this item is consumable or an alchemical (potions, oils, poisons, etc.)
+    // Explicitly consumable items (isConsumable=true) are always consumed, even throwable weapons
+    // Non-explicit: never consume weapons or armor — only gear/alchemical consumables
+    else if (this.system.isConsumable ||
+             (this.system.alchemicalType && this.system.equipmentType !== 'weapon' && this.system.equipmentType !== 'armor')) {
       const newQuantity = this.system.quantity - 1;
       if (newQuantity <= 0) {
         // Remove this item
@@ -667,7 +670,7 @@ export class VagabondItem extends Item {
    * @param {string} statKey - The stat used for the attack (for crit bonus)
    * @returns {Promise<Roll>} The damage roll
    */
-  async rollDamage(actor, isCritical = false, statKey = null) {
+  async rollDamage(actor, isCritical = false, statKey = null, favorHinder = 'none') {
     // Check if this is a weapon (legacy weapon item OR equipment with equipmentType='weapon')
     const isWeapon = (this.type === 'weapon') ||
                     (this.type === 'equipment' && this.system.equipmentType === 'weapon');
@@ -678,16 +681,57 @@ export class VagabondItem extends Item {
 
     let damageFormula = this.system.currentDamage;
 
+    // Rage: while Berserk + Light/No Armor, upsize damage dice by 1 step and enable exploding
+    const isBerserk = actor.statuses?.has('berserk');
+    let rageActive = false;
+    if (isBerserk) {
+      const equippedArmor = actor.items.find(item => {
+        const isArmor = (item.type === 'armor') ||
+                       (item.type === 'equipment' && item.system.equipmentType === 'armor');
+        return isArmor && item.system.equipped;
+      });
+      const armorType = equippedArmor?.system?.armorType;
+      if (!equippedArmor || armorType === 'light') {
+        // Die upsizing: step up the die ladder (d4→d6→d8→d10→d12)
+        const dieLadder = [4, 6, 8, 10, 12];
+        damageFormula = damageFormula.replace(/(\d*)d(\d+)/g, (match, count, size) => {
+          const currentSize = parseInt(size);
+          const ladderIdx = dieLadder.indexOf(currentSize);
+          const newSize = ladderIdx >= 0 && ladderIdx < dieLadder.length - 1
+            ? dieLadder[ladderIdx + 1]  // step up ladder
+            : currentSize + 2;           // fallback: +2 for non-standard dice
+          return `${count}d${newSize}`;
+        });
+        rageActive = true;
+
+        // Rip and Tear: +1 bonus per damage die dealt
+        const classItem = actor.items.find(i => i.type === 'class');
+        const actorLevel = actor.system.attributes?.level?.value || 1;
+        const hasRipAndTear = classItem ? (classItem.system.levelFeatures || []).some(f =>
+          (f.level || 99) <= actorLevel && (f.name || '').toLowerCase().includes('rip and tear')
+        ) : false;
+        if (hasRipAndTear) {
+          const dieMatch = damageFormula.match(/(\d*)d\d+/);
+          const dieCount = parseInt(dieMatch?.[1] || '1') || 1;
+          damageFormula += ` + ${dieCount}`;
+        }
+      }
+    }
+
     // Apply specific die size bonus
     const weaponSkillKey = this.system.weaponSkill;
     const dieSizeBonus = actor.system[`${weaponSkillKey}DamageDieSizeBonus`] || 0;
-    
+
     if (dieSizeBonus !== 0 && damageFormula.includes('d')) {
-      // Logic: If formula is "2d6", and bonus is +2, it should become "2d8"
-      // We parse the formula (e.g. "2d6+1") and replace the dX part
+      // Add dieSizeBonus directly to die faces (e.g. +2: d8→d10), clamped to standard dice
+      const validDieSizes = [4, 6, 8, 10, 12];
       damageFormula = damageFormula.replace(/(\d*)d(\d+)/, (match, count, size) => {
-        const newSize = parseInt(size) + dieSizeBonus;
-        return `${count}d${newSize}`;
+        const rawNew = parseInt(size) + dieSizeBonus;
+        // Clamp to nearest valid die size
+        const clamped = validDieSizes.reduce((best, v) =>
+          Math.abs(v - rawNew) < Math.abs(best - rawNew) ? v : best
+        );
+        return `${count}d${clamped}`;
       });
     }
 
@@ -696,6 +740,28 @@ export class VagabondItem extends Item {
       const statValue = actor.system.stats[statKey]?.value || 0;
       if (statValue !== 0) {  // ✅ FIX: Include negative stats too (they reduce damage)
         damageFormula += ` + ${statValue}`;
+      }
+    }
+
+    // Sneak Attack: add extra d4s on Favored attacks
+    let sneakAttackApplied = 0;
+    const sneakDice = actor.system.sneakAttackDice || 0;
+    const isFavored = favorHinder === 'favor';
+    if (sneakDice > 0 && isFavored) {
+      const hasLethal = actor.system.hasLethalWeapon || false;
+      const combat = game.combat;
+      const currentRound = combat?.round || 0;
+      const lastSneakRound = actor.getFlag('vagabond', 'lastSneakAttackRound') || 0;
+      const noCombatActive = !combat || currentRound === 0;
+
+      // Apply if: Lethal Weapon (always), no combat active, or first attack this round
+      if (hasLethal || noCombatActive || lastSneakRound !== currentRound) {
+        damageFormula += ` + ${sneakDice}d4`;
+        sneakAttackApplied = sneakDice;
+        // Track round usage (only when not Lethal Weapon and in active combat)
+        if (!hasLethal && !noCombatActive) {
+          await actor.setFlag('vagabond', 'lastSneakAttackRound', currentRound);
+        }
       }
     }
 
@@ -731,6 +797,20 @@ export class VagabondItem extends Item {
       await VagabondDamageHelper._manuallyExplodeDice(roll, explodeValues);
     }
 
+    // Rage exploding: explode on max face value (e.g., 8 on d8) if no other explosion applied
+    if (rageActive && !explodeValues) {
+      const rageFaces = [];
+      for (const term of roll.terms) {
+        if (term.constructor.name === 'Die') rageFaces.push(term.faces);
+      }
+      if (rageFaces.length > 0) {
+        await VagabondDamageHelper._manuallyExplodeDice(roll, rageFaces);
+      }
+    }
+
+    // Attach metadata to the roll for downstream use
+    roll.sneakAttackDice = sneakAttackApplied;
+    roll.rageActive = rageActive;
     return roll;
   }
 }

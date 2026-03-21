@@ -1694,23 +1694,29 @@ export function registerEurekaHook() {
     if (!game.user.isGM) return;
 
     const content = message.content ?? "";
-    // Must be a weapon attack card that is a hit AND a crit
-    if (!content.includes("Attack")) return;
-    if (!content.includes("result-hit")) return;
+    // Must be a crit
     if (!content.includes("(Crit)")) return;
 
-    // Extract actor and item
-    const actorMatch = content.match(/data-actor-id="([^"]+)"/);
-    const itemMatch = content.match(/data-item-id="([^"]+)"/);
-    if (!actorMatch || !itemMatch) return;
-
-    const actor = game.actors.get(actorMatch[1]);
+    // Extract actor from message speaker (works for all card types)
+    const speaker = message.speaker;
+    const actor = speaker?.actor ? game.actors.get(speaker.actor) : null;
     if (!actor) return;
-    const weapon = actor.items.get(itemMatch[1]);
-    if (!weapon) return;
 
-    // Only for alchemical weapons (weaponSkill === "craft")
-    if (weapon.system.weaponSkill !== "craft") return;
+    // Check if this is a Craft-related crit:
+    // 1. Weapon attack with weaponSkill "craft" (alchemical weapon attack)
+    // 2. Regular Craft skill check (rollSkillLabel contains "Craft")
+    let isCraftCrit = false;
+
+    const itemMatch = content.match(/data-item-id="([^"]+)"/);
+    if (itemMatch) {
+      const weapon = actor.items.get(itemMatch[1]);
+      if (weapon?.system?.weaponSkill === "craft") isCraftCrit = true;
+    }
+
+    // Also check for a plain Craft skill check — label will say "Craft (Crit)"
+    if (!isCraftCrit && content.includes("Craft (Crit)")) isCraftCrit = true;
+
+    if (!isCraftCrit) return;
 
     // Check Alchemist level ≥ 2
     const alcData = getAlchemistData(actor);

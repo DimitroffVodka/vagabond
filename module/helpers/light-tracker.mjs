@@ -75,10 +75,12 @@ function _lightConfig(def) {
   };
 }
 
-// Only scan player actors and dropped-light actors -- skip hundreds of NPCs
+// Scan player actors, dropped-light actors, and any actor with a lit light source
 function _getActiveActors() {
   return game.actors.filter(a =>
-    a.hasPlayerOwner || a.getFlag(SYSTEM_ID, VLT_LIGHT_ACTOR_FLAG)
+    a.hasPlayerOwner ||
+    a.getFlag(SYSTEM_ID, VLT_LIGHT_ACTOR_FLAG) ||
+    (a.type === "character" && a.items.some(i => i.getFlag(SYSTEM_ID, "lit")))
   );
 }
 
@@ -161,7 +163,7 @@ async function _dropLightOnCanvas(item, dropX, dropY) {
 
   const lightActor = await Actor.create({
     name:  `${item.name} (dropped)`,
-    type:  actor.type,
+    type:  "npc",
     img:   item.img,
     flags: {
       [SYSTEM_ID]: {
@@ -198,12 +200,17 @@ async function _dropLightOnCanvas(item, dropX, dropY) {
     hidden:  false,
   }]);
 
-  if (wasLit) {
-    const origToken = actor.token?.object ?? actor.getActiveTokens(true)[0];
-    if (origToken) await origToken.document.update({ light: DARK_LIGHT });
-  }
-
   await item.delete();
+
+  // Only clear the actor's token light if they have no other lit items remaining
+  if (wasLit) {
+    const hasOtherLit = actor.items.some(i => i.getFlag(SYSTEM_ID, "lit"));
+    if (!hasOtherLit) {
+      for (const token of actor.getActiveTokens()) {
+        await token.document.update({ light: DARK_LIGHT });
+      }
+    }
+  }
 
   await ChatMessage.create({
     speaker: ChatMessage.getSpeaker({ actor }),

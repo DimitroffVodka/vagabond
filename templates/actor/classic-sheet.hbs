@@ -1,0 +1,485 @@
+{{! Classic Character Sheet - Wide Landscape Layout }}
+<div class="classic-layout">
+
+  {{! ═══ LEFT COLUMN: Stats + Skills ═══ }}
+  <div class="classic-col-left">
+
+    {{! Stats - compact 2x3 grid }}
+    <div class="classic-stats-grid">
+      {{#each system.stats as |stat key|}}
+        <div class="classic-stat-block">
+          <input
+            type="text"
+            name="system.stats.{{key}}.value"
+            value="{{stat.value}}"
+            data-dtype="Number"
+            class="classic-stat-value"
+            data-tooltip="{{#if (ne stat.value stat.total)}}Base: {{stat.value}}, Total: {{stat.total}}{{else}}{{stat.total}}{{/if}}"
+          />
+          <label class="classic-stat-label">{{localize (lookup @root.config.statAbbreviations key)}}</label>
+        </div>
+      {{/each}}
+    </div>
+
+    {{! Saves row }}
+    <div class="classic-saves-group classic-saves-left">
+      {{#each system.saves as |save key|}}
+        <div class="classic-save">
+          <label class="rollable" data-action="roll" data-roll="d20" data-type="save" data-key="{{key}}" data-difficulty="{{save.difficulty}}" data-label="{{save.label}} Save (Difficulty {{save.difficulty}})" data-tooltip="{{save.description}}">
+            {{save.label}}
+          </label>
+          <span class="classic-save-diff">
+            {{#if (eq key 'reflex')}}<i class="fas fa-running"></i>
+            {{else if (eq key 'endure')}}<i class="fas fa-shield-alt"></i>
+            {{else if (eq key 'will')}}<i class="fas fa-brain"></i>
+            {{/if}}
+            {{save.difficulty}}
+          </span>
+        </div>
+      {{/each}}
+    </div>
+
+    {{! Skills }}
+    <div class="classic-skills-section classic-collapsible">
+      <h4 class="classic-section-title classic-collapsible-header" data-action="toggleSection">
+        <i class="fas fa-caret-down classic-collapse-icon"></i> Skills
+      </h4>
+      <div class="classic-collapsible-body">
+        <div class="classic-skills-list">
+          {{#each regularSkills as |skill key|}}
+            <div class="classic-skill">
+              <label class="skill-checkbox-label">
+                <input type="checkbox" name="system.skills.{{key}}.trained" {{#if skill.trained}}checked{{/if}} class="skill-checkbox-hidden" />
+                <span class="skill-checkbox-icon {{#if skill.trained}}trained{{else}}untrained{{/if}}"></span>
+              </label>
+              <label class="classic-skill-name rollable" data-action="roll" data-roll="d20" data-type="skill" data-key="{{key}}" data-difficulty="{{skill.difficulty}}" data-trained="{{skill.trained}}" data-label="{{skill.label}} (Difficulty {{skill.difficulty}})">
+                {{skill.label}}
+                {{#if (eq @root.system.attributes.manaSkill key)}}
+                  <i class="fa-duotone fa-regular fa-wand-magic-sparkles mana-skill-icon" title="Mana Skill"></i>
+                {{/if}}
+              </label>
+              <span class="classic-skill-diff">{{skill.difficulty}}</span>
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    </div>
+
+    {{! Attacks }}
+    <div class="classic-attacks-section classic-collapsible">
+      <h4 class="classic-section-title classic-collapsible-header" data-action="toggleSection">
+        <i class="fas fa-caret-down classic-collapse-icon"></i> Attacks
+      </h4>
+      <div class="classic-collapsible-body">
+        <div class="classic-skills-list">
+          {{#each attackSkills as |skill key|}}
+            <div class="classic-skill">
+              {{#if skill.showInSkillsList}}
+                <span class="skill-checkbox-label">
+                  <span class="skill-checkbox-icon {{#if skill.trained}}trained{{else}}untrained{{/if}}"></span>
+                </span>
+              {{else}}
+                <label class="skill-checkbox-label">
+                  <input type="checkbox" name="system.skills.{{key}}.trained" {{#if skill.trained}}checked{{/if}} class="skill-checkbox-hidden" />
+                  <span class="skill-checkbox-icon {{#if skill.trained}}trained{{else}}untrained{{/if}}"></span>
+                </label>
+              {{/if}}
+              <label class="classic-skill-name rollable" data-action="roll" data-roll="d20" data-type="skill" data-key="{{key}}" data-difficulty="{{skill.difficulty}}" data-trained="{{skill.trained}}" data-label="{{skill.label}} (Difficulty {{skill.difficulty}})">
+                {{skill.label}}
+              </label>
+              <span class="classic-skill-diff">{{skill.difficulty}}</span>
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{! ═══ CENTER COLUMN ═══ }}
+  <div class="classic-col-center">
+
+    {{! Header }}
+    <div class="classic-header">
+      <div class="classic-header-row1">
+        <input name="name" type="text" value="{{actor.name}}" placeholder="Character Name" class="classic-name-input" />
+        <div class="classic-xp-field {{#if system.attributes.canLevelUp}}level-up-ready{{/if}}">
+          <label class="classic-xp-label" data-action="levelUp">
+            {{#if system.attributes.canLevelUp}}<i class="fas fa-chevron-double-up"></i>{{/if}}
+            XP
+          </label>
+          <input type="text" name="system.attributes.xp" value="{{system.attributes.xp}}" data-dtype="Number" class="classic-xp-input" />
+          <span class="classic-xp-req">/ {{system.attributes.xpRequired}}</span>
+        </div>
+      </div>
+      <div class="classic-header-row2">
+        {{#if (and (not system.details.constructed) (not system.details.builderDismissed))}}
+          <button type="button" class="btn-char-builder-icon pulse-glow" data-action="openCharBuilder" data-tooltip="Build Character">
+            <i class="fa-fw fas fa-scroll"></i>
+          </button>
+        {{/if}}
+        <span class="classic-info-text">
+          Lvl <input type="text" name="system.attributes.level.value" value="{{system.attributes.level.value}}" data-dtype="Number" class="classic-level-input" />,
+          {{#if system.ancestryData}}
+            <span class="ancestry-name clickable-link" data-item-id="{{system.ancestryData.id}}" data-action="viewAncestry">{{system.ancestryData.name}}</span>
+          {{else}}Unknown{{/if}}
+          {{#if system.classData}}
+            <span class="class-name clickable-link" data-item-id="{{system.classData.id}}" data-action="viewClass">{{system.classData.name}}</span>
+          {{else}}No Class{{/if}}
+          {{#if system.ancestryData}}({{system.ancestryData.beingType}}, {{localize (lookup config.sizes system.ancestryData.size)}}){{/if}}
+        </span>
+      </div>
+    </div>
+
+    {{! Portrait + HP + Armor + Fatigue }}
+    <div class="classic-vitals-row">
+      <div class="classic-portrait">
+        <img class="profile-img" src="{{actor.img}}" data-edit="img" data-action="onEditImage" data-tooltip="{{actor.name}}" />
+        {{#if statusEffects}}
+          <div class="classic-status-display">
+            {{#each statusEffects as |effect|}}
+              <div class="status-icon" data-effect-id="{{effect.id}}" data-effect-uuid="{{effect.uuid}}" data-tooltip="{{effect.name}}" data-action="statusClick">
+                <img src="{{effect.icon}}" alt="{{effect.name}}" width="20" height="20" />
+              </div>
+            {{/each}}
+          </div>
+        {{/if}}
+      </div>
+      <div class="classic-hp-armor">
+        <div class="classic-hp-block">
+          <label class="classic-hp-label">HP</label>
+          <input type="text" name="system.health.value" value="{{system.health.value}}" data-dtype="Number" class="classic-hp-current" />
+          <span class="classic-hp-sep">/</span>
+          <span class="classic-hp-max">{{system.health.max}}</span>
+        </div>
+        <div class="classic-armor-block">
+          <label class="classic-armor-label">Armor</label>
+          <span class="classic-armor-value">{{system.armor}}</span>
+        </div>
+        <div class="classic-fatigue-block">
+          <label class="classic-fatigue-label">Fatigue</label>
+          <div class="classic-fatigue-pips">
+            {{#each fatigueBoxes as |box index|}}
+              <i class="fas fa-skull fatigue-skull {{#if box.checked}}fatigue-active{{else}}fatigue-inactive{{/if}}" data-index="{{index}}" data-tooltip="Fatigue Level {{box.level}}"></i>
+            {{/each}}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {{! Quick row + Speed combined row }}
+    <div class="classic-combat-row">
+      <div class="classic-quick-row">
+        {{#if system.hasLuckPool}}
+          <div class="classic-quick-item rollable" data-action="spendLuck" data-tooltip="Click to spend, Shift+Click to add">
+            <i class="fas fa-clover"></i>
+            <input type="number" name="system.currentLuck" value="{{system.currentLuck}}" min="0" max="{{system.maxLuck}}" data-dtype="Number" class="classic-quick-input" />
+          </div>
+        {{/if}}
+        <div class="classic-quick-item rollable" data-action="spendStudiedDie" data-tooltip="Click to spend Studied Die | Shift+Click to add">
+          <i class="fas fa-book-open"></i>
+          <input type="number" name="system.studiedDice" value="{{system.studiedDice}}" data-dtype="Number" class="classic-quick-input" min="0" />
+        </div>
+        <div class="classic-quick-item rollable" data-action="modifyCheckBonus" data-tooltip="Left click: +1 | Right click: -1">
+          <i class="fas fa-plus-minus"></i>
+          <input type="text" name="system.universalCheckBonus" value="{{system.universalCheckBonus}}" data-dtype="Number" class="classic-quick-input check-mod-value" readonly />
+        </div>
+        <button type="button" class="classic-favor-btn {{system.favorHinder}}" data-action="toggleFavorHinder"
+          data-tooltip="{{#if (eq system.favorHinder 'favor')}}Favored{{else if (eq system.favorHinder 'hinder')}}Hindered{{else}}Neutral{{/if}}">
+          {{#if (eq system.favorHinder "favor")}}
+            <img src="systems/vagabond/assets/ui/dice/favor-mark.webp" alt="Favored" class="classic-favor-img" />
+          {{else if (eq system.favorHinder "hinder")}}
+            <img src="systems/vagabond/assets/ui/dice/hinder-mark.webp" alt="Hindered" class="classic-favor-img" />
+          {{else}}
+            <img src="systems/vagabond/assets/ui/dice/neutral-mark.webp" alt="Neutral" class="classic-favor-img" />
+          {{/if}}
+        </button>
+      </div>
+      <div class="classic-speed-group">
+        <div class="classic-speed-item"><label>Crawl</label><input type="text" name="system.speed.crawl" value="{{system.speed.crawl}}" data-dtype="Number" class="classic-speed-input" /><span class="classic-speed-unit">ft</span></div>
+        <div class="classic-speed-item classic-speed-main"><label>Speed</label><input type="text" name="system.speed.base" value="{{system.speed.base}}" data-dtype="Number" class="classic-speed-input" /><span class="classic-speed-unit">ft</span></div>
+        <div class="classic-speed-item"><label>Travel</label><input type="text" name="system.speed.travel" value="{{system.speed.travel}}" data-dtype="Number" class="classic-speed-input" /><span class="classic-speed-unit">mi</span></div>
+      </div>
+    </div>
+
+    {{! Equipped Weapons & Gear }}
+    {{#if hasEquippedItems}}
+    <div class="classic-equipped-section">
+      <h4 class="classic-section-title">Equipped</h4>
+      {{#each weapons as |weapon|}}
+        {{#if weapon.system.equipped}}
+          <div class="classic-weapon-row" data-item-id="{{weapon._id}}">
+            <img class="classic-weapon-icon" src="{{weapon.img}}" alt="" />
+            <label class="classic-weapon-name rollable" data-action="rollWeapon" data-item-id="{{weapon._id}}" title="{{weapon.name}}">{{weapon.name}}</label>
+            <span class="classic-weapon-damage">{{weapon.system.currentDamage}}</span>
+            <span class="classic-weapon-grip">
+              {{#if (eq weapon.system.grip '1H')}}<i class="fas fa-hand-fist"></i>
+              {{else if (eq weapon.system.grip '2H')}}<i class="fas fa-hands"></i>
+              {{else if (eq weapon.system.grip 'V')}}
+                {{#if (eq weapon.system.equipmentState 'oneHand')}}<i class="fas fa-hand-fist clickable" data-action="toggleWeaponGrip" data-item-id="{{weapon._id}}"></i>
+                {{else}}<i class="fas fa-hands clickable" data-action="toggleWeaponGrip" data-item-id="{{weapon._id}}"></i>
+                {{/if}}
+              {{/if}}
+            </span>
+          </div>
+        {{/if}}
+      {{/each}}
+      {{#each gear as |item|}}
+        {{#if item.system.equipped}}
+          <div class="classic-weapon-row" data-item-id="{{item._id}}">
+            <img class="classic-weapon-icon" src="{{item.img}}" alt="" />
+            <label class="classic-weapon-name rollable" data-action="useItem" data-item-id="{{item._id}}" title="{{item.name}}">{{item.name}}</label>
+            <span class="classic-weapon-damage">×{{item.system.quantity}}</span>
+          </div>
+        {{/if}}
+      {{/each}}
+    </div>
+    {{/if}}
+
+    {{! Mana & Spells }}
+    {{#if hasFavoritedSpells}}
+    <div class="classic-magic-section">
+      <div class="classic-mana-row">
+        <label class="clickable mana-modifier" data-action="modifyMana" data-tooltip="Left click to spend, Right click to restore">Mana</label>
+        <input type="text" name="system.mana.current" value="{{system.mana.current}}" data-dtype="Number" class="classic-mana-input" />
+        <span class="classic-mana-sep">/</span>
+        <span class="classic-mana-max">{{system.mana.max}}</span>
+        <label class="classic-mana-castlabel">Cast Max</label>
+        <span class="classic-mana-castmax">{{system.mana.castingMax}}</span>
+        <div class="classic-focus-pips">
+          {{#each focusPips as |pip|}}
+            <i class="fas fa-star-christmas focus-pip {{#if pip.filled}}filled{{else}}empty{{/if}}"></i>
+          {{/each}}
+        </div>
+      </div>
+      <div class="classic-spells-list favorited-spells-list">
+        {{#each spells as |spell|}}
+          {{#if spell.system.favorite}}
+            <div class="favorited-spell accordion-item collapsed classic-spell-item {{#if (contains @root.focusedSpellIds spell._id)}}focused{{/if}}" data-spell-id="{{spell._id}}" data-accordion-id="fav-spell-{{spell._id}}">
+              {{! Trigger Row }}
+              <div class="spell-trigger classic-spell-trigger">
+                {{! Icon (cast) }}
+                <div class="spell-icon-trigger clickable rollable" data-action="castSpell" data-spell-id="{{spell._id}}">
+                  <img src="{{spell.img}}" alt="{{spell.name}}" />
+                </div>
+                {{! Name (opens accordion) }}
+                <div class="spell-name-container clickable" data-action="toggleSpellAccordion">
+                  <label class="spell-name" title="{{spell.name}}">{{spell.name}}</label>
+                  <div class="spell-damage-type-icon">
+                    <i class="{{lookup @root.config.damageTypeIcons spell.system.damageType}}" data-tooltip="{{localize (lookup @root.config.damageTypes spell.system.damageType)}}"></i>
+                  </div>
+                </div>
+                {{! Damage (modify) }}
+                <div class="spell-damage-trigger clickable"
+                     data-action="modifyDamage"
+                     data-spell-id="{{spell._id}}"
+                     data-damage-type="{{spell.system.damageType}}"
+                     title="Left click +damage, Right click -damage">
+                  {{#unless (eq spell.system.damageType '-')}}
+                    <div class="damage-display-group">
+                      <span class="spell-damage-dice">{{#if (lookup @root.spellStates spell._id)}}{{lookup (lookup @root.spellStates spell._id) 'damageDice'}}{{else}}1{{/if}}</span>d{{spell.effectiveDamageDieSize}}
+                    </div>
+                  {{else}}
+                    <span class="damage-placeholder">-</span>
+                  {{/unless}}
+                </div>
+                {{! Mana Cost }}
+                <div class="spell-mana-total clickable" data-action="toggleSpellAccordion">0</div>
+              </div>
+
+              {{! Accordion: Delivery, Range, Focus, FX }}
+              <div class="spell-accordion-content accordion-content collapsed">
+                <div class="accordion-inner-grid">
+                  <div class="delivery-select-wrapper">
+                    <select class="spell-delivery-select" data-spell-id="{{spell._id}}">
+                      <option value="">{{localize "VAGABOND.UI.Labels.Delivery"}}</option>
+                      {{#each @root.config.deliveryTypes as |label key|}}<option value="{{key}}">{{localize label}}</option>{{/each}}
+                    </select>
+                  </div>
+                  <div class="spell-delivery-cost disabled" data-action="modifyDelivery" data-spell-id="{{spell._id}}" title="Select a delivery type first">0</div>
+                  <div class="spell-range clickable" data-action="toggleSpellPreview" data-spell-id="{{spell._id}}" title="Draw template">—</div>
+                  <div class="spell-focus-icon {{#if (contains @root.focusedSpellIds spell._id)}}fx-active{{else}}fx-inactive{{/if}}"
+                       data-action="toggleSpellFocus"
+                       data-spell-id="{{spell._id}}"
+                       title="{{#if (contains @root.focusedSpellIds spell._id)}}Focusing — click to release{{else}}Focus this spell{{/if}}">
+                    <i class="fas fa-star-christmas"></i>
+                  </div>
+                  <div class="spell-fx-icon fx-inactive" data-action="toggleFx" data-spell-id="{{spell._id}}" title="Toggle spell effect">
+                    {{#if (eq @root.config.fxIcon.type "txt")}}<span class="fx-text-label">{{@root.config.fxIcon.value}}</span>
+                    {{else if (eq @root.config.fxIcon.type "img")}}<img src="{{@root.config.fxIcon.value}}" alt="Fx" style="border:none; vertical-align:middle; height: 1em;" />
+                    {{else}}<i class="{{@root.config.fxIcon.value}}"></i>{{/if}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {{/if}}
+        {{/each}}
+      </div>
+    </div>
+    {{/if}}
+
+    {{! Wealth }}
+    <div class="classic-wealth-row">
+      <span class="classic-wealth-label">Wealth:</span>
+      <div class="classic-currency"><label class="gold-label">G</label><input type="text" name="system.currency.gold" value="{{system.currency.gold}}" data-dtype="Number" /></div>
+      <div class="classic-currency"><label class="silver-label">S</label><input type="text" name="system.currency.silver" value="{{system.currency.silver}}" data-dtype="Number" /></div>
+      <div class="classic-currency"><label class="copper-label">C</label><input type="text" name="system.currency.copper" value="{{system.currency.copper}}" data-dtype="Number" /></div>
+    </div>
+  </div>
+
+  {{! ═══ RIGHT COLUMN: Inventory + Features ═══ }}
+  <div class="classic-col-right">
+
+    {{! Inventory }}
+    <div class="classic-inventory-section classic-collapsible">
+      <div class="classic-inv-header classic-collapsible-header" data-action="toggleSection">
+        <h4 class="classic-section-title"><i class="fas fa-caret-down classic-collapse-icon"></i> Inventory</h4>
+        <span class="classic-slots-counter {{#if (gt system.inventory.occupiedSlots system.inventory.maxSlots)}}overloaded{{/if}}">
+          {{system.inventory.occupiedSlots}} / {{system.inventory.maxSlots}} slots
+        </span>
+      </div>
+      <div class="classic-collapsible-body">
+        <div class="classic-inv-list">
+          {{#each inventoryItems as |itemData|}}
+            <div class="classic-inv-item {{#if itemData.equipped}}equipped{{/if}}" data-item-id="{{itemData.item._id}}">
+              <img class="classic-inv-icon" src="{{itemData.item.img}}" alt="" />
+              <span class="classic-inv-name" data-action="editItem" data-item-id="{{itemData.item._id}}" title="{{itemData.item.name}}">{{itemData.item.name}}</span>
+              {{#if (gt itemData.quantity 1)}}
+                <span class="classic-inv-qty">×{{itemData.quantity}}</span>
+              {{/if}}
+              <span class="classic-inv-slots">{{itemData.totalSlots}}s</span>
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    </div>
+
+    {{! Features }}
+    {{#if enrichedFeatures.length}}
+    <div class="classic-features-section classic-collapsible">
+      <h4 class="classic-section-title classic-collapsible-header" data-action="toggleSection">
+        <i class="fas fa-caret-down classic-collapse-icon"></i> Features
+      </h4>
+      <div class="classic-collapsible-body">
+        <ul class="classic-feature-list">
+          {{#each enrichedFeatures as |feature|}}
+            <li class="classic-feature accordion-item collapsed" data-accordion-id="feature-{{feature.index}}">
+              <div class="accordion-header clickable" data-action="toggleFeature" data-feature-id="{{feature._id}}">
+                <span class="classic-feature-name">{{feature.name}}</span>
+              </div>
+              {{#if feature.enrichedDescription}}
+                <div class="accordion-content classic-feature-desc">{{{feature.enrichedDescription}}}</div>
+              {{/if}}
+            </li>
+          {{/each}}
+        </ul>
+      </div>
+    </div>
+    {{/if}}
+
+    {{! Traits }}
+    {{#if enrichedTraits.length}}
+    <div class="classic-traits-section classic-collapsible">
+      <h4 class="classic-section-title classic-collapsible-header" data-action="toggleSection">
+        <i class="fas fa-caret-down classic-collapse-icon"></i> Traits
+      </h4>
+      <div class="classic-collapsible-body">
+        <ul class="classic-feature-list">
+          {{#each enrichedTraits as |trait|}}
+            <li class="classic-feature accordion-item collapsed" data-accordion-id="trait-{{trait.index}}">
+              <div class="accordion-header clickable" data-action="toggleTrait" data-trait-id="{{trait._id}}">
+                <span class="classic-feature-name">{{trait.name}}</span>
+              </div>
+              {{#if trait.enrichedDescription}}
+                <div class="accordion-content classic-feature-desc">{{{trait.enrichedDescription}}}</div>
+              {{/if}}
+            </li>
+          {{/each}}
+        </ul>
+      </div>
+    </div>
+    {{/if}}
+
+    {{! Perks }}
+    {{#if enrichedPerks.length}}
+    <div class="classic-perks-section classic-collapsible">
+      <h4 class="classic-section-title classic-collapsible-header" data-action="toggleSection">
+        <i class="fas fa-caret-down classic-collapse-icon"></i> Perks
+      </h4>
+      <div class="classic-collapsible-body">
+        <ul class="classic-feature-list">
+          {{#each enrichedPerks as |perk|}}
+            <li class="classic-feature accordion-item collapsed" data-item-id="{{perk._id}}" data-accordion-id="perk-{{perk._id}}">
+              <div class="accordion-header clickable" data-action="togglePerk" data-perk-id="{{perk._id}}">
+                <span class="classic-feature-name">{{perk.name}}</span>
+              </div>
+              <div class="accordion-content classic-feature-desc">
+                {{#if perk.prerequisites}}
+                  <div class="classic-perk-prereq">{{perk.prerequisites}}</div>
+                {{/if}}
+                {{#if perk.enrichedDescription}}{{{perk.enrichedDescription}}}{{/if}}
+              </div>
+            </li>
+          {{/each}}
+        </ul>
+      </div>
+    </div>
+    {{/if}}
+
+    {{! Effects }}
+    {{#if effects}}
+    <div class="classic-effects-section classic-collapsible">
+      <h4 class="classic-section-title classic-collapsible-header" data-action="toggleSection">
+        <i class="fas fa-caret-down classic-collapse-icon"></i> Effects
+      </h4>
+      <div class="classic-collapsible-body">
+        <ol class="effects-list classic-effects-list">
+          {{#each effects as |section sid|}}
+            <li class="effects-header flexrow" data-effect-type="{{section.type}}">
+              <div class="effect-name flexrow">{{localize section.label}}</div>
+              <div class="effect-source">{{localize 'VAGABOND.Effect.Source'}}</div>
+              <div class="effect-source">{{localize 'EFFECT.TABS.duration'}}</div>
+              <div class="effect-controls flexrow">
+                <a class="effect-control clickable" data-action="createDoc" data-document-class="ActiveEffect"
+                  data-origin="{{@root.actor.uuid}}" data-img="icons/svg/aura.svg"
+                  {{#if (eq section.type "inactive")}}data-disabled="true"
+                  {{else if (eq section.type "temporary")}}data-duration.rounds="1"{{/if}}
+                  data-tooltip='{{localize "DOCUMENT.Create" type="Effect"}}'>
+                  <i class="fas fa-plus"></i> {{localize 'DOCUMENT.New' type='Effect'}}
+                </a>
+              </div>
+            </li>
+            <ol class="effect-list">
+              {{#each section.effects as |effect|}}
+                <li class="effect effect flexrow" data-effect-id="{{effect.id}}" data-parent-id="{{effect.parent.id}}" data-document-class="ActiveEffect">
+                  <div class="effect-name flexrow">
+                    <img class="effect-image" src="{{effect.img}}" height="24" width="24" />
+                    <div>{{effect.name}}</div>
+                  </div>
+                  <div class="effect-source">{{effect.sourceName}}</div>
+                  <div class="effect-duration">{{effect.duration.label}}</div>
+                  <div class="effect-controls flexrow">
+                    {{#if @root.editable}}
+                    <a class="effect-control" data-action="toggleEffect" data-tooltip='{{localize "VAGABOND.Effect.Toggle"}}'>
+                      <i class="fas {{#if effect.disabled}}fa-check{{else}}fa-times{{/if}}"></i>
+                    </a>
+                    {{/if}}
+                    <a class="effect-control" data-action="viewDoc" data-tooltip='{{localize "DOCUMENT.Update" type="Effect"}}'>
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    {{#if @root.editable}}
+                    <a class="effect-control" data-action="deleteDoc" data-tooltip='{{localize "DOCUMENT.Delete" type="Effect"}}'>
+                      <i class="fas fa-trash"></i>
+                    </a>
+                    {{/if}}
+                  </div>
+                </li>
+              {{/each}}
+            </ol>
+          {{/each}}
+        </ol>
+      </div>
+    </div>
+    {{/if}}
+
+  </div>
+</div>

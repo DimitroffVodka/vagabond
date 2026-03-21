@@ -151,23 +151,61 @@ export class DowntimeApp extends api.HandlebarsApplicationMixin(api.ApplicationV
     const mightValue = this.#actor.system.stats.might.value;
     const currentHP = this.#actor.system.health.value;
     const maxHP = this.#actor.system.health.max;
-    const newHP = Math.min(maxHP, currentHP + mightValue);
+
+    // Bard — Song of Rest: check if any party member has it
+    // Include GM-owned characters (for testing) and player-owned ones
+    let songOfRestBonus = 0;
+    let songOfRestBard = null;
+    const scenePCs = game.actors.filter(a => a.type === 'character');
+    for (const pc of scenePCs) {
+      if (pc.system.hasSongOfRest) {
+        const presence = pc.system.stats.presence?.total ?? pc.system.stats.presence?.value ?? 0;
+        const bardLevel = pc.system.bardLevel ?? pc.system.attributes?.level?.value ?? 1;
+        songOfRestBonus = presence + bardLevel;
+        songOfRestBard = pc.name;
+        break;
+      }
+    }
+
+    const totalRecovery = mightValue + songOfRestBonus;
+    const newHP = Math.min(maxHP, currentHP + totalRecovery);
     const actualRecovery = newHP - currentHP;
 
     // Update HP
-    await this.#actor.update({ 'system.health.value': newHP });
+    const updateData = { 'system.health.value': newHP };
+
+    // Song of Rest also grants a Studied Die
+    let studiedDieGranted = false;
+    if (songOfRestBonus > 0) {
+      const currentStudied = this.#actor.system.studiedDice ?? 0;
+      updateData['system.studiedDice'] = currentStudied + 1;
+      studiedDieGranted = true;
+    }
+
+    await this.#actor.update(updateData);
 
     // Create chat card
+    let descHTML = `
+        <p><i class="fas fa-heart"></i> <strong>${this.#actor.name}</strong> takes a breather.</p>
+        <p><strong>HP Recovery:</strong> ${actualRecovery} (${currentHP} → ${newHP})</p>
+        <p><em>Recovered HP equal to Might (${mightValue})</em></p>`;
+
+    if (songOfRestBonus > 0) {
+      descHTML += `
+        <hr>
+        <p><i class="fas fa-music"></i> <strong>Song of Rest</strong> (${songOfRestBard})</p>
+        <p><em>+${songOfRestBonus} bonus HP (Presence + Bard Level)</em></p>`;
+      if (studiedDieGranted) {
+        descHTML += `<p><em>+1 Studied Die granted!</em></p>`;
+      }
+    }
+
     const card = new VagabondChatCard()
       .setType('generic')
       .setActor(this.#actor)
       .setTitle('Breather')
       .setSubtitle(this.#actor.name)
-      .setDescription(`
-        <p><i class="fas fa-heart"></i> <strong>${this.#actor.name}</strong> takes a breather.</p>
-        <p><strong>HP Recovery:</strong> ${actualRecovery} (${currentHP} → ${newHP})</p>
-        <p><em>Recovered HP equal to Might (${mightValue}).</em></p>
-      `);
+      .setDescription(descHTML);
 
     await card.send();
   }

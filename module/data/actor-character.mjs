@@ -544,6 +544,78 @@ export default class VagabondCharacter extends VagabondActorBase {
       label: "Bully Perk"
     });
 
+    // Rogue — Sneak Attack: number of bonus d4s on first Favored attack per round
+    schema.sneakAttackDice = new fields.NumberField({
+      ...requiredInteger, initial: 0, min: 0,
+      label: "Sneak Attack Dice (d4s)"
+    });
+
+    // Rogue — Lethal Weapon: Sneak Attack applies to ALL Favored attacks, not just first
+    schema.hasLethalWeapon = new fields.BooleanField({
+      initial: false,
+      label: "Lethal Weapon"
+    });
+
+    // Rogue — Unflinching Luck: die face for refund check (0=none, 12=d12, 10=d10)
+    schema.unflinchingLuckDie = new fields.NumberField({
+      ...requiredInteger, initial: 0, min: 0,
+      label: "Unflinching Luck Die"
+    });
+
+    // Rogue — Evasive: ignore Hinder on Reflex Saves, drop 2 dice on Dodge instead of 1
+    schema.hasEvasive = new fields.BooleanField({
+      initial: false,
+      label: "Evasive"
+    });
+
+    // Barbarian — Rage: die upsizing + explode + damage reduction while Berserk
+    schema.hasRage = new fields.BooleanField({
+      initial: false,
+      label: "Rage"
+    });
+
+    // Barbarian — Rage Damage Reduction per incoming die (1 at L1, 2 at L10 with Rip and Tear)
+    schema.rageDamageReduction = new fields.NumberField({
+      ...requiredInteger, initial: 0, min: 0,
+      label: "Rage Damage Reduction per Die"
+    });
+
+    // Barbarian — Rip and Tear: upgraded Rage (+1 per damage die dealt, DR 2 per die)
+    schema.hasRipAndTear = new fields.BooleanField({
+      initial: false,
+      label: "Rip and Tear"
+    });
+
+    // Barbarian — Aggressor: +10 speed in first round of combat
+    schema.hasAggressor = new fields.BooleanField({
+      initial: false,
+      label: "Aggressor"
+    });
+
+    // Barbarian — Fearmonger: frighten nearby weaker enemies on kill
+    schema.hasFearmonger = new fields.BooleanField({
+      initial: false,
+      label: "Fearmonger"
+    });
+
+    // Barbarian — Mindless Rancor: immune to Charmed and Confused
+    schema.hasMindlessRancor = new fields.BooleanField({
+      initial: false,
+      label: "Mindless Rancor"
+    });
+
+    // Barbarian — Bloodthirsty: Favor on attacks vs wounded targets
+    schema.hasBloodthirsty = new fields.BooleanField({
+      initial: false,
+      label: "Bloodthirsty"
+    });
+
+    // Status Immunities for player characters (mirrors NPC statusImmunities)
+    schema.statusImmunities = new fields.ArrayField(
+      new fields.StringField({ required: true }),
+      { required: true, initial: [] }
+    );
+
     // Defender status modifiers (affects attackers targeting this actor)
     schema.defenderStatusModifiers = new fields.SchemaField({
       // Invisible: attackers are treated as Blinded
@@ -578,6 +650,130 @@ export default class VagabondCharacter extends VagabondActorBase {
       label: "On-Hit Burning Duration Dice",
       hint: "Dice formula for Burning duration in rounds (e.g. 1d4, 1d6, 1d8). Set by Active Effects."
     });
+
+    // ── Bard Class Features ────────────────────────────────────────────────
+
+    // Bard — Virtuoso: Performance Check → Group buff (Inspiration/Resolve/Valor)
+    schema.hasVirtuoso = new fields.BooleanField({
+      initial: false,
+      label: "Virtuoso"
+    });
+
+    // Bard — Song of Rest: Breather bonus (HP + Studied Die)
+    schema.hasSongOfRest = new fields.BooleanField({
+      initial: false,
+      label: "Song of Rest"
+    });
+
+    // Bard — Starstruck: debuff enemies on Virtuoso performance
+    schema.hasStarstruck = new fields.BooleanField({
+      initial: false,
+      label: "Starstruck"
+    });
+
+    // Bard — Bravado: Will Saves can't be Hindered while not Incapacitated
+    schema.hasBravado = new fields.BooleanField({
+      initial: false,
+      label: "Bravado"
+    });
+
+    // Bard — Climax: Favor and bonus dice granted by Bard can Explode
+    schema.hasClimax = new fields.BooleanField({
+      initial: false,
+      label: "Climax"
+    });
+
+    // Bard — Starstruck Enhancement (L10): Starstruck affects all Near Enemies
+    schema.hasStarstruckEnhancement = new fields.BooleanField({
+      initial: false,
+      label: "Starstruck Enhancement"
+    });
+
+    // Bard Level (for Song of Rest HP formula: Presence + Bard Level)
+    schema.bardLevel = new fields.NumberField({
+      ...requiredInteger, initial: 0, min: 0,
+      label: "Bard Level"
+    });
+
+    // Bard — Virtuoso Resolve: Favor on Saves (contextual, not universal)
+    schema.virtuosoSavesFavor = new fields.BooleanField({
+      initial: false,
+      label: "Virtuoso Resolve (Favor on Saves)"
+    });
+
+    // Bard — Virtuoso Valor: Favor on Attack and Cast Checks (contextual, not universal)
+    schema.virtuosoAttacksFavor = new fields.BooleanField({
+      initial: false,
+      label: "Virtuoso Valor (Favor on Attacks)"
+    });
+
+    // Bard — Virtuoso Inspiration: d6 bonus to Healing rolls
+    schema.virtuosoHealingBonus = new fields.NumberField({
+      ...requiredInteger, initial: 0, min: 0,
+      label: "Virtuoso Inspiration (Healing Bonus d6s)"
+    });
+
+    // Bard — Climax: granted dice can Explode (set on allies by Virtuoso when Bard has Climax)
+    schema.grantedDiceCanExplode = new fields.BooleanField({
+      initial: false,
+      label: "Granted Dice Can Explode"
+    });
+
+    // ── Dancer Class Features ──────────────────────────────────────────────
+
+    // Dancer — Step Up: grant ally bonus Action, 2d20 on Reflex Saves
+    schema.hasStepUp = new fields.BooleanField({
+      initial: false,
+      label: "Step Up"
+    });
+
+    // Dancer — Step Up Active: currently has 2d20 on Reflex Saves
+    schema.stepUpActive = new fields.BooleanField({
+      initial: false,
+      label: "Step Up Active"
+    });
+
+    // Dancer — Double Time: Step Up targets 2 allies instead of 1
+    schema.hasDoubleTime = new fields.BooleanField({
+      initial: false,
+      label: "Double Time"
+    });
+
+    // Dancer — Choreographer: Step Up also grants Favor + Speed bonus
+    schema.hasChoreographer = new fields.BooleanField({
+      initial: false,
+      label: "Choreographer"
+    });
+
+    // Dancer — Fleet of Foot: Reflex Save crit range reduced by ceil(dancerLevel/4)
+    schema.hasFleetOfFoot = new fields.BooleanField({
+      initial: false,
+      label: "Fleet of Foot"
+    });
+
+    // Dancer — Don't Stop Me Now: Favor on Saves vs Paralyzed/Restrained/moved
+    schema.hasDontStopMeNow = new fields.BooleanField({
+      initial: false,
+      label: "Don't Stop Me Now"
+    });
+
+    // Dancer — Flash of Beauty: Crit on Save = two Actions
+    schema.hasFlashOfBeauty = new fields.BooleanField({
+      initial: false,
+      label: "Flash of Beauty"
+    });
+
+    // Dancer Level (for Fleet of Foot crit formula: ceil(dancerLevel/4))
+    schema.dancerLevel = new fields.NumberField({
+      ...requiredInteger, initial: 0, min: 0,
+      label: "Dancer Level"
+    });
+
+    // Dancer — Reflex Save Crit Bonus (negative = easier crits)
+    schema.reflexSaveCritBonus = new fields.ArrayField(
+      new fields.StringField({ blank: true }),
+      { initial: [], label: "Reflex Save Crit Bonus" }
+    );
 
     return schema;
   }
@@ -687,6 +883,9 @@ export default class VagabondCharacter extends VagabondActorBase {
     this.fisticuffs = false;
     this.shoveSizeOverride = '';
     this.hasBully = false;
+
+    // --- 8. Reset Dancer Fields ---
+    this.reflexSaveCritBonus = [];
   }
 
   /**
@@ -798,6 +997,7 @@ export default class VagabondCharacter extends VagabondActorBase {
     this.rangedCritBonus = this._evaluateFormulaField(this.rangedCritBonus, rollData);
     this.brawlCritBonus = this._evaluateFormulaField(this.brawlCritBonus, rollData);
     this.finesseCritBonus = this._evaluateFormulaField(this.finesseCritBonus, rollData);
+    this.reflexSaveCritBonus = this._evaluateFormulaField(this.reflexSaveCritBonus, rollData);
 
     // NOTE: Stat bonuses, Save bonuses, Skill bonuses, and Weapon Skill bonuses
     // are NOT evaluated here - they're done inline in prepareDerivedData
@@ -879,6 +1079,16 @@ export default class VagabondCharacter extends VagabondActorBase {
     // ------------------------------------------------------------------
     // 1. Calculate derived values that depend on Embedded Items/Effects
     // ------------------------------------------------------------------
+
+    // Detect class feature flags FIRST so combat/speed calculations can use them (e.g. Aggressor +10 speed)
+    this._detectTraitAndFeatureFlags();
+
+    // Dancer: Fleet of Foot sets reflexSaveCritBonus DURING detection, so evaluate it now
+    // (it was [] when _evaluateNonStatBonusFields ran earlier, before detection)
+    if (Array.isArray(this.reflexSaveCritBonus)) {
+      this.reflexSaveCritBonus = this._evaluateFormulaField(this.reflexSaveCritBonus, rollData);
+    }
+
     this._calculateManaValues(rollData);
 
     // NOTE: Check your _calculateCombatValues function!
@@ -902,7 +1112,7 @@ export default class VagabondCharacter extends VagabondActorBase {
     this._calculateAncestryData();
     // this._calculateClassData(); // Simplified: We just grab ID/Name now.
     this._prepareClassDisplayData();
-    this._detectTraitAndFeatureFlags();
+    // _detectTraitAndFeatureFlags() is called earlier (before _calculateCombatValues) so Aggressor speed works
     this._calculateXPRequirements();
 
     // Process Saves (dynamically from homebrew config)
@@ -1030,6 +1240,146 @@ export default class VagabondCharacter extends VagabondActorBase {
         if (desc.includes('considered huge for shoves')) {
           this.shoveSizeOverride = 'huge';
         }
+
+        // Rogue — Sneak Attack: scales 1d4 at L1, +1d4 every 3 levels
+        if (name === 'sneak attack') {
+          this.sneakAttackDice = 1 + Math.floor((actorLevel - 1) / 3);
+        }
+
+        // Rogue — Unflinching Luck: d12 at L2, d10 at L8
+        // Feature name may include die size suffix e.g. "Unflinching Luck (d12)"
+        if (name.startsWith('unflinching luck')) {
+          this.unflinchingLuckDie = actorLevel >= 8 ? 10 : 12;
+        }
+
+        // Rogue — Evasive: ignore Hinder on Reflex, drop 2 dice on Dodge
+        if (name === 'evasive') {
+          this.hasEvasive = true;
+        }
+
+        // Rogue — Lethal Weapon: Sneak Attack on all Favored attacks
+        if (name === 'lethal weapon') {
+          this.hasLethalWeapon = true;
+        }
+
+        // Barbarian — Rage: die upsizing + explode + damage reduction while Berserk
+        // Note: compendium stores L1 as "Rage, Wrath" — use includes() for combined names
+        if (name.includes('rage')) {
+          this.hasRage = true;
+          this.rageDamageReduction = 1; // base: reduce 1 per incoming damage die
+        }
+
+        // Barbarian — Aggressor: +10 speed in first round of combat
+        if (name.includes('aggressor')) {
+          this.hasAggressor = true;
+        }
+
+        // Barbarian — Fearmonger: frighten nearby weaker enemies on kill
+        if (name.includes('fearmonger')) {
+          this.hasFearmonger = true;
+        }
+
+        // Barbarian — Mindless Rancor: immune to Charmed and Confused
+        if (name.includes('mindless rancor')) {
+          this.hasMindlessRancor = true;
+        }
+
+        // Barbarian — Bloodthirsty: Favor vs wounded targets
+        if (name.includes('bloodthirsty')) {
+          this.hasBloodthirsty = true;
+        }
+
+        // Barbarian — Rip and Tear: upgrades Rage (2 per die reduction, +1 per die dealt)
+        if (name.includes('rip and tear')) {
+          this.hasRipAndTear = true;
+          this.rageDamageReduction = 2; // upgraded: reduce 2 per incoming damage die
+        }
+
+        // Bard — Virtuoso: Performance Check → Group buff
+        if (name === 'virtuoso' || name.includes('virtuoso')) {
+          this.hasVirtuoso = true;
+        }
+
+        // Bard — Song of Rest: Breather bonus (HP + Studied Die)
+        if (name === 'song of rest' || name.includes('song of rest')) {
+          this.hasSongOfRest = true;
+        }
+
+        // Bard — Starstruck: debuff enemies on Virtuoso performance
+        if (name.includes('starstruck')) {
+          this.hasStarstruck = true;
+          // Starstruck Enhancement: L10 upgrade (affects all Near Enemies)
+          if (name.includes('enhancement') || actorLevel >= 10) {
+            this.hasStarstruckEnhancement = true;
+          }
+        }
+
+        // Bard — Bravado: Will Saves can't be Hindered
+        if (name.includes('bravado')) {
+          this.hasBravado = true;
+        }
+
+        // Bard — Climax: Favor and bonus dice you grant can Explode
+        // Also detect legacy compendium name "Awe-Inspiring"
+        if (name.includes('climax') || name.includes('awe-inspiring')) {
+          this.hasClimax = true;
+        }
+
+        // Bard — Encore (legacy compendium name for Starstruck Enhancement at L10)
+        if (name.includes('encore')) {
+          this.hasStarstruckEnhancement = true;
+        }
+
+        // Dancer — Step Up: grant ally bonus Action, 2d20 on Reflex Saves
+        if (name.includes('step up')) {
+          this.hasStepUp = true;
+        }
+
+        // Dancer — Double Time: Step Up targets 2 allies instead of 1
+        if (name.includes('double time')) {
+          this.hasDoubleTime = true;
+        }
+
+        // Dancer — Choreographer: Step Up also grants Favor + Speed bonus
+        if (name.includes('choreographer')) {
+          this.hasChoreographer = true;
+        }
+
+        // Dancer — Fleet of Foot: Reflex Save crit range reduced
+        if (name.includes('fleet of foot')) {
+          this.hasFleetOfFoot = true;
+        }
+
+        // Dancer — Evasive: same mechanic as Rogue Evasive (already detected above)
+
+        // Dancer — Don't Stop Me Now: Favor on Saves vs Paralyzed/Restrained/moved
+        if (name.includes("don't stop me now") || name.includes('dont stop me now')) {
+          this.hasDontStopMeNow = true;
+        }
+
+        // Dancer — Flash of Beauty: Crit on Save = two Actions
+        if (name.includes('flash of beauty')) {
+          this.hasFlashOfBeauty = true;
+        }
+      }
+
+      // Track Bard level for Song of Rest HP formula (Presence + Bard Level)
+      if (classItem.name?.toLowerCase() === 'bard') {
+        this.bardLevel = actorLevel;
+        // Starstruck Enhancement is the L10 upgrade to Starstruck
+        // If they have Starstruck and are L10+, they get the enhancement
+        if (this.hasStarstruck && actorLevel >= 10) {
+          this.hasStarstruckEnhancement = true;
+        }
+      }
+
+      // Track Dancer level + Fleet of Foot crit bonus
+      if (classItem.name?.toLowerCase() === 'dancer') {
+        this.dancerLevel = actorLevel;
+        if (this.hasFleetOfFoot) {
+          const critReduction = Math.ceil(actorLevel / 4);
+          this.reflexSaveCritBonus = [String(-critReduction)];
+        }
       }
     }
 
@@ -1039,6 +1389,16 @@ export default class VagabondCharacter extends VagabondActorBase {
       const name = (perk.name || '').toLowerCase();
       if (name === 'bully') {
         this.hasBully = true;
+      }
+    }
+
+    // --- Auto-populate Status Immunities ---
+    // Mindless Rancor: immune to Charmed and Confused
+    if (this.hasMindlessRancor) {
+      for (const s of ['charmed', 'confused']) {
+        if (!this.statusImmunities.includes(s)) {
+          this.statusImmunities.push(s);
+        }
       }
     }
   }
@@ -1122,6 +1482,10 @@ export default class VagabondCharacter extends VagabondActorBase {
     data.brawlCritBonus = this.brawlCritBonus || 0;
     data.finesseCritBonus = this.finesseCritBonus || 0;
     data.spellCritBonus = this.spellCritBonus || 0;
+    data.reflexSaveCritBonus = this.reflexSaveCritBonus || 0;
+
+    // Bard Climax: granted dice can explode (Virtuoso buff)
+    data.grantedDiceCanExplode = this.grantedDiceCanExplode || false;
 
     return data;
   }
@@ -1151,7 +1515,20 @@ export default class VagabondCharacter extends VagabondActorBase {
     // 2. Evaluate base speed from homebrew derivation formula
     const speedFormula = CONFIG.VAGABOND?.homebrew?.derivations?.speed
       ?? '25 + floor(max(0, @dexterity.total - 2) / 2) * 5';
-    const baseSpeed = Math.max(0, this._evaluateSingleFormula(speedFormula, rollData) + speedBonus);
+    let baseSpeed = Math.max(0, this._evaluateSingleFormula(speedFormula, rollData) + speedBonus);
+
+    // Aggressor: +10 speed in first round of combat
+    if (this.hasAggressor) {
+      const combat = game.combat;
+      if (combat?.started && combat.round === 1) {
+        baseSpeed += 10;
+      }
+    }
+
+    // Dancer — Choreographer: +10ft Speed when Step Up is active
+    if (this.parent?.getFlag?.('vagabond', 'choreographerSpeedBonus')) {
+      baseSpeed += 10;
+    }
 
     // 3. Evaluate crawl/travel formulas — @speed.base is available via augmented rollData
     const speedRollData = { ...rollData, speed: { base: baseSpeed } };
