@@ -447,83 +447,10 @@ export class CountdownDiceOverlay {
   }
 
   /**
-   * Clean up any linked effects before a countdown die is deleted.
-   * Handles Starstruck, Burning, and other linked status effects.
-   * @param {JournalEntry} dice - The dice journal entry about to be deleted
-   */
-  async _cleanupLinkedEffects(dice) {
-    if (!game.user.isGM) return;
-
-    // Check for any linked status effect (Starstruck, Burning, etc.)
-    const link = dice.flags?.vagabond?.starstruckLink
-              || dice.flags?.vagabond?.linkedStatusEffect;
-    if (!link) return;
-
-    const { status, tokenIds, sceneId, label } = link;
-    if (!status) return;
-
-    // Resolve tokens from the scene — NPC tokens are typically unlinked,
-    // so the status lives on the synthetic token actor, not the world actor.
-    const clearedNames = [];
-
-    if (tokenIds?.length && sceneId) {
-      const scene = game.scenes.get(sceneId);
-      if (scene) {
-        for (const tokenId of tokenIds) {
-          const tokenDoc = scene.tokens.get(tokenId);
-          const actor = tokenDoc?.actor;
-          if (!actor) continue;
-          if (actor.statuses?.has(status)) {
-            await actor.toggleStatusEffect(status);
-            clearedNames.push(actor.name);
-          }
-        }
-      }
-    }
-
-    // Also clean up additional status condition (when Burning + Status share a die)
-    const additionalStatus = link.statusCondition;
-    if (additionalStatus && additionalStatus !== status && tokenIds?.length && sceneId) {
-      const scene2 = game.scenes.get(sceneId);
-      if (scene2) {
-        for (const tokenId of tokenIds) {
-          const tokenDoc = scene2.tokens.get(tokenId);
-          const actor = tokenDoc?.actor;
-          if (!actor) continue;
-          if (actor.statuses?.has(additionalStatus)) {
-            await actor.toggleStatusEffect(additionalStatus);
-          }
-        }
-      }
-    }
-
-    // Legacy fallback: older data may have actorIds instead of tokenIds
-    if (clearedNames.length === 0 && link.actorIds?.length) {
-      for (const actorId of link.actorIds) {
-        const actor = game.actors.get(actorId);
-        if (!actor) continue;
-        if (actor.statuses?.has(status)) {
-          await actor.toggleStatusEffect(status);
-          clearedNames.push(actor.name);
-        }
-      }
-    }
-
-    if (clearedNames.length > 0) {
-      const statusLabel = label || status.charAt(0).toUpperCase() + status.slice(1);
-      const extras = additionalStatus && additionalStatus !== status
-        ? ` and ${additionalStatus.charAt(0).toUpperCase() + additionalStatus.slice(1)}`
-        : '';
-      ui.notifications.info(`${statusLabel}${extras} expired — removed from ${clearedNames.join(', ')}.`);
-    }
-  }
-
-  /**
    * Handle rolling a dice
    * @param {JournalEntry} dice - The dice journal entry
-   * @param {boolean} [skipAnimation=false] - If true, apply changes immediately (for auto-roll)
    */
-  async _onRollDice(dice, skipAnimation = false) {
+  async _onRollDice(dice) {
     const flags = dice.flags.vagabond.countdownDice;
     const diceType = flags.diceType;
 
@@ -533,8 +460,53 @@ export class CountdownDiceOverlay {
 
     const rollResult = roll.total;
 
-    // Apply linked status damage (e.g. Burning — the die roll IS the damage)
-    await this._applyLinkedDamage(dice, rollResult);
+    // Compute tick damage inline (GM only) before posting the card.
+    // Fires when tickDamageEnabled is true — uses die roll as damage unless formula is set.
+    let tickData = null;
+    if (game.user.isGM && flags.linkedActorUuid && flags.tickDamageEnabled) {
+      try {
+        const actor = await fromUuid(flags.linkedActorUuid);
+        if (actor) {
+          const { StatusHelper } = await import('../helpers/status-helper.mjs');
+          tickData = await StatusHelper.dealTickDamage(
+            actor,
+            flags.tickDamageFormula ?? '',
+            flags.tickDamageType ?? '-',
+            flags.linkedStatusId ?? '',
+            rollResult                // die roll result used as damage when formula is blank
+          );
+          if (tickData) {
+            const autoApply = game.settings.get('vagabond', 'autoApplySaveDamage');
+            if (autoApply && tickData.finalDamage > 0) {
+              const currentHP = actor.system.health?.value ?? 0;
+              const newHP = Math.max(0, currentHP - tickData.finalDamage);
+              await actor.update({ 'system.health.value': newHP });
+              const { VagabondChatCard } = await import('../helpers/chat-card.mjs');
+              await VagabondChatCard.applyResult(actor, {
+                type: 'damage',
+                rawAmount: tickData.rawDamage,
+                finalAmount: tickData.finalDamage,
+                damageType: tickData.damageTypeKey,
+                previousValue: currentHP,
+                newValue: newHP,
+                sourceName: tickData.statusLabel,
+              });
+            }
+            // TODO: fatigueOnTick — restore this block when re-enabling the feature:
+            // const fatigueOnTick = flags.fatigueOnTick ?? 0;
+            // if (autoApply && fatigueOnTick > 0) {
+            //   const currentFatigue = actor.system.fatigue ?? 0;
+            //   const maxFatigue = actor.system.fatigueMax ?? 5;
+            //   await actor.update({ 'system.fatigue': Math.min(maxFatigue, currentFatigue + fatigueOnTick) });
+            //   tickData.fatigueApplied = fatigueOnTick;
+            // }
+            tickData.autoApplied = autoApply;
+          }
+        }
+      } catch (err) {
+        console.warn('Vagabond | Could not deal status tick damage:', err);
+      }
+    }
 
     // Determine outcome
     if (rollResult === 1) {
@@ -542,126 +514,34 @@ export class CountdownDiceOverlay {
 
       if (smallerDice === null) {
         // d4 rolled 1 - countdown ends
-        await this._postChatMessage(dice, roll, rollResult, 'ended');
-        // Clean up any linked effects (e.g., status removal)
-        await this._cleanupLinkedEffects(dice);
-
-        if (skipAnimation) {
-          // Auto-roll: delete immediately to avoid race conditions
-          this.removeDice(dice.id);
+        await this._postChatMessage(dice, roll, rollResult, 'ended', null, tickData);
+        // Wait for dice animation to complete before deleting (Dice So Nice takes ~2 seconds)
+        const timeoutId = setTimeout(async () => {
+          this.pendingDeletions.delete(dice.id);
           await dice.delete();
-        } else {
-          // Manual click: wait for Dice So Nice animation (~2 seconds)
-          const timeoutId = setTimeout(async () => {
-            this.pendingDeletions.delete(dice.id);
-            await dice.delete();
-          }, 2500);
-          this.pendingDeletions.set(dice.id, timeoutId);
-        }
+        }, 2500);
+        // Store timeout so we can cancel it if needed
+        this.pendingDeletions.set(dice.id, timeoutId);
       } else {
         // Shrink dice
-        await this._postChatMessage(dice, roll, rollResult, 'reduced', smallerDice);
-
-        if (skipAnimation) {
-          // Auto-roll: update immediately
+        await this._postChatMessage(dice, roll, rollResult, 'reduced', smallerDice, tickData);
+        // Wait for dice animation before updating
+        const timeoutId = setTimeout(async () => {
+          this.pendingDeletions.delete(dice.id);
           await dice.update({
             'flags.vagabond.countdownDice.diceType': smallerDice,
           });
-        } else {
-          // Manual click: wait for animation
-          const timeoutId = setTimeout(async () => {
-            this.pendingDeletions.delete(dice.id);
-            await dice.update({
-              'flags.vagabond.countdownDice.diceType': smallerDice,
-            });
-          }, 2500);
-          this.pendingDeletions.set(dice.id, timeoutId);
-        }
+          // Explicitly refresh the overlay element after the update.
+          // The updateJournalEntry hook may use stale flag data or miss the
+          // diceElements map entry; fetching fresh here guarantees the visual syncs.
+          await this.refreshDice(dice.id);
+        }, 2500);
+        // Store timeout so we can cancel it if needed
+        this.pendingDeletions.set(dice.id, timeoutId);
       }
     } else {
       // Countdown continues
-      await this._postChatMessage(dice, roll, rollResult, 'continues');
-    }
-  }
-
-  /**
-   * Apply damage from a linked burning die when rolled.
-   * The die roll result IS the damage (e.g. Cd4 rolls 3 = 3 poison damage).
-   * Damage goes through the normal damage pipeline (armor, immune, weak).
-   * @param {JournalEntry} dice - The countdown die journal entry
-   * @param {number} rollResult - The result of the countdown die roll
-   */
-  async _applyLinkedDamage(dice, rollResult) {
-    const link = dice.flags?.vagabond?.linkedStatusEffect;
-    if (!link) return;
-
-    // Only burning dice deal damage — plain countdown dice do not
-    if (link.status !== 'burning') return;
-
-    const { tokenIds, sceneId } = link;
-    if (!tokenIds?.length || !sceneId) return;
-
-    const scene = game.scenes.get(sceneId);
-    if (!scene) return;
-
-    // Read damage type from the link flags — defaults to 'fire' for legacy data
-    const damageType = link.damageType || 'fire';
-    const burnDamage = rollResult;
-    const diceType = dice.flags.vagabond.countdownDice.diceType;
-
-    // Damage type display icons
-    const typeIcons = {
-      fire: 'fa-fire', cold: 'fa-snowflake', poison: 'fa-skull-crossbones',
-      lightning: 'fa-bolt', acid: 'fa-flask', necrotic: 'fa-ghost',
-    };
-    const icon = typeIcons[damageType] || 'fa-fire';
-
-    for (const tokenId of tokenIds) {
-      const tokenDoc = scene.tokens.get(tokenId);
-      const actor = tokenDoc?.actor;
-      if (!actor) continue;
-
-      // Only deal damage if the actor still has the Burning status
-      if (!actor.statuses?.has('burning')) continue;
-
-      try {
-        // Run through the normal damage pipeline (respects armor, immune, weak)
-        const { VagabondDamageHelper } = await import('../helpers/damage-helper.mjs');
-        const finalDamage = VagabondDamageHelper.calculateFinalDamage(
-          actor, burnDamage, damageType, null
-        );
-
-        // Apply the final damage to HP
-        const currentHP = actor.system.health?.value ?? 0;
-        const newHP = Math.max(0, currentHP - finalDamage);
-        await actor.update({ 'system.health.value': newHP });
-
-        // Build breakdown text
-        const absorbed = burnDamage - finalDamage;
-        let breakdownText = '';
-        if (absorbed > 0) breakdownText += ` (${absorbed} absorbed)`;
-        if (finalDamage === 0 && burnDamage > 0) breakdownText = ' — fully absorbed!';
-
-        // Post chat card
-        const { VagabondChatCard } = await import('../helpers/chat-card.mjs');
-        const card = new VagabondChatCard()
-          .setType('generic')
-          .setActor(actor)
-          .setTitle('Burning!')
-          .setSubtitle(actor.name)
-          .setDescription(`
-            <p><i class="fas ${icon}"></i> <strong>${actor.name} is burning!</strong></p>
-            <p>Takes <strong>${finalDamage} ${damageType}</strong> damage! <em>[${diceType}: ${rollResult}]</em>${breakdownText}</p>
-            <p>(${currentHP} → ${newHP} HP)</p>
-          `);
-        await card.send();
-
-        if (newHP <= 0) {
-          ui.notifications.warn(`${actor.name} has been killed by Burning damage!`);
-        }
-      } catch (e) {
-        console.error('Vagabond | Burning countdown damage error:', e);
-      }
+      await this._postChatMessage(dice, roll, rollResult, 'continues', null, tickData);
     }
   }
 
@@ -673,7 +553,7 @@ export class CountdownDiceOverlay {
    * @param {string} status - Status: 'continues', 'reduced', or 'ended'
    * @param {string} newDiceType - New dice type (for 'reduced' status)
    */
-  async _postChatMessage(dice, roll, rollResult, status, newDiceType = null) {
+  async _postChatMessage(dice, roll, rollResult, status, newDiceType = null, tickData = null) {
     const flags = dice.flags.vagabond.countdownDice;
     const currentDiceType = flags.diceType;
 
@@ -685,7 +565,8 @@ export class CountdownDiceOverlay {
       rollResult,
       status,
       currentDiceType,
-      newDiceType
+      newDiceType,
+      tickData
     );
   }
 
@@ -742,8 +623,6 @@ export class CountdownDiceOverlay {
       });
 
       if (confirmed) {
-        // Clean up any linked effects before deleting
-        await this._cleanupLinkedEffects(dice);
         // Remove DOM element immediately before async delete
         const diceId = dice.id;
         this.removeDice(diceId);

@@ -52,6 +52,7 @@ import { LightTracker } from './helpers/light-tracker.mjs';
 import { LevelUpDialog } from './applications/level-up-dialog.mjs';
 import { PartyCompactView } from './applications/party-compact-view.mjs';
 import { RelicForge } from './applications/relic-forge.mjs';
+import { OngoingPanel } from './applications/ongoing-panel.mjs';
 import VagabondActiveEffectConfig from './applications/active-effect-config.mjs';
 import { VagabondSpellSequencer } from './helpers/spell-sequencer.mjs';
 import { VagabondItemSequencer } from './helpers/item-sequencer.mjs';
@@ -98,7 +99,18 @@ function registerGameSettings() {
     requiresReload: false,
   });
 
-  // Setting 3: Auto-apply save damage
+  // Setting 3: NPC flat damage preference
+  game.settings.register('vagabond', 'npcUseFlatDamage', {
+    name: 'VAGABOND.Settings.npcUseFlatDamage.name',
+    hint: 'VAGABOND.Settings.npcUseFlatDamage.hint',
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: false,
+    requiresReload: false,
+  });
+
+  // Setting 4: Auto-apply save damage
   game.settings.register('vagabond', 'autoApplySaveDamage', {
     name: 'VAGABOND.Settings.autoApplySaveDamage.name',
     hint: 'VAGABOND.Settings.autoApplySaveDamage.hint',
@@ -488,6 +500,8 @@ async function preloadHandlebarsTemplates() {
     'systems/vagabond/templates/construct/construct-part-card.hbs',
     //Chat cards
     'systems/vagabond/templates/chat/damage-display.hbs',
+    // Ongoing panel
+    'systems/vagabond/templates/apps/ongoing-panel.hbs',
   ];
 
   // Load standard partials
@@ -548,6 +562,7 @@ globalThis.vagabond = {
     LevelUpDialog,
     PartyCompactView,
     RelicForge,
+    OngoingPanel,
   },
   ui: {
     ProgressClockOverlay,
@@ -1124,9 +1139,20 @@ Hooks.on('getSceneControlButtons', (controls) => {
         onClick: () => {
           RelicForge.open();
         }
-      }
+      },
+      ongoingPanel: {
+        name:    'ongoingPanel',
+        title:   game.i18n.localize('VAGABOND.OngoingPanel.SceneControl'),
+        icon:    'fas fa-list-ul',
+        button:  true,
+        onClick: () => Hooks.callAll('vagabond.toggleOngoingPanel'),
+      },
     }
   };
+});
+
+Hooks.on('vagabond.toggleOngoingPanel', () => {
+  OngoingPanel.toggle();
 });
 
 /**
@@ -1221,6 +1247,39 @@ Hooks.on('deleteJournalEntry', async (journal, options, userId) => {
             ui.notifications.info(`Starstruck expired — ${statusLabel} removed from ${clearedNames.join(', ')}.`);
           }
         }
+      }
+    }
+
+    // Auto-remove linked status when its countdown die expires (generic)
+    const cdFlags = journal.flags?.vagabond?.countdownDice;
+    if (cdFlags?.linkedActorUuid && cdFlags?.linkedStatusId) {
+      try {
+        const actor = await fromUuid(cdFlags.linkedActorUuid);
+        if (actor) {
+          await actor.toggleStatusEffect(cdFlags.linkedStatusId, { active: false });
+
+          const statusLabel = game.i18n.localize(
+            CONFIG.VAGABOND?.statusConditions?.[cdFlags.linkedStatusId] ?? cdFlags.linkedStatusId
+          );
+          const { VagabondChatCard } = await import('./helpers/chat-card.mjs');
+          const card = new VagabondChatCard();
+          card.data.title = journal.name;
+          card.data.subtitle = statusLabel;
+          card.data.description = `<p><i class="fas fa-hourglass-end"></i> ${game.i18n.format('VAGABOND.Status.CountdownExpired', {
+            actor: actor.name,
+            status: statusLabel,
+          })}</p>`;
+          card.data.type = 'countdown-dice';
+          card.data.alias = actor.name;
+          const statusIcon = CONFIG.VAGABOND?.statusConditionIcons?.[cdFlags.linkedStatusId];
+          if (statusIcon) {
+            card.data.icon = statusIcon;
+            if (statusIcon.endsWith('.svg')) card.data.iconBackground = '#000000';
+          }
+          await card.send();
+        }
+      } catch(err) {
+        console.warn('Vagabond | Could not remove linked status on countdown expiry:', err);
       }
     }
   }
@@ -1952,6 +2011,40 @@ Hooks.on('renderChatMessageHTML', (message, html) => {
         diceType: diceType,
         size: 'S', // Small size
       });
+    });
+  });
+
+  // ---------------------------------------------------------
+  // 8. Tick Damage Apply Button (Countdown Dice, manual-apply mode)
+  // ---------------------------------------------------------
+  const tickDamageButtons = html.querySelectorAll('.vagabond-tick-damage-button');
+
+  tickDamageButtons.forEach(button => {
+    button.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      button.disabled = true;
+      try {
+        const actorUuid = button.dataset.actorUuid;
+        const amount = parseInt(button.dataset.damageAmount);
+        if (!actorUuid || isNaN(amount) || amount <= 0) return;
+        const actor = await fromUuid(actorUuid);
+        if (!actor) { ui.notifications.warn('Target actor not found.'); return; }
+        const currentHP = actor.system.health?.value ?? 0;
+        const newHP = Math.max(0, currentHP - amount);
+        await actor.update({ 'system.health.value': newHP });
+        ui.notifications.info(`Applied ${amount} damage to ${actor.name}.`);
+        const { VagabondChatCard } = await import('./helpers/chat-card.mjs');
+        await VagabondChatCard.applyResult(actor, {
+          type: 'damage',
+          rawAmount: amount,
+          finalAmount: amount,
+          previousValue: currentHP,
+          newValue: newHP,
+        });
+      } catch (err) {
+        console.error('Vagabond | Tick damage apply failed:', err);
+        button.disabled = false;
+      }
     });
   });
 
