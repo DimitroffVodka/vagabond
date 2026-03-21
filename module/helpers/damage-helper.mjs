@@ -308,17 +308,93 @@ export class VagabondDamageHelper {
       finalFormula += ` + ${universalDiceBonus}`;
     }
 
+    // Rage: while Berserk + Light/No Armor, upsize damage dice and enable exploding
+    let rageActive = false;
+    const isBerserk = actor.statuses?.has('berserk');
+    if (isBerserk) {
+      const equippedArmor = actor.items.find(i => {
+        const isArmor = (i.type === 'armor') ||
+                       (i.type === 'equipment' && i.system.equipmentType === 'armor');
+        return isArmor && i.system.equipped;
+      });
+      const armorType = equippedArmor?.system?.armorType;
+      if (!equippedArmor || armorType === 'light') {
+        // Die upsizing: step up the die ladder (d4->d6->d8->d10->d12)
+        const dieLadder = [4, 6, 8, 10, 12];
+        finalFormula = finalFormula.replace(/(\d*)d(\d+)/g, (match, count, size) => {
+          const currentSize = parseInt(size);
+          const ladderIdx = dieLadder.indexOf(currentSize);
+          const newSize = ladderIdx >= 0 && ladderIdx < dieLadder.length - 1
+            ? dieLadder[ladderIdx + 1]
+            : currentSize + 2;
+          return `${count}d${newSize}`;
+        });
+        rageActive = true;
+
+        // Rip and Tear: +1 bonus per damage die dealt
+        const classItem = actor.items.find(i => i.type === 'class');
+        const actorLevel = actor.system.attributes?.level?.value || 1;
+        const hasRipAndTear = classItem ? (classItem.system.levelFeatures || []).some(f =>
+          (f.level || 99) <= actorLevel && (f.name || '').toLowerCase().includes('rip and tear')
+        ) : false;
+        if (hasRipAndTear) {
+          const dieMatch = finalFormula.match(/(\d*)d\d+/);
+          const dieCount = parseInt(dieMatch?.[1] || '1') || 1;
+          finalFormula += ` + ${dieCount}`;
+        }
+      }
+    }
+
+    // Sneak Attack: add extra d4s on Favored attacks (deferred damage path)
+    let sneakAttackApplied = 0;
+    const sneakDice = actor.system.sneakAttackDice || 0;
+    const isFavored = (context.favorHinder || 'none') === 'favor';
+    if (sneakDice > 0 && isFavored) {
+      const hasLethal = actor.system.hasLethalWeapon || false;
+      const combat = game.combat;
+      const currentRound = combat?.round || 0;
+      const lastSneakRound = actor.getFlag('vagabond', 'lastSneakAttackRound') || 0;
+      const noCombatActive = !combat || currentRound === 0;
+
+      if (hasLethal || noCombatActive || lastSneakRound !== currentRound) {
+        finalFormula += ` + ${sneakDice}d4`;
+        sneakAttackApplied = sneakDice;
+        if (!hasLethal && !noCombatActive) {
+          await actor.setFlag('vagabond', 'lastSneakAttackRound', currentRound);
+        }
+      }
+    }
+
     // Roll damage (without explosion modifiers in formula)
     const damageRoll = new Roll(finalFormula, actor.getRollData());
     await damageRoll.evaluate();
 
+    // Attach sneak attack info to the roll for downstream use
+    damageRoll.sneakAttackDice = sneakAttackApplied;
+
     // Apply manual explosions if item supports it
+    let itemExploded = false;
     if (item) {
       const explodeValues = this._getExplodeValues(item, actor);
       if (explodeValues) {
         await this._manuallyExplodeDice(damageRoll, explodeValues);
+        itemExploded = true;
       }
     }
+
+    // Rage exploding: explode on max face value if no other explosion applied
+    if (rageActive && !itemExploded) {
+      const rageFaces = [];
+      for (const term of damageRoll.terms) {
+        if (term.constructor.name === 'Die') rageFaces.push(term.faces);
+      }
+      if (rageFaces.length > 0) {
+        await this._manuallyExplodeDice(damageRoll, rageFaces);
+      }
+    }
+
+    // Attach rage info to the roll
+    damageRoll.rageActive = rageActive;
 
     // Determine damage type
     let damageTypeLabel = 'Physical';
@@ -1011,14 +1087,49 @@ export class VagabondDamageHelper {
    * @param {Item} attackingWeapon - The weapon used (optional, for material weakness checks)
    * @returns {number} Final damage amount
    */
-  static calculateFinalDamage(actor, damage, damageType, attackingWeapon = null) {
+  static calculateFinalDamage(actor, damage, damageType, attackingWeapon = null, sneakDice = 0, incomingDiceCount = 0, breakdown = null) {
     // Normalize damage type for lookup
     const normalizedType = damageType.toLowerCase();
 
+    // Start with base damage
+    let finalDamage = damage;
+
+    // Rage damage reduction: while Berserk + Light/No Armor, reduce damage by 1 per incoming die
+    // (Rip and Tear upgrades this to 2 per die)
+    // Flat damage (0 dice) still gets reduced as if 1 die minimum
+    // NOTE: Rage DR applies to ALL damage types (including typeless "-"), so it must run
+    // before any early returns for typeless/weakness/immunity
+    if (actor.statuses?.has('berserk')) {
+      // Check light/no armor requirement
+      const ragArmor = actor.items.find(item => {
+        const isArmor = (item.type === 'armor') ||
+                       (item.type === 'equipment' && item.system.equipmentType === 'armor');
+        return isArmor && item.system.equipped;
+      });
+      const ragArmorType = ragArmor?.system?.armorType;
+      if (!ragArmor || ragArmorType === 'light') {
+        // Determine DR amount: 1 per die base, 2 if Rip and Tear
+        let rageDR = 1;
+        const classItem = actor.items.find(i => i.type === 'class');
+        if (classItem) {
+          const actorLevel = actor.system.attributes?.level?.value || 1;
+          const hasRipAndTear = (classItem.system.levelFeatures || []).some(f =>
+            (f.level || 99) <= actorLevel && (f.name || '').toLowerCase().includes('rip and tear')
+          );
+          if (hasRipAndTear) rageDR = 2;
+        }
+        const effectiveDiceCount = Math.max(1, incomingDiceCount); // Minimum 1 die for flat damage
+        const rageReduction = rageDR * effectiveDiceCount;
+        finalDamage = Math.max(0, finalDamage - rageReduction);
+        if (breakdown) breakdown.rageReduction = rageReduction;
+      }
+    }
+
     // Handle typeless damage ("-") - just apply armor, skip immunities/weaknesses
     if (normalizedType === '-') {
-      const armorRating = actor.system.armor || 0;
-      return Math.max(0, damage - armorRating);
+      const armorRating = Math.max(0, (actor.system.armor || 0) - sneakDice);
+      if (breakdown) breakdown.armorReduction = Math.min(armorRating, finalDamage);
+      return Math.max(0, finalDamage - armorRating);
     }
 
     // Get immunities and weaknesses arrays (for NPCs and from equipped armor)
@@ -1038,9 +1149,6 @@ export class VagabondDamageHelper {
         immunities = [...immunities, ...equippedArmor.system.immunities];
       }
     }
-
-    // Start with base damage
-    let finalDamage = damage;
 
     // Check for material-based weakness (Cold Iron, Silver)
     if (attackingWeapon && attackingWeapon.system?.metal) {
@@ -1063,13 +1171,65 @@ export class VagabondDamageHelper {
     }
 
     // RAW: Immune - Unharmed by the damage type
-    if (immunities.includes(normalizedType)) {
+    // Check direct immunity first
+    let isImmune = immunities.includes(normalizedType);
+
+    // Physical immunity: covers blunt/piercing/slashing from non-magical weapons
+    // A weapon is "magical" if it has a special metal OR has Active Effects (relic powers)
+    if (!isImmune && immunities.includes('physical')) {
+      const physicalTypes = ['blunt', 'piercing', 'slashing'];
+      if (physicalTypes.includes(normalizedType)) {
+        if (!attackingWeapon || !_isWeaponMagical(attackingWeapon)) {
+          isImmune = true;
+        }
+      }
+    }
+
+    if (isImmune) {
       return 0;
+    }
+
+    // Resistances — half damage BEFORE armor
+    // Gather from actor schema + equipped item AE flags (relic powers)
+    const resistances = new Set(actor.system.resistances || []);
+
+    // Check equipped items for relic resistance AEs
+    if (actor.items) {
+      for (const item of actor.items) {
+        if (item.type !== 'equipment' || !item.system.equipped) continue;
+        for (const ae of item.effects) {
+          const dr = ae.flags?.vagabond?.damageResistance;
+          if (dr) resistances.add(dr.toLowerCase());
+        }
+      }
+    }
+
+    let isResisted = false;
+
+    if (resistances.has(normalizedType)) {
+      isResisted = true;
+    }
+
+    // Physical resistance: applies to blunt/piercing/slashing from non-magical weapons
+    if (!isResisted && resistances.has('physical')) {
+      const physicalTypes = ['blunt', 'piercing', 'slashing'];
+      if (physicalTypes.includes(normalizedType)) {
+        if (!attackingWeapon || !_isWeaponMagical(attackingWeapon)) {
+          isResisted = true;
+        }
+      }
+    }
+
+    if (isResisted) {
+      finalDamage = Math.floor(finalDamage / 2);
     }
 
     // RAW: Armor - Subtracted from ALL incoming damage
     // Armor always reduces damage unless target is immune or weak
-    const armorRating = actor.system.armor || 0;
+    // Sneak Attack: pierces armor equal to number of sneak dice
+    const baseArmor = actor.system.armor || 0;
+    const armorRating = Math.max(0, baseArmor - sneakDice);
+    if (breakdown) breakdown.armorReduction = Math.min(armorRating, finalDamage);
     finalDamage = Math.max(0, finalDamage - armorRating);
 
     return finalDamage;
@@ -1163,7 +1323,7 @@ export class VagabondDamageHelper {
   /**
    * Create save buttons (Reflex, Endure, Will, Apply Direct)
    */
-  static createSaveButtons(damageAmount, damageType, damageRoll, actorId, itemId, attackType, targetsAtRollTime = [], actionIndex = null, attackWasCrit = false, statusSaveTypes = new Set()) {
+  static createSaveButtons(damageAmount, damageType, damageRoll, actorId, itemId, attackType, targetsAtRollTime = [], actionIndex = null, attackWasCrit = false, statusSaveTypes = new Set(), isCleave = false, sneakDice = 0) {
     // Encode the damage roll terms
     const rollTermsData = JSON.stringify({
       terms: damageRoll.terms.map(t => {
@@ -1196,6 +1356,20 @@ export class VagabondDamageHelper {
     const endureClass = statusSaveTypes.has('endure') ? ' save-has-status' : '';
     const willClass   = statusSaveTypes.has('will')   ? ' save-has-status' : '';
 
+    // Count total dice for Rage damage reduction
+    let totalDiceCount = 0;
+    for (const term of damageRoll.terms) {
+      if (term.constructor.name === 'Die') {
+        totalDiceCount += (term.results?.length || term.number || 0);
+      }
+    }
+    const diceCountAttr = totalDiceCount > 0 ? ` data-dice-count="${totalDiceCount}"` : '';
+
+    // Cleave attribute (halve damage when applied)
+    const cleaveAttr = isCleave ? ' data-cleave="true"' : '';
+    // Sneak Attack armor pierce attribute
+    const sneakAttr = sneakDice > 0 ? ` data-sneak-dice="${sneakDice}"` : '';
+
     // LAYOUT FIX: Two rows. Top: Apply Direct. Bottom: Saves.
     return `
       <div class="vagabond-save-buttons-container">
@@ -1207,7 +1381,7 @@ export class VagabondDamageHelper {
               data-item-id="${itemId || ''}"
               data-action-index="${actionIndex ?? ''}"
               data-is-critical="${attackWasCrit}"
-              data-targets="${targetsJson}">
+              data-targets="${targetsJson}"${cleaveAttr}${sneakAttr}${diceCountAttr}>
               <i class="fas fa-burst"></i> ${applyDirectLabel}
             </button>
         </div>
@@ -1223,7 +1397,7 @@ export class VagabondDamageHelper {
               data-action-index="${actionIndex ?? ''}"
               data-attack-type="${attackType}"
               data-attack-was-crit="${attackWasCrit}"
-              data-targets="${targetsJson}">
+              data-targets="${targetsJson}"${cleaveAttr}${sneakAttr}${diceCountAttr}>
               <i class="fas fa-running"></i> ${reflexLabel}
             </button>
             <button class="vagabond-save-button save-endure${endureClass}"
@@ -1236,7 +1410,7 @@ export class VagabondDamageHelper {
               data-action-index="${actionIndex ?? ''}"
               data-attack-type="${attackType}"
               data-attack-was-crit="${attackWasCrit}"
-              data-targets="${targetsJson}">
+              data-targets="${targetsJson}"${cleaveAttr}${sneakAttr}${diceCountAttr}>
               <i class="fas fa-shield-alt"></i> ${endureLabel}
             </button>
             <button class="vagabond-save-button save-will${willClass}"
@@ -1249,7 +1423,7 @@ export class VagabondDamageHelper {
               data-action-index="${actionIndex ?? ''}"
               data-attack-type="${attackType}"
               data-attack-was-crit="${attackWasCrit}"
-              data-targets="${targetsJson}">
+              data-targets="${targetsJson}"${cleaveAttr}${sneakAttr}${diceCountAttr}>
               <i class="fas fa-brain"></i> ${willLabel}
             </button>
         </div>
@@ -1273,6 +1447,7 @@ export class VagabondDamageHelper {
     const attackWasCrit = button.dataset.attackWasCrit === 'true';
     const actionIndexRaw = button.dataset.actionIndex;
     const actionIdx = (actionIndexRaw !== '' && actionIndexRaw != null) ? parseInt(actionIndexRaw) : null;
+    const sneakDice = parseInt(button.dataset.sneakDice) || 0;
 
     // Get targets with fallback
     const storedTargets = this._getTargetsFromButton(button);
@@ -1313,15 +1488,19 @@ export class VagabondDamageHelper {
       actorsToRoll = targetTokens.map(t => t.actor).filter(a => a);
     }
 
-    // Determine Cleave split before iterating
-    const _saveSourceActor = actorId ? game.actors.get(actorId) : null;
-    const _saveSourceItem = _saveSourceActor?.items.get(itemId);
-    const _hasCleave = _saveSourceItem?.system?.properties?.includes('Cleave') ?? false;
-    const _saveTargetCount = actorsToRoll.length;
+    // Cleave: pre-calculate per-actor damage shares from raw damage
+    const isCleave = button.dataset.cleave === 'true';
+    const cleaveShares = new Map();
+    if (isCleave && actorsToRoll.length >= 2) {
+      const pseudoTokens = actorsToRoll.map(a => ({ actor: a }));
+      const shares = this._distributeCleave(damageAmount, pseudoTokens);
+      for (const { target, share } of shares) {
+        cleaveShares.set(target.actor, share);
+      }
+    }
 
     // Roll save for each actor
-    for (let _saveIdx = 0; _saveIdx < actorsToRoll.length; _saveIdx++) {
-      const targetActor = actorsToRoll[_saveIdx];
+    for (const targetActor of actorsToRoll) {
       if (!targetActor) continue;
 
       // Check permissions
@@ -1336,12 +1515,30 @@ export class VagabondDamageHelper {
         continue;
       }
 
-      // Cleave splits the incoming damage across all targets
-      let effectiveDamageAmount = damageAmount;
-      if (_hasCleave && _saveTargetCount > 1) {
-        const base = Math.floor(damageAmount / _saveTargetCount);
-        effectiveDamageAmount = base + (_saveIdx < (damageAmount % _saveTargetCount) ? 1 : 0);
+      // Rage: prompt to go Berserk before rolling save (can go Berserk "after you take damage")
+      if (!targetActor.statuses?.has('berserk')) {
+        const defenderClassItem = targetActor.items.find(i => i.type === 'class');
+        const defenderLevel = targetActor.system.attributes?.level?.value || 1;
+        const defenderHasRage = defenderClassItem ? (defenderClassItem.system.levelFeatures || []).some(f =>
+          (f.level || 99) <= defenderLevel && (f.name || '').toLowerCase().includes('rage')
+        ) : false;
+        if (defenderHasRage) {
+          const goBerserk = await foundry.applications.api.DialogV2.wait({
+            window: { title: 'Go Berserk?' },
+            content: '<p>You\'re about to take damage! Activate Rage and go Berserk?</p><p><small>Die upsize, explode, and reduce incoming damage by 1 per die.</small></p>',
+            buttons: [
+              { action: 'yes', label: 'Go Berserk!', icon: 'fas fa-fire-flame-curved' },
+              { action: 'no', label: 'No', icon: 'fas fa-times' }
+            ]
+          });
+          if (goBerserk === 'yes') {
+            await targetActor.toggleStatusEffect('berserk');
+          }
+        }
       }
+
+      // Use cleave share or full damage
+      const effectiveDamageAmount = cleaveShares.get(targetActor) ?? damageAmount;
 
       // Determine if save is Hindered by conditions (heavy armor, ranged attack, etc.)
       const isHindered = this._isSaveHindered(saveType, attackType, targetActor);
@@ -1349,6 +1546,14 @@ export class VagabondDamageHelper {
       // Check if attacker has outgoingSavesModifier (e.g., Confused: saves vs its attacks have Favor)
       const sourceActor = actorId ? game.actors.get(actorId) : null;
       let effectiveAttackerModifier = sourceActor?.system?.outgoingSavesModifier || 'none';
+
+      // Protection ward: if defender has a relic Protection ward matching the attacker, grant Favor on save
+      if (sourceActor?.type === 'npc') {
+        const protectionFavor = this._checkProtectionWard(targetActor, sourceActor);
+        if (protectionFavor && effectiveAttackerModifier !== 'favor') {
+          effectiveAttackerModifier = effectiveAttackerModifier === 'hinder' ? 'none' : 'favor';
+        }
+      }
 
       // Check if target has status resistance granting Favor on this save type
       {
@@ -1386,28 +1591,55 @@ export class VagabondDamageHelper {
       const isSuccess = saveRoll.total >= difficulty;
       const { VagabondChatCard } = await import('./chat-card.mjs');
       const { VagabondRollBuilder } = await import('./roll-builder.mjs');
-      const critNumber = VagabondRollBuilder.calculateCritThreshold(targetActor.getRollData());
+      const saveCritType = saveType === 'reflex' ? 'reflex-save' : null;
+      const critNumber = VagabondRollBuilder.calculateCritThreshold(targetActor.getRollData(), saveCritType);
       const isCritical = VagabondChatCard.isRollCritical(saveRoll, critNumber);
+
+      // Crit save choice: luck or full negate
+      let critSaveBenefit = false;
+      if (isCritical) {
+        const critChoice = await VagabondChatCard._grantLuckOnCrit(targetActor, null, 'Critical Save');
+        critSaveBenefit = (critChoice === 'benefit');
+      }
 
       // Calculate damage breakdown for display
       let damageAfterSave = effectiveDamageAmount;
       let saveReduction = 0;
-      if (isSuccess) {
-        if (_hasCleave && _saveTargetCount > 1 && damageAmount > 0) {
-          // Proportionally scale the save reduction to match the Cleave split
-          const fullAfterSave = this._removeHighestDie(rollTermsData);
-          damageAfterSave = Math.floor(effectiveDamageAmount * (fullAfterSave / damageAmount));
-        } else {
-          damageAfterSave = this._removeHighestDie(rollTermsData);
-        }
+      if (critSaveBenefit) {
+        // Crit benefit: fully negate damage + gain an Action
+        damageAfterSave = 0;
+        saveReduction = effectiveDamageAmount;
+      } else if (isSuccess) {
+        // Evasive: remove TWO highest dice on Dodge (Reflex) saves instead of one
+        const isEvasiveDodge = saveType === 'reflex' && targetActor.system.hasEvasive;
+        damageAfterSave = isEvasiveDodge
+          ? this._removeHighestDice(rollTermsData, 2)
+          : this._removeHighestDie(rollTermsData);
+        // For cleave, cap save-reduced damage at the cleave share
+        if (isCleave) damageAfterSave = Math.min(damageAfterSave, effectiveDamageAmount);
         saveReduction = effectiveDamageAmount - damageAfterSave;
       }
 
-      // Apply armor/immune/weak modifiers and track armor reduction
+      // Count incoming dice for Rage damage reduction
+      let incomingDiceCount = 0;
+      for (const term of (rollTermsData.terms || [])) {
+        if (term.type === 'Die' && term.results) {
+          incomingDiceCount += term.results.length;
+        }
+      }
+
+      // Apply armor/immune/weak modifiers and track armor/rage reduction
       // sourceActor already declared above for outgoingSavesModifier check
       const sourceItem = sourceActor?.items.get(itemId);
-      const finalDamage = this.calculateFinalDamage(targetActor, damageAfterSave, damageType, sourceItem);
-      const armorReduction = damageAfterSave - finalDamage;
+      const dmgBreakdown = { rageReduction: 0, armorReduction: 0 };
+      let finalDamage = critSaveBenefit ? 0 : this.calculateFinalDamage(targetActor, damageAfterSave, damageType, sourceItem, sneakDice, incomingDiceCount, dmgBreakdown);
+      // Bane: bonus damage dice vs matching creature types
+      let baneDamage = 0;
+      if (!critSaveBenefit && sourceActor) {
+        baneDamage = await this.checkBaneDamage(targetActor, sourceActor, sourceItem);
+        finalDamage += baneDamage;
+      }
+      const armorReduction = dmgBreakdown.armorReduction;
 
       // Auto-apply damage if setting enabled
       const autoApply = game.settings.get('vagabond', 'autoApplySaveDamage');
@@ -1415,6 +1647,12 @@ export class VagabondDamageHelper {
         const currentHP = targetActor.system.health?.value || 0;
         const newHP = Math.max(0, currentHP - finalDamage);
         await targetActor.update({ 'system.health.value': newHP });
+        // Fearmonger: frighten nearby weaker enemies on kill
+        if (newHP <= 0 && sourceActor) await this.checkFearmonger(targetActor, sourceActor);
+        // On-Hit Burning: apply burning/status from weapon properties or relic power (skip if crit negated)
+        if (sourceActor && !critSaveBenefit) await this.checkOnHitBurning(targetActor, sourceActor, null, null, sourceItem);
+        // On-Kill: Lifesteal/Manasteal triggers
+        if (newHP <= 0 && currentHP > 0 && sourceActor) await this.checkOnKillEffects(targetActor, sourceActor, sourceItem);
       }
 
       // Collect on-hit status entries (item.causedStatuses with fallback to actor action)
@@ -1470,9 +1708,9 @@ export class VagabondDamageHelper {
         finalDamage,
         damageType,
         autoApply,
-        autoApply ? null : statusContext  // embed context only for manual-apply cards
+        autoApply ? null : statusContext,  // embed context only for manual-apply cards
+        dmgBreakdown.rageReduction
       );
-      if (isCritical) await VagabondChatCard._grantLuckOnCrit(targetActor, saveMessage, 'Critical Save');
 
       // autoApply ON → damage was already applied; process statuses now.
       // autoApply OFF → defer status processing to handleApplySaveDamage (apply button click).
@@ -1713,8 +1951,9 @@ export class VagabondDamageHelper {
       return true;
     }
 
-    // Dodge (Reflex): Hindered if Heavy Armor
+    // Dodge (Reflex): Hindered if Heavy Armor (Evasive bypasses this)
     if (saveType === 'reflex') {
+      if (actor.system.hasEvasive) return false;
       const equippedArmor = actor.items.find(item => {
         const isArmor = (item.type === 'armor') ||
                        (item.type === 'equipment' && item.system.equipmentType === 'armor');
@@ -1772,12 +2011,46 @@ export class VagabondDamageHelper {
       // If already hindered, stays hindered (no double-hinder)
     }
 
+    // Evasive: Reflex Saves can't be Hindered (while not Incapacitated)
+    if (saveType === 'reflex' && (actor.system.hasEvasive || false) && !actor.statuses?.has('incapacitated')) {
+      if (effectiveFavorHinder === 'hinder') effectiveFavorHinder = 'none';
+      if (isHindered) isHindered = false;
+    }
+
+    // Don't Stop Me Now: Favor on Saves vs Paralyzed/Restrained/moved
+    if ((actor.system.hasDontStopMeNow || false) &&
+        (actor.statuses?.has('paralyzed') || actor.statuses?.has('restrained'))) {
+      if (effectiveFavorHinder === 'hinder') { effectiveFavorHinder = 'none'; }
+      else if (effectiveFavorHinder === 'none') { effectiveFavorHinder = 'favor'; }
+    }
+
+    // Virtuoso Resolve: Favor on Saves (granted by Bard's Virtuoso performance)
+    if (actor.system.virtuosoSavesFavor || false) {
+      if (effectiveFavorHinder === 'hinder') { effectiveFavorHinder = 'none'; }
+      else if (effectiveFavorHinder === 'none') { effectiveFavorHinder = 'favor'; }
+    }
+
+    // Dancer — Step Up Active: 2d20kh on Reflex Saves
+    let baseFormula = null;
+    if (saveType === 'reflex' && (actor.system.stepUpActive || false)) {
+      baseFormula = '2d20kh';
+    }
+
+    // Dancer — Choreographer: one-check Favor (consume after this roll)
+    if (actor.getFlag('vagabond', 'choreographerFavorOneCheck')) {
+      if (effectiveFavorHinder === 'hinder') { effectiveFavorHinder = 'none'; }
+      else if (effectiveFavorHinder === 'none') { effectiveFavorHinder = 'favor'; }
+      await actor.update({ 'system.favorHinder': 'none' });
+      await actor.unsetFlag('vagabond', 'choreographerFavorOneCheck');
+    }
+
     // Build and evaluate roll with conditional hinder support
     // (isHindered = true when heavy armor for Dodge, or ranged/cast attack for Block)
     const roll = await VagabondRollBuilder.buildAndEvaluateD20WithConditionalHinder(
       actor,
       effectiveFavorHinder,
-      isHindered
+      isHindered,
+      baseFormula
     );
 
     return roll;
@@ -1833,7 +2106,7 @@ export class VagabondDamageHelper {
    * @returns {Promise<ChatMessage>}
    * @private
    */
-  static async _postSaveResult(actor, saveType, roll, difficulty, isSuccess, isCritical, isHindered, originalDamage, saveReduction, armorReduction, finalDamage, damageType, autoApplied, statusContext = null) {
+  static async _postSaveResult(actor, saveType, roll, difficulty, isSuccess, isCritical, isHindered, originalDamage, saveReduction, armorReduction, finalDamage, damageType, autoApplied, statusContext = null, rageReduction = 0) {
     const saveLabel = game.i18n.localize(`VAGABOND.Saves.${saveType.charAt(0).toUpperCase() + saveType.slice(1)}.name`);
 
     // Import VagabondChatCard
@@ -1857,7 +2130,8 @@ export class VagabondDamageHelper {
       saveType,
       actor,
       autoApplied,
-      isHindered
+      isHindered,
+      rageReduction
     );
 
     // Add crit rule text if critical save
@@ -1871,6 +2145,17 @@ export class VagabondDamageHelper {
           </p>
         </div>
       `;
+      // Flash of Beauty: Crit on Save = two Actions
+      if (actor.system.hasFlashOfBeauty) {
+        critRuleHTML += `
+          <div class="save-crit-rule" style="border-left:3px solid #d4af37; padding-left:8px; margin-top:4px;">
+            <p>
+              <strong>Flash of Beauty:</strong>
+              ${actor.name} can take <strong>two Actions</strong> instead of one!
+            </p>
+          </div>
+        `;
+      }
     }
 
     card.setDescription((card.data.description || '') + damageCalculationHTML + critRuleHTML);
@@ -1941,6 +2226,17 @@ export class VagabondDamageHelper {
           </p>
         </div>
       `;
+      // Flash of Beauty: Crit on Save = two Actions
+      if (actor.system.hasFlashOfBeauty) {
+        descriptionHTML += `
+          <div class="save-crit-rule" style="border-left:3px solid #d4af37; padding-left:8px; margin-top:4px;">
+            <p>
+              <strong>Flash of Beauty:</strong>
+              ${actor.name} can take <strong>two Actions</strong> instead of one!
+            </p>
+          </div>
+        `;
+      }
     }
 
     card.setDescription(descriptionHTML);
@@ -1962,7 +2258,7 @@ export class VagabondDamageHelper {
    * @returns {string} HTML string
    * @private
    */
-  static _buildDamageCalculation(originalDamage, saveReduction, armorReduction, finalDamage, damageType, saveType, actor, autoApplied, isHindered) {
+  static _buildDamageCalculation(originalDamage, saveReduction, armorReduction, finalDamage, damageType, saveType, actor, autoApplied, isHindered, rageReduction = 0) {
     // Get save icon
     const saveIcons = {
       'reflex': 'fa-solid fa-running',
@@ -2021,6 +2317,15 @@ export class VagabondDamageHelper {
         <span class="damage-operator">-</span>
         <span class="damage-component" title="${saveTooltip}">
           <i class="${saveIcon} ${saveIconClass}"></i> ${saveReduction}
+        </span>`;
+    }
+
+    // Add Rage damage reduction if any
+    if (rageReduction > 0) {
+      calculationHTML += `
+        <span class="damage-operator">-</span>
+        <span class="damage-component" title="Rage: reduce ${rageReduction} (per die)">
+          <i class="fas fa-fire-flame-curved"></i> ${rageReduction}
         </span>`;
     }
 
@@ -2164,6 +2469,8 @@ export class VagabondDamageHelper {
     const damageType = button.dataset.damageType;
     const actorId = button.dataset.actorId;
     const itemId = button.dataset.itemId;
+    const sneakDice = parseInt(button.dataset.sneakDice) || 0;
+    const diceCount = parseInt(button.dataset.diceCount) || 0;
 
     // Get weapon data for material weakness checks
     const sourceActor = game.actors.get(actorId);
@@ -2185,13 +2492,73 @@ export class VagabondDamageHelper {
       return;
     }
 
-    // Cleave splits damage across targets (ceil/floor, first targets get the remainder)
-    const hasCleave = sourceItem?.system?.properties?.includes('Cleave');
-    const targetCount = targetedTokens.length;
+    // Rage: prompt Barbarian targets to go Berserk before damage is applied
+    for (const target of targetedTokens) {
+      const tActor = target.actor;
+      if (!tActor || tActor.type !== 'character') continue;
+      if (tActor.statuses?.has('berserk')) continue;
+      const rageClassItem = tActor.items.find(i => i.type === 'class');
+      const rageLevel = tActor.system.attributes?.level?.value || 1;
+      const targetHasRage = rageClassItem ? (rageClassItem.system.levelFeatures || []).some(f =>
+        (f.level || 99) <= rageLevel && (f.name || '').toLowerCase().includes('rage')
+      ) : false;
+      if (targetHasRage) {
+        const goBerserk = await foundry.applications.api.DialogV2.wait({
+          window: { title: 'Go Berserk?' },
+          content: `<p>${tActor.name} is about to take damage! Activate Rage and go Berserk?</p><p><small>Reduce incoming damage by 1 per die (2 with Rip and Tear).</small></p>`,
+          buttons: [
+            { action: 'yes', label: 'Go Berserk!', icon: 'fas fa-fire-flame-curved' },
+            { action: 'no', label: 'No', icon: 'fas fa-times' }
+          ]
+        });
+        if (goBerserk === 'yes') {
+          await tActor.toggleStatusEffect('berserk');
+        }
+      }
+    }
 
-    // Apply damage to each resolved target
-    for (let i = 0; i < targetedTokens.length; i++) {
-      const target = targetedTokens[i];
+    // Cleave: smart damage distribution across targets
+    const isCleave = button.dataset.cleave === 'true';
+
+    if (isCleave && targetedTokens.length >= 2) {
+      // Distribute raw damage using smart split, then apply armor per-target
+      const shares = this._distributeCleave(damageAmount, targetedTokens);
+      for (const { target, share } of shares) {
+        const targetActor = target.actor;
+        if (!targetActor) continue;
+        if (!targetActor.isOwner && !game.user.isGM) {
+          ui.notifications.warn(`You don't have permission to modify ${targetActor.name}.`);
+          continue;
+        }
+        let finalDamage = this.calculateFinalDamage(targetActor, share, damageType, sourceItem, sneakDice, diceCount);
+        const baneDamage = await this.checkBaneDamage(targetActor, sourceActor, sourceItem);
+        finalDamage += baneDamage;
+        const currentHP = targetActor.system.health?.value || 0;
+        const newHP = Math.max(0, currentHP - finalDamage);
+        await targetActor.update({ 'system.health.value': newHP });
+        ui.notifications.info(`Applied ${finalDamage} (Cleave${baneDamage ? ` +${baneDamage} bane` : ''}) damage to ${targetActor.name}`);
+        // Fearmonger: frighten nearby weaker enemies on kill
+        if (newHP <= 0 && sourceActor) await this.checkFearmonger(targetActor, sourceActor);
+        // On-Hit Burning: apply burning/status from weapon properties or relic power
+        if (sourceActor) await this.checkOnHitBurning(targetActor, sourceActor, null, null, sourceItem);
+        // On-Kill: Lifesteal/Manasteal triggers
+        if (newHP <= 0 && currentHP > 0 && sourceActor) await this.checkOnKillEffects(targetActor, sourceActor, sourceItem);
+
+        // Post damage result to chat
+        const { VagabondChatCard: VCCCleave } = await import('./chat-card.mjs');
+        await VCCCleave.applyResult(targetActor, {
+          type: 'damage',
+          rawAmount: share,
+          armorReduction: share - (finalDamage - baneDamage),
+          finalAmount: finalDamage,
+          damageType,
+          previousValue: currentHP,
+          newValue: newHP,
+        });
+      }
+    } else {
+    // Normal (non-cleave) damage application
+    for (const target of targetedTokens) {
       const targetActor = target.actor;
       if (!targetActor) continue;
 
@@ -2201,28 +2568,31 @@ export class VagabondDamageHelper {
         continue;
       }
 
-      // Split damage for Cleave: floor(total/count), first targets absorb remainder
-      let effectiveDamage = damageAmount;
-      if (hasCleave && targetCount > 1) {
-        const base = Math.floor(damageAmount / targetCount);
-        effectiveDamage = base + (i < (damageAmount % targetCount) ? 1 : 0);
-      }
-
       // Calculate final damage (armor/immune/weak)
-      const finalDamage = this.calculateFinalDamage(targetActor, effectiveDamage, damageType, sourceItem);
+      let finalDamage = this.calculateFinalDamage(targetActor, damageAmount, damageType, sourceItem, sneakDice, diceCount);
+
+      // Bane: bonus damage dice vs matching creature types (applied after armor)
+      const baneDamage = await this.checkBaneDamage(targetActor, sourceActor, sourceItem);
+      finalDamage += baneDamage;
 
       const currentHP = targetActor.system.health?.value || 0;
       const newHP = Math.max(0, currentHP - finalDamage);
       await targetActor.update({ 'system.health.value': newHP });
 
-      ui.notifications.info(`Applied ${finalDamage} damage to ${targetActor.name}`);
+      ui.notifications.info(`Applied ${finalDamage}${baneDamage ? ` (incl. ${baneDamage} bane)` : ''} damage to ${targetActor.name}`);
+      // Fearmonger: frighten nearby weaker enemies on kill
+      if (newHP <= 0 && sourceActor) await this.checkFearmonger(targetActor, sourceActor);
+      // On-Hit Burning: apply burning/status from weapon properties or relic power
+      if (sourceActor) await this.checkOnHitBurning(targetActor, sourceActor, null, null, sourceItem);
+      // On-Kill: Lifesteal/Manasteal triggers
+      if (newHP <= 0 && currentHP > 0 && sourceActor) await this.checkOnKillEffects(targetActor, sourceActor, sourceItem);
 
       // Post damage result to chat
       const { VagabondChatCard: VCCDirect } = await import('./chat-card.mjs');
       await VCCDirect.applyResult(targetActor, {
         type: 'damage',
-        rawAmount: effectiveDamage,
-        armorReduction: effectiveDamage - finalDamage,
+        rawAmount: damageAmount,
+        armorReduction: damageAmount - (finalDamage - baneDamage),
         finalAmount: finalDamage,
         damageType,
         previousValue: currentHP,
@@ -2279,6 +2649,7 @@ export class VagabondDamageHelper {
         await VagabondChatCard.statusResults(statusResults, targetActor, sourceName, sourceItem?.img ?? null);
       }
     }
+    } // end else (non-cleave)
 
     // Button remains active so damage can be applied to different tokens
   }
@@ -2311,6 +2682,15 @@ export class VagabondDamageHelper {
     const currentHP = actor.system.health?.value || 0;
     const newHP = Math.max(0, currentHP - finalDamage);
     await actor.update({ 'system.health.value': newHP });
+
+    // On-Kill: Lifesteal/Manasteal triggers
+    if (newHP <= 0 && currentHP > 0) {
+      const sourceActorIdKill = button.dataset.sourceActorId;
+      const sourceItemIdKill = button.dataset.sourceItemId;
+      const sourceActorKill = sourceActorIdKill ? game.actors.get(sourceActorIdKill) : null;
+      const sourceItemKill = sourceActorKill?.items.get(sourceItemIdKill);
+      if (sourceActorKill) await this.checkOnKillEffects(actor, sourceActorKill, sourceItemKill);
+    }
 
     // Update button text and disable
     const icon = button.querySelector('i');
@@ -2388,6 +2768,629 @@ export class VagabondDamageHelper {
         }
         await VagabondChatCard.statusResults(statusResults, actor, sourceName, sourceItem?.img ?? null);
       }
+    }
+  }
+
+  /**
+   * Remove the N highest individual die results from the roll total.
+   * Used by Evasive to ignore TWO highest dice on a successful Dodge save.
+   * If total dice count <= count, damage is fully negated.
+   * @param {object} rollTermsData - Parsed roll terms data with .total and .terms
+   * @param {number} count - Number of highest dice to remove
+   * @returns {number} Damage after removing N highest dice
+   * @private
+   */
+  static _removeHighestDice(rollTermsData, count = 2) {
+    let total = rollTermsData.total;
+    const allDieResults = [];
+
+    // Collect all individual die results
+    for (const term of rollTermsData.terms) {
+      if (term.type === 'Die' && term.results) {
+        for (const result of term.results) {
+          allDieResults.push(result.result);
+        }
+      }
+    }
+
+    // If dice count <= removal count, save completely negates damage
+    if (allDieResults.length <= count) {
+      return 0;
+    }
+
+    // Sort descending and sum the top N
+    allDieResults.sort((a, b) => b - a);
+    let removedSum = 0;
+    for (let i = 0; i < count; i++) {
+      removedSum += allDieResults[i];
+    }
+
+    return Math.max(0, total - removedSum);
+  }
+
+  /**
+   * Smart Cleave damage distribution: split total damage between two targets,
+   * weighting toward the lower-HP target (capped at their current HP).
+   * @param {number} totalDamage - Raw damage to split
+   * @param {Array} targets - Array of token-like objects with .actor
+   * @returns {Array<{target, share}>} Each target with its damage share
+   * @private
+   */
+  static _distributeCleave(totalDamage, targets) {
+    if (targets.length < 2) {
+      return targets.map(t => ({ target: t, share: totalDamage }));
+    }
+
+    // Sort by current HP ascending (lower HP first); ties keep original order
+    const sorted = [...targets].map((t, i) => ({ target: t, hp: t.actor?.system.health?.value || 0, idx: i }));
+    sorted.sort((a, b) => a.hp - b.hp || a.idx - b.idx);
+
+    const lowerEntry = sorted[0];
+    const higherEntry = sorted[1];
+
+    // Ceil to lower-HP target, but cap at their current HP
+    let lowerShare = Math.min(Math.ceil(totalDamage / 2), lowerEntry.hp);
+    let higherShare = totalDamage - lowerShare;
+
+    return [
+      { target: lowerEntry.target, share: lowerShare },
+      { target: higherEntry.target, share: higherShare },
+    ];
+  }
+
+  /**
+   * Check if a defender has a Protection ward matching the attacker.
+   * Scans equipped item AE flags for wardType + wardTarget.
+   * @param {Actor} defender - The character making the save
+   * @param {Actor} attacker - The NPC whose attack triggered the save
+   * @returns {boolean} True if a protection ward matches the attacker
+   */
+  static _checkProtectionWard(defender, attacker) {
+    if (!defender?.items || !attacker) return false;
+
+    const attackerBeingType = attacker.system?.beingType || '';
+    const attackerName = attacker.name || '';
+
+    for (const item of defender.items) {
+      if (!item.system.equipped) continue;
+      for (const ae of item.effects) {
+        const flags = ae.flags?.vagabond;
+        if (!flags?.wardType || !flags?.wardTarget) continue;
+
+        const wardTarget = flags.wardTarget;
+        let matches = false;
+
+        switch (flags.wardType) {
+          case 'niche':
+            matches = attackerName.toLowerCase().includes(wardTarget.toLowerCase());
+            break;
+          case 'specific':
+            matches = attackerBeingType.toLowerCase() === wardTarget.toLowerCase() ||
+                      attackerName.toLowerCase().includes(wardTarget.toLowerCase());
+            break;
+          case 'general': {
+            const nt = attackerBeingType.toLowerCase().replace(/s$/, '');
+            const nw = wardTarget.toLowerCase().replace(/s$/, '');
+            matches = nt === nw;
+            break;
+          }
+        }
+
+        if (matches) return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Check if a weapon has bane properties matching the target and roll bonus dice.
+   * Scans the weapon's Active Effect flags for bane data (baneType + baneDice).
+   * Matching logic:
+   *   - Niche: target actor name matches the bane's stored creature name
+   *   - Specific: target's beingType or name matches the bane subtype list
+   *   - General: target's beingType matches the bane being type
+   * @param {Actor} targetActor - The NPC being attacked
+   * @param {Actor} sourceActor - The attacker
+   * @param {Item|null} sourceItem - The weapon used
+   * @returns {number} Bonus bane damage (0 if no match)
+   */
+  static async checkBaneDamage(targetActor, sourceActor, sourceItem) {
+    if (!targetActor || !sourceItem?.effects) return 0;
+    if (targetActor.type !== 'npc') return 0;
+
+    const targetBeingType = targetActor.system.beingType || '';
+    const targetName = targetActor.name || '';
+
+    let totalBaneDamage = 0;
+
+    for (const ae of sourceItem.effects) {
+      const flags = ae.flags?.vagabond;
+      if (!flags?.baneType || !flags?.baneDice) continue;
+
+      let matches = false;
+      const baneTarget = flags.baneTarget || '';
+
+      switch (flags.baneType) {
+        case 'niche':
+          matches = targetName.toLowerCase().includes(baneTarget.toLowerCase());
+          break;
+        case 'specific':
+          matches = targetBeingType.toLowerCase() === baneTarget.toLowerCase() ||
+                    targetName.toLowerCase().includes(baneTarget.toLowerCase());
+          break;
+        case 'general': {
+          const normalizedTarget = targetBeingType.toLowerCase().replace(/s$/, '');
+          const normalizedBane = baneTarget.toLowerCase().replace(/s$/, '');
+          matches = normalizedTarget === normalizedBane;
+          break;
+        }
+      }
+
+      if (matches) {
+        const baneRoll = new Roll(flags.baneDice);
+        await baneRoll.evaluate();
+        totalBaneDamage += baneRoll.total;
+
+        ChatMessage.create({
+          speaker: ChatMessage.getSpeaker({ actor: sourceActor }),
+          content: `<div class="vagabond-bane-message">
+            <strong>Bane!</strong> ${sourceItem.name} deals +${baneRoll.total} bonus damage
+            vs ${targetName} (${flags.baneType}: ${baneTarget}, rolled ${flags.baneDice} = ${baneRoll.total})
+          </div>`,
+          type: CONST.CHAT_MESSAGE_STYLES.OTHER
+        });
+      }
+    }
+
+    // Also check equipped items on attacker (in case bane is on a non-weapon relic)
+    if (totalBaneDamage === 0 && sourceActor?.items) {
+      for (const item of sourceActor.items) {
+        if (item === sourceItem || !item.system.equipped) continue;
+        for (const ae of item.effects) {
+          const flags = ae.flags?.vagabond;
+          if (!flags?.baneType || !flags?.baneDice) continue;
+
+          let matches = false;
+          const baneTarget = flags.baneTarget || '';
+
+          switch (flags.baneType) {
+            case 'niche':
+              matches = targetName.toLowerCase().includes(baneTarget.toLowerCase());
+              break;
+            case 'specific':
+              matches = targetBeingType.toLowerCase() === baneTarget.toLowerCase() ||
+                        targetName.toLowerCase().includes(baneTarget.toLowerCase());
+              break;
+            case 'general': {
+              const nb = baneTarget.toLowerCase().replace(/s$/, '');
+              const nt = targetBeingType.toLowerCase().replace(/s$/, '');
+              matches = nt === nb;
+              break;
+            }
+          }
+
+          if (matches) {
+            const baneRoll = new Roll(flags.baneDice);
+            await baneRoll.evaluate();
+            totalBaneDamage += baneRoll.total;
+
+            ChatMessage.create({
+              speaker: ChatMessage.getSpeaker({ actor: sourceActor }),
+              content: `<div class="vagabond-bane-message">
+                <strong>Bane!</strong> ${item.name} deals +${baneRoll.total} bonus damage
+                vs ${targetName} (${flags.baneType}: ${baneTarget}, rolled ${flags.baneDice} = ${baneRoll.total})
+              </div>`,
+              type: CONST.CHAT_MESSAGE_STYLES.OTHER
+            });
+          }
+        }
+      }
+    }
+
+    return totalBaneDamage;
+  }
+
+  /**
+   * Check and apply on-kill relic effects (Lifesteal, Manasteal).
+   * Scans the attacker's equipped weapon AE flags for onKillHealDice / onKillManaDice.
+   * @param {Actor} targetActor - The target that was killed (HP reached 0)
+   * @param {Actor} sourceActor - The attacker who dealt the killing blow
+   * @param {Item|null} sourceItem - The weapon/item used
+   */
+  static async checkOnKillEffects(targetActor, sourceActor, sourceItem) {
+    if (!sourceActor?.system) return;
+
+    // Gather on-kill flags from the weapon's Active Effects
+    let healDice = null;
+    let manaDice = null;
+
+    // Check source item AE flags first
+    if (sourceItem?.effects) {
+      for (const ae of sourceItem.effects) {
+        const flags = ae.flags?.vagabond;
+        if (!flags) continue;
+        if (flags.onKillHealDice && !healDice) healDice = flags.onKillHealDice;
+        if (flags.onKillManaDice && !manaDice) manaDice = flags.onKillManaDice;
+      }
+    }
+
+    // Also check all equipped items on the attacker (in case a non-weapon grants it)
+    if (!healDice || !manaDice) {
+      for (const item of sourceActor.items) {
+        if (!item.system.equipped) continue;
+        for (const ae of item.effects) {
+          const flags = ae.flags?.vagabond;
+          if (!flags) continue;
+          if (flags.onKillHealDice && !healDice) healDice = flags.onKillHealDice;
+          if (flags.onKillManaDice && !manaDice) manaDice = flags.onKillManaDice;
+        }
+      }
+    }
+
+    // Lifesteal: heal the attacker
+    if (healDice) {
+      const healRoll = new Roll(healDice);
+      await healRoll.evaluate();
+      const healAmount = healRoll.total;
+      const currentHP = sourceActor.system.health?.value || 0;
+      const maxHP = sourceActor.system.health?.max || currentHP;
+      const newHP = Math.min(maxHP, currentHP + healAmount);
+      const actualHeal = newHP - currentHP;
+      if (actualHeal > 0) {
+        await sourceActor.update({ 'system.health.value': newHP });
+      }
+      ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: sourceActor }),
+        content: `<div class="vagabond-onkill-message">
+          <strong>Lifesteal!</strong> ${sourceActor.name} slays ${targetActor.name} and heals
+          <span class="heal-amount">${actualHeal} HP</span> (rolled ${healDice} = ${healRoll.total})
+        </div>`,
+        type: CONST.CHAT_MESSAGE_STYLES.OTHER
+      });
+    }
+
+    // Manasteal: restore attacker's mana
+    if (manaDice) {
+      const manaRoll = new Roll(manaDice);
+      await manaRoll.evaluate();
+      const manaAmount = manaRoll.total;
+      const currentMana = sourceActor.system.mana?.value ?? 0;
+      const maxMana = sourceActor.system.mana?.max ?? currentMana;
+      const newMana = Math.min(maxMana, currentMana + manaAmount);
+      const actualRestore = newMana - currentMana;
+      if (actualRestore > 0) {
+        await sourceActor.update({ 'system.mana.value': newMana });
+      }
+      ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: sourceActor }),
+        content: `<div class="vagabond-onkill-message">
+          <strong>Manasteal!</strong> ${sourceActor.name} slays ${targetActor.name} and restores
+          <span class="mana-amount">${actualRestore} Mana</span> (rolled ${manaDice} = ${manaRoll.total})
+        </div>`,
+        type: CONST.CHAT_MESSAGE_STYLES.OTHER
+      });
+    }
+  }
+
+  /**
+   * Fearmonger: When an enemy is killed, frighten nearby weaker enemies.
+   * Applies Frightened status to NPC tokens within 30ft with HD < attacker's Level.
+   * Sets auto-expire flag for removal at end of next round.
+   * @param {Actor} targetActor - The actor that was killed
+   * @param {Actor} attackingActor - The actor that dealt the killing blow
+   */
+  static async checkFearmonger(targetActor, attackingActor) {
+    // Check if attacker has Fearmonger from class features
+    const fmClassItem = attackingActor?.items?.find(i => i.type === 'class');
+    const fmLevel = attackingActor?.system?.attributes?.level?.value || 1;
+    const hasFearmonger = fmClassItem ? (fmClassItem.system.levelFeatures || []).some(f =>
+      (f.level || 99) <= fmLevel && (f.name || '').toLowerCase().includes('fearmonger')
+    ) : false;
+    if (!hasFearmonger) return;
+    if (!canvas?.tokens?.placeables) return;
+
+    const attackerLevel = attackingActor.system.attributes?.level?.value || 1;
+    const currentRound = game.combat?.round || 0;
+
+    // Find the killed token on canvas
+    const killedToken = canvas.tokens.placeables.find(t => t.actor?.id === targetActor.id);
+    if (!killedToken) return;
+
+    // Find nearby NPC tokens within 30ft with HD < attacker's Level
+    const frightenedTokens = [];
+    for (const token of canvas.tokens.placeables) {
+      if (!token.actor || token.actor.type !== 'npc') continue;
+      if (token.id === killedToken.id) continue;
+      // Skip already-dead NPCs
+      const tokenHP = token.actor.system.health?.value ?? token.actor.system.hp?.value ?? 1;
+      if (tokenHP <= 0) continue;
+
+      // Check distance (30ft = Near)
+      const dist = canvas.grid.measurePath([killedToken.center, token.center]).distance;
+      if (dist > 30) continue;
+
+      // Check HD < attacker Level
+      const hd = token.actor.system.hd || token.actor.system.hitDice || 0;
+      if (hd >= attackerLevel) continue;
+
+      // Check status immunity
+      const statusImmunities = token.actor.system.statusImmunities || [];
+      if (statusImmunities.includes('frightened')) continue;
+
+      frightenedTokens.push(token);
+    }
+
+    if (frightenedTokens.length === 0) return;
+
+    // Apply Frightened with auto-expire flag
+    for (const token of frightenedTokens) {
+      if (token.actor.statuses?.has('frightened')) continue;
+
+      const frightDef = CONFIG.statusEffects.find(e => e.id === 'frightened');
+      if (!frightDef) continue;
+
+      const effectData = {
+        name: frightDef.name || 'Frightened',
+        img: frightDef.img || 'icons/svg/hazard.svg',
+        statuses: ['frightened'],
+        changes: frightDef.changes || [],
+        flags: {
+          vagabond: {
+            fearmongerExpireRound: currentRound + 1
+          }
+        }
+      };
+      await token.actor.createEmbeddedDocuments('ActiveEffect', [effectData]);
+    }
+
+    ui.notifications.info(`Fearmonger: ${frightenedTokens.length} enemy(s) Frightened!`);
+  }
+
+  /**
+   * Check if a weapon hit should apply burning/status effects via countdown dice.
+   * Three-source priority: explicit override > weapon flags > actor relic power.
+   * @param {Actor} targetActor - The target being hit
+   * @param {Actor} sourceActor - The attacker
+   * @param {string|null} damageType - Override damage type
+   * @param {string|null} dieTypeOverride - Override die type (e.g. from spell)
+   * @param {Item|null} sourceItem - The weapon/item used
+   */
+  static async checkOnHitBurning(targetActor, sourceActor, damageType = null, dieTypeOverride = null, sourceItem = null) {
+    if (!sourceActor?.system) return;
+
+    // Don't apply effects to a dead target
+    const targetHP = targetActor.system.health?.value ?? 0;
+    if (targetHP <= 0) return;
+
+    // Determine what on-hit effects apply
+    const properties = sourceItem?.system?.properties || [];
+    const hasBurningProperty = properties.includes('Burning');
+    const hasStatusProperty = properties.includes('Status');
+    const weaponFlags = sourceItem?.flags?.vagabond?.onHitBurning || {};
+
+    // Determine countdown die source: explicit override > weapon flags > actor relic power
+    let countdownDie = dieTypeOverride;
+    let burningDamageType = damageType;
+    let statusCondition = weaponFlags.statusCondition || '';
+
+    // Check weapon-level flags (shared countdown die for both Burning and Status)
+    if (!countdownDie && sourceItem) {
+      if (weaponFlags.dieType) {
+        countdownDie = weaponFlags.dieType;
+        burningDamageType = burningDamageType || weaponFlags.damageType || sourceItem.system?.damageType || 'fire';
+      }
+    }
+
+    // Fall back to actor-level relic power (burning only, always fire)
+    if (!countdownDie) {
+      countdownDie = sourceActor.system.onHitBurningDice;
+      burningDamageType = burningDamageType || 'fire';
+    }
+
+    // Default damage type
+    burningDamageType = burningDamageType || 'fire';
+
+    // Determine if burning should apply
+    const shouldBurn = hasBurningProperty || dieTypeOverride || (!hasBurningProperty && !hasStatusProperty && countdownDie);
+
+    // Determine if status should apply
+    const shouldStatus = hasStatusProperty && statusCondition;
+
+    // If neither burning nor status applies, nothing to do
+    if (!shouldBurn && !shouldStatus) return;
+    if (!countdownDie || typeof countdownDie !== 'string' || countdownDie.trim() === '') return;
+
+    // Validate die type
+    const validDice = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20'];
+    const finalDieType = validDice.includes(countdownDie.trim().toLowerCase()) ? countdownDie.trim().toLowerCase() : 'd4';
+
+    // Find the target's token ID and scene for linked cleanup
+    const targetToken = canvas?.tokens?.placeables?.find(t => t.actor?.id === targetActor.id);
+    const tokenIds = targetToken ? [targetToken.id] : [];
+    const sceneId = canvas?.scene?.id || '';
+
+    const { CountdownDice } = await import('../documents/countdown-dice.mjs');
+
+    // === BURNING LOGIC ===
+    if (shouldBurn) {
+      const statusImmunities = targetActor.system.statusImmunities || [];
+      if (!statusImmunities.includes('burning')) {
+        await this._applyBurningDie(targetActor, sourceActor, finalDieType, burningDamageType, tokenIds, sceneId, statusCondition, shouldStatus, CountdownDice);
+        return;
+      }
+    }
+
+    // === STATUS-ONLY LOGIC (no burning, or burning was immune) ===
+    if (shouldStatus) {
+      await this._applyStatusDie(targetActor, sourceActor, finalDieType, statusCondition, tokenIds, sceneId, CountdownDice);
+    }
+  }
+
+  /**
+   * Apply a burning countdown die to a target. If Status property is also active,
+   * the same die tracks both burning damage and the status condition.
+   * @private
+   */
+  static async _applyBurningDie(targetActor, sourceActor, finalDieType, burningDamageType, tokenIds, sceneId, statusCondition, shouldStatus, CountdownDice) {
+    // Check for existing burning dice on this target with the same damage type
+    const existingDice = CountdownDice.getAll().filter(dice => {
+      const link = dice.flags?.vagabond?.linkedStatusEffect;
+      if (!link || link.status !== 'burning') return false;
+      if (link.damageType !== burningDamageType) return false;
+      if (link.tokenIds?.some(id => tokenIds.includes(id))) return true;
+      const diceName = dice.flags?.vagabond?.countdownDice?.name || '';
+      if (diceName.includes(targetActor.name)) return true;
+      return false;
+    });
+
+    if (existingDice.length > 0) {
+      const DICE_ORDER = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20'];
+      const existing = existingDice[0];
+      const existingType = existing.flags.vagabond.countdownDice.diceType;
+      const existingIndex = DICE_ORDER.indexOf(existingType);
+      const newIndex = DICE_ORDER.indexOf(finalDieType);
+
+      if (newIndex > existingIndex) {
+        await existing.update({ 'flags.vagabond.countdownDice.diceType': finalDieType });
+        ui.notifications.info(`${targetActor.name}'s ${burningDamageType} Burning upgraded to C${finalDieType}!`);
+      }
+      return;
+    }
+
+    try {
+      if (!targetActor.statuses?.has('burning')) {
+        await targetActor.toggleStatusEffect('burning', { active: true });
+      }
+
+      if (shouldStatus && statusCondition && statusCondition !== 'burning') {
+        if (!targetActor.statuses?.has(statusCondition)) {
+          await targetActor.toggleStatusEffect(statusCondition, { active: true });
+        }
+      }
+
+      const typeIcons = {
+        fire: 'fa-fire', cold: 'fa-snowflake', poison: 'fa-skull-crossbones',
+        shock: 'fa-bolt', acid: 'fa-flask', necrotic: 'fa-ghost',
+        psychic: 'fa-brain', magical: 'fa-sparkles',
+      };
+      const icon = typeIcons[burningDamageType] || 'fa-fire';
+      const label = burningDamageType.charAt(0).toUpperCase() + burningDamageType.slice(1);
+
+      let dieName = `Burning (${label}): ${targetActor.name}`;
+      if (shouldStatus && statusCondition) {
+        const statusLabel = statusCondition.charAt(0).toUpperCase() + statusCondition.slice(1);
+        dieName = `Burning (${label}) + ${statusLabel}: ${targetActor.name}`;
+      }
+
+      const journal = await CountdownDice.create({
+        name: dieName,
+        diceType: finalDieType,
+        size: 'S',
+        ownership: { default: 3, [game.user.id]: 3 }
+      });
+
+      if (journal) {
+        await journal.setFlag('vagabond', 'linkedStatusEffect', {
+          status: 'burning',
+          label: `Burning (${label})`,
+          damageType: burningDamageType,
+          statusCondition: shouldStatus ? statusCondition : '',
+          tokenIds: tokenIds,
+          sceneId: sceneId
+        });
+      }
+
+      const { VagabondChatCard } = await import('./chat-card.mjs');
+      let desc = `<p><i class="fas ${icon}"></i> <strong>${targetActor.name} is burning!</strong></p>
+          <p>Burning (${label}) for <strong>C${finalDieType}</strong>!</p>`;
+      if (shouldStatus && statusCondition) {
+        const statusLabel = statusCondition.charAt(0).toUpperCase() + statusCondition.slice(1);
+        desc += `<p><i class="fas fa-bolt"></i> Also applying <strong>${statusLabel}</strong> for the duration.</p>`;
+      }
+      desc += `<p><em>Roll the countdown die each round - on a 1, it shrinks or ends.</em></p>`;
+
+      const card = new VagabondChatCard()
+        .setType('generic')
+        .setActor(sourceActor)
+        .setTitle('Burning!')
+        .setSubtitle(targetActor.name)
+        .setDescription(desc);
+      await card.send();
+    } catch (e) {
+      console.error('Vagabond | On-Hit Burning error:', e);
+    }
+  }
+
+  /**
+   * Apply a status-only countdown die (no burning damage).
+   * The die tracks how long the status condition lasts.
+   * @private
+   */
+  static async _applyStatusDie(targetActor, sourceActor, finalDieType, statusCondition, tokenIds, sceneId, CountdownDice) {
+    const statusImmunities = targetActor.system.statusImmunities || [];
+    if (statusImmunities.includes(statusCondition)) return;
+
+    const existingDice = CountdownDice.getAll().filter(dice => {
+      const link = dice.flags?.vagabond?.linkedStatusEffect;
+      if (!link || link.status !== statusCondition) return false;
+      if (link.tokenIds?.some(id => tokenIds.includes(id))) return true;
+      const diceName = dice.flags?.vagabond?.countdownDice?.name || '';
+      if (diceName.includes(targetActor.name)) return true;
+      return false;
+    });
+
+    if (existingDice.length > 0) {
+      const DICE_ORDER = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20'];
+      const existing = existingDice[0];
+      const existingType = existing.flags.vagabond.countdownDice.diceType;
+      const existingIndex = DICE_ORDER.indexOf(existingType);
+      const newIndex = DICE_ORDER.indexOf(finalDieType);
+
+      if (newIndex > existingIndex) {
+        await existing.update({ 'flags.vagabond.countdownDice.diceType': finalDieType });
+        const statusLabel = statusCondition.charAt(0).toUpperCase() + statusCondition.slice(1);
+        ui.notifications.info(`${targetActor.name}'s ${statusLabel} upgraded to C${finalDieType}!`);
+      }
+      return;
+    }
+
+    try {
+      if (!targetActor.statuses?.has(statusCondition)) {
+        await targetActor.toggleStatusEffect(statusCondition, { active: true });
+      }
+
+      const statusLabel = statusCondition.charAt(0).toUpperCase() + statusCondition.slice(1);
+
+      const journal = await CountdownDice.create({
+        name: `${statusLabel}: ${targetActor.name}`,
+        diceType: finalDieType,
+        size: 'S',
+        ownership: { default: 3, [game.user.id]: 3 }
+      });
+
+      if (journal) {
+        await journal.setFlag('vagabond', 'linkedStatusEffect', {
+          status: statusCondition,
+          label: statusLabel,
+          tokenIds: tokenIds,
+          sceneId: sceneId
+        });
+      }
+
+      const { VagabondChatCard } = await import('./chat-card.mjs');
+      const card = new VagabondChatCard()
+        .setType('generic')
+        .setActor(sourceActor)
+        .setTitle(`${statusLabel}!`)
+        .setSubtitle(targetActor.name)
+        .setDescription(`
+          <p><i class="fas fa-bolt"></i> <strong>${targetActor.name} is ${statusLabel}!</strong></p>
+          <p>Duration: <strong>C${finalDieType}</strong></p>
+          <p><em>Roll the countdown die each round - on a 1, it shrinks or ends.</em></p>
+        `);
+      await card.send();
+    } catch (e) {
+      console.error('Vagabond | On-Hit Status error:', e);
     }
   }
 }
