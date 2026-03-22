@@ -1,0 +1,5720 @@
+[
+  {
+    "name": "Sixth Sense",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You ignore the Blinded Status for sight-based Checks and Saves.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "awareness",
+            "value": 6
+          }
+        ],
+        "trainedSkills": [
+          "detect"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "07tq67JlrIrvq2AG",
+    "sort": 100000
+  },
+  {
+    "name": "Salbenist",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can perform a 10-minute Ritual with a Weapon and an oil. Upon concluding the Ritual, you gain the following benefits until you perform it again:</span></p><p><span class=\"fontstyle0\">• You can attack with it using Craft.</span></p><p><span class=\"fontstyle0\">• You can will the absorbed oil to coat it on your Turn (no Action). This doesn’t consume it, and it remains coated until you dismiss it, it leaves your hand, or until it is coated with another oil.</span></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [
+          "craft",
+          "mysticism"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769602627385,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "0RhDUoeDs8XiEHxk",
+    "sort": 200000
+  },
+  {
+    "name": "Patience",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">When you Hold to Attack, your next Endure Save to Block before your next Turn is Favored.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "might",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "detect"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "0g0Z7XRDrgVzbpdD",
+    "sort": 300000
+  },
+  {
+    "name": "Situational Awareness",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You have Favor on Checks against surprise, and being flanked doesn't Hinder your Saves.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "awareness",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "detect"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "1MMfNdmGHvhCqzQc",
+    "sort": 400000
+  },
+  {
+    "name": "Peerless Athlete",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can stand from Prone at the start of your Turn (no Action), and you can Rush and Jump with the same Action.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "might",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "brawl"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "1NzO4CqbsWgrwGvW",
+    "sort": 500000
+  },
+  {
+    "name": "Harmonic Resonance",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can use a Musical Instrument as a Trinket. When you do, you can Cast with a delivery of Aura or Cone if you otherwise couldn't, and you spend 1 less Mana on Aura and Cone delivery. This Casting still creates sound.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [
+          "performance"
+        ],
+        "spells": [
+          ""
+        ],
+        "hasAnySpell": true,
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1769600461952,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "1YfGySrk0K59Bcso",
+    "sort": 600000
+  },
+  {
+    "name": "Ambusher",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You have Favor on attacks to initiate a Combat and against Beings that haven't acted in that Combat.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "awareness",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "sneak"
+        ],
+        "spells": [
+          ""
+        ],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769599045707,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "3Ejo0QEPqsFSnFBd",
+    "sort": 800000
+  },
+  {
+    "name": "Chicanery",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">If you fail a Check, it doesn't alert Beings to your presence, or advance relevant Progress Clocks being tracked.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "dexterity",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "sneak"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "3n2DoBWhgEXIGJTL",
+    "sort": 900000
+  },
+  {
+    "name": "Ungarmax",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Allies you cause to be Berserk with Apoplex gain a +1 bonus to each damage die used for their attacks.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          "Compendium.vagabond.spells.Item.x2wHc3r9nD8Ubo1S"
+        ],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769602080840,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "5JQf59fkqTzUDlyd",
+    "sort": 1000000
+  },
+  {
+    "name": "Storm Raiser",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Once per Day, you can conduct a 10-minute Ritual to change the weather in the surrounding mile for Cd4 Shifts. This change is strong enough to cause or end heavy storms.</span><br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "awareness",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "mysticism"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769602800616,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "6CgNXM9yYbHeOntN",
+    "sort": 1100000
+  },
+  {
+    "name": "Advancement",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Increase one of your Stats by 1, but no higher than 7. You can take this Perk multiple times</span></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "stat",
+        "selected": "",
+        "targetField": "system.stats.{choice}.bonus",
+        "effectMode": 2,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.1.1",
+      "createdTime": 1770306150959,
+      "modifiedTime": 1770316006079,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "6lfwEoF90Jgoqhg8",
+    "sort": 0
+  },
+  {
+    "name": "Heightened Cognition",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can spend a Studied die to pass a Detect, Mysticism, or Survival Check you fail.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "awareness",
+            "value": 7
+          }
+        ],
+        "trainedSkills": [],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "6oY0VmQBej8yjZjp",
+    "sort": 1200000
+  },
+  {
+    "name": "Padfoot",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Once per Day, you gain a Studied die when you Travel 6 miles or more.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "awareness",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "survival"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "7caGINuFjOymP59f",
+    "sort": 1300000
+  },
+  {
+    "name": "Cat-Like Reflexes",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You reduce any fall damage you take by half and, while you are Prone, you can stand up using only 5 feet of Speed.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "dexterity",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "finesse"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "8BKJcDXHDmUYbD3D",
+    "sort": 1400000
+  },
+  {
+    "name": "Steady Aim",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You ignore Hinder on Ranged Weapon attacks if you can see the Target, and have Favor on Ranged Checks against Targets who haven't moved since the end of your last Turn.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [
+          "detect",
+          "ranged"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769601875053,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "9ChcXEGqz39efjBH",
+    "sort": 1600000
+  },
+  {
+    "name": "Master Chef",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">During a Scene where you have cooking tools, you can cook meals using 5s worth of Materials. Doing so makes d6+1 rations which restore d6 HP to anyone who eats one as part of a Breather. They function as normal rations after a Shift.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "presence",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "survival"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "9qNLXkVLcjSbOFeq",
+    "sort": 1700000
+  },
+  {
+    "name": "Owl-Blasted",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">If you spend Mana to attempt to cause a Being to be Charmed and the Check fails, you regain d4 Mana that was spent on the Casting.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          "Compendium.vagabond.spells.Item.lS7PlTGD7VFNLKhD"
+        ],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769600886565,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "A2BOOG7sAzbZKEEg",
+    "sort": 1800000
+  },
+  {
+    "name": "Moonlight Sonata",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can cause for the light shed by your Spells to be Moonlight.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          "Compendium.vagabond.spells.Item.M0HRBrZaRQ81vcAg"
+        ],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769600832054,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "AHiaLOVSH8ItAQf4",
+    "sort": 1900000
+  },
+  {
+    "name": "Rally",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Once per Shift, you can use an Action to boost the morale of your Allies, granting them 1 Luck and ending a Status affecting them from either Charmed or Frightened.</span><br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "presence",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "leadership"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769602502994,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "AYgEsFexlPAI9DYH",
+    "sort": 2000000
+  },
+  {
+    "name": "Spin-to-Win",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">When you attack with a Melee Cleave weapon, you can deal half its damage to any viable Targets, rather than just one extra Being.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "might",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "melee"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "AcF9FfxPP5jFaQSG",
+    "sort": 2100000
+  },
+  {
+    "name": "Medium",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can conduct a 10 minute Ritual to ask up to 3 questions from the GM which can only be answered with a \"yes\" or \"no.\" The Fates are the source of the information, and will answer these questions truthfully (if possible). Afterward, you can't conduct this Ritual until you complete a Quest.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "awareness",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "mysticism"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "AjP1wBwolTK06wBs",
+    "sort": 2200000
+  },
+  {
+    "name": "Impersonator",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can unerringly imitate the voice of any Humanlike you have heard speak.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "presence",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "influence"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "AwFov4YDGerC3iAi",
+    "sort": 2300000
+  },
+  {
+    "name": "Reanimator",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can perform a 10-minute Ritual with the corpse of a Being that is not an Artificial or Undead, and that has HD no higher than your Level. Doing so raises it as an Undead as per the Raise Spell. It is under your control for one Shift, or until you perform this Ritual again. It uses either your Arcana, Craft, or Mysticism Skill for Checks and Saves.</span></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [
+          "craft"
+        ],
+        "spells": [],
+        "trainedSkillOrGroups": [
+          [
+            "arcana",
+            "mysticism"
+          ]
+        ],
+        "statOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769602552810,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "Bg61LXm2yYZAD1EC",
+    "sort": 2500000
+  },
+  {
+    "name": "Mithridatism",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Your Saves against Sickened are Favored, and you reduce Poison-based damage you take by 2 per die of the effect.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "might",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "medicine"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "CYsiZFILWebXi85y",
+    "sort": 2600000
+  },
+  {
+    "name": "Heightened Magnetism",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can spend a Luck to pass an Influence, Leadership, or Performance Check you fail.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "presence",
+            "value": 7
+          }
+        ],
+        "trainedSkills": [],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "CdryeyzeoaDj2bVO",
+    "sort": 2700000
+  },
+  {
+    "name": "Drunken Master",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">1H Crude Weapons have the Finesse property for you.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [
+          "brawl",
+          "finesse"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "Cir7R8Jo1piMGQ4S",
+    "sort": 2800000
+  },
+  {
+    "name": "Duelist",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">While Dual-Wielding (p. 72), you can Move up to half your Speed when you skip your Move to make an attack, and you Dodge attacks with Favor if you and the attacker are the only Beings Close to each other.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "dexterity",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "melee"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "D0iPKxmjcKY8yfvw",
+    "sort": 2900000
+  },
+  {
+    "name": "Master Artisan",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">When you spend a Shift to Craft, it puts two Shifts worth of work towards making the Item, rather than one.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "reason",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "craft"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "DlqVD05dVoVhNotv",
+    "sort": 3000000
+  },
+  {
+    "name": "Tough",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Your Max HP increases by an amount equal to your current Level, and increases by 1 additional point each time you gain a Level. You can take this Perk multiple times.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "might",
+            "value": 7
+          }
+        ],
+        "trainedSkills": [],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [
+      {
+        "name": "Max Health Increase",
+        "origin": "Compendium.vagabond.perks.Item.FiyuMtwyxLqRdOWm",
+        "img": "icons/svg/aura.svg",
+        "_id": "KkAfLga1fmCtZ4TG",
+        "type": "base",
+        "system": {},
+        "changes": [
+          {
+            "key": "system.bonuses.hpPerLevel",
+            "mode": 2,
+            "value": "1",
+            "priority": null
+          }
+        ],
+        "disabled": false,
+        "duration": {
+          "startTime": null,
+          "combat": null,
+          "seconds": null,
+          "rounds": null,
+          "turns": null,
+          "startRound": null,
+          "startTurn": null
+        },
+        "description": "",
+        "tint": "#ffffff",
+        "transfer": true,
+        "statuses": [],
+        "sort": 0,
+        "flags": {},
+        "_stats": {
+          "compendiumSource": null,
+          "duplicateSource": null,
+          "exportSource": null,
+          "coreVersion": "13.351",
+          "systemId": "vagabond",
+          "systemVersion": "1.5.0",
+          "createdTime": 1765911754601,
+          "modifiedTime": 1765913631658,
+          "lastModifiedBy": "13p65OEadZSZVLRk"
+        }
+      }
+    ],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.5.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "FiyuMtwyxLqRdOWm",
+    "sort": 3100000
+  },
+  {
+    "name": "Diplomat",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You have Favor on Leadership Checks to negotiate and parley if you have not dealt damage to the Target in the last minute.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "presence",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "leadership"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "Gwk9fOU8wGffhiXm",
+    "sort": 3200000
+  },
+  {
+    "name": "Heightened Intellect",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can spend a Studied die to pass an Arcana, Craft, or Medicine Check you fail.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "reason",
+            "value": 7
+          }
+        ],
+        "trainedSkills": [],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1769600523207,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "H99o70lTa5RBtokg",
+    "sort": 3300000
+  },
+  {
+    "name": "Panache",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">If you hit a Close Enemy with an attack, the next Save you make against an attack before the start of your next Turn is Favored.</span><br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "dexterity",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "melee"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769602447228,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "Isg2EmtLYZelbcTH",
+    "sort": 3400000
+  },
+  {
+    "name": "Snareroot Trapper",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can Cast Sprout with a Glyph delivery for no additional Mana and without Focusing. You can have one Casting of Sprout active this way.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          "Compendium.vagabond.spells.Item.oGdK9T2toIepnctx"
+        ],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769601807086,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "J3XVdZlRGj7bZNVL",
+    "sort": 3500000
+  },
+  {
+    "name": "Transvection",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">If you Cast Levitate on an Item of 2 Slots or less, it gains a Fly Speed of 30’ and you do not need to Focus on that Cast. It keeps this Speed until you use this Ability on another Item.</span><br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          "Compendium.vagabond.spells.Item.lyJBorVks7Y2tpgF"
+        ],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769602955094,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "JCMcCU9cymaqyTqE",
+    "sort": 3600000
+  },
+  {
+    "name": "Shapechanger",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">When you are a Target of your Polymorph Spell, you use your Cast Skill for its Actions, and it doesn't cost you Mana to Focus on it as per the Spell's description.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          "Compendium.vagabond.spells.Item.KizGmuUO2gr17fSR"
+        ],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769601713905,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "JaiyEsxypeEWxtlz",
+    "sort": 3700000
+  },
+  {
+    "name": "Arcane Artisan",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">When you spend a Shift to Craft, you can spend Mana to supplement Materials at a rate of 5s per Mana spent.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [
+          "craft"
+        ],
+        "spells": [
+          ""
+        ],
+        "hasAnySpell": true,
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769596321652,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "JjMAJz1bVTvyRV4J",
+    "sort": 3800000
+  },
+  {
+    "name": "Sharpshooter",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can skip your Move to reduce the roll you need to Crit on a Ranged attack this Turn by 1.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "awareness",
+            "value": 7
+          }
+        ],
+        "trainedSkills": [
+          "ranged"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "LP1K8ZSBIEuu3AgF",
+    "sort": 3900000
+  },
+  {
+    "name": "Witchsight",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">While you Focus on this Ability, you make Checks against illusions with Favor and you can see Invisible Beings if you aren’t otherwise Blinded.</span><br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "awareness",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [],
+        "spells": [],
+        "trainedSkillOrGroups": [
+          [
+            "arcana",
+            "mysticism"
+          ]
+        ],
+        "statOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769603104824,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "MMFem3lhaPwAUnrj",
+    "sort": 4000000
+  },
+  {
+    "name": "Tactician",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can use your Action or skip your Move to issue an order, choosing from the following list. The benefits of a command you issue last for the Combat or until you issue another order: <br /></span></p><p><span class=\"fontstyle0\"><strong>Attack:</strong> Declare a Target Enemy. Attack and Cast Checks against it ignore Hinder. <br /><strong>Defend:</strong> You and your Allies' Saves against attacks can't be Hindered. <br /><strong>Retreat:</strong> Your Allies that use their Action to Rush and end their Turn further away from any Enemies than they started have Favor on Saves against attacks that Round.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "reason",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "leadership"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769601992331,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "MMolIZlu0qpoZ86S",
+    "sort": 4100000
+  },
+  {
+    "name": "Bully",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Checks you make to Grapple or Shove Targets that are smaller than you are Favored, and you can use them as a greatclub with the Brawl property that deals its damage to both the Target and itself on a hit. Your attacks with it count as maintaining the grapple.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "might",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "brawl"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "Mslyxx2O89wfor2L",
+    "sort": 4200000
+  },
+  {
+    "name": "Necromancer",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">When you Focus on Raise, you can choose an Undead you control. The Target regains HP equal to (half your Level, round up).</span><br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          "Compendium.vagabond.spells.Item.GaL1pCOL67Vf586b"
+        ],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769602386509,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "N5GRj7612EvMw5Z5",
+    "sort": 4300000
+  },
+  {
+    "name": "Pack Mule",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You gain +2 Item Slots. You can take this Perk multiple Times.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "might",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "brawl"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [
+      {
+        "name": "+2 Inv. Slots",
+        "origin": "Compendium.vagabond.perks.Item.NOaDBIZcpv6T87QR",
+        "img": "icons/svg/aura.svg",
+        "_id": "gD7of5SiofatX44x",
+        "type": "base",
+        "system": {},
+        "changes": [
+          {
+            "key": "system.inventory.bonusSlots",
+            "mode": 2,
+            "value": "2",
+            "priority": null
+          }
+        ],
+        "disabled": false,
+        "duration": {
+          "startTime": null,
+          "combat": null,
+          "seconds": null,
+          "rounds": null,
+          "turns": null,
+          "startRound": null,
+          "startTurn": null
+        },
+        "description": "",
+        "tint": "#ffffff",
+        "transfer": true,
+        "statuses": [],
+        "sort": 0,
+        "flags": {
+          "vagabond": {
+            "applicationMode": "permanent"
+          }
+        },
+        "_stats": {
+          "compendiumSource": null,
+          "duplicateSource": null,
+          "exportSource": null,
+          "coreVersion": "13.351",
+          "systemId": "vagabond",
+          "systemVersion": "2.8.0",
+          "createdTime": 1769600904125,
+          "modifiedTime": 1769600937087,
+          "lastModifiedBy": "13p65OEadZSZVLRk"
+        }
+      }
+    ],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "NOaDBIZcpv6T87QR",
+    "sort": 4400000
+  },
+  {
+    "name": "Familiar",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can conduct a 10 minute Ritual to conjure a familiar, a loyal Ally to you that you control. The familiar can be any Small Being with HD: 1. It uses your Cast Skill for Checks and Saves, and you can Cast Spells using the familiar as a conduit for your Magic. If you do, you can deliver the Spell from the familiar as if it were originating from you. The familiar is banished when it drops to 0HP or if you conduct this Ritual again to create another familiar.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [],
+        "trainedSkillOrGroups": [
+          [
+            "arcana",
+            "mysticism"
+          ]
+        ],
+        "statOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1769602307704,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "O2z8sxDuwIm56HqO",
+    "sort": 4500000
+  },
+  {
+    "name": "Inspiring Presence",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">If any of your Allies are Berserk, Charmed, Confused, or Frightened by an effect that ends on a Countdown die, you can use your Action to attempt to rally them and make a Leadership Check. If you pass, the Countdown die for the effect decreases by 1 size.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "presence",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "leadership"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "OO8rtGe3vqQmFbLc",
+    "sort": 4600000
+  },
+  {
+    "name": "Magical Secret",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Choose a Spell. You learn the Spell and can Cast it using a Skill of your choice. You can take this Perk multiple times.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [],
+        "trainedSkillOrGroups": [
+          [
+            "arcana",
+            "influence",
+            "mysticism"
+          ]
+        ],
+        "statOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "spell",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [
+      {
+        "name": "Spellcaster",
+        "origin": "Compendium.vagabond.perks.Item.ORTWxP4kkcmn2Etv",
+        "img": "icons/svg/aura.svg",
+        "_id": "mCKjmPlv0eI2mOKR",
+        "type": "base",
+        "system": {},
+        "changes": [
+          {
+            "key": "system.attributes.isSpellcaster",
+            "mode": 5,
+            "value": "true",
+            "priority": null
+          }
+        ],
+        "disabled": false,
+        "duration": {
+          "startTime": null,
+          "combat": null,
+          "seconds": null,
+          "rounds": null,
+          "turns": null,
+          "startRound": null,
+          "startTurn": null
+        },
+        "description": "",
+        "tint": "#ffffff",
+        "transfer": true,
+        "statuses": [],
+        "sort": 0,
+        "flags": {
+          "vagabond": {
+            "applicationMode": "permanent"
+          }
+        },
+        "_stats": {
+          "compendiumSource": null,
+          "duplicateSource": null,
+          "exportSource": null,
+          "coreVersion": "13.351",
+          "systemId": "vagabond",
+          "systemVersion": "4.3.1",
+          "createdTime": 1765054152798,
+          "modifiedTime": 1773795355575,
+          "lastModifiedBy": "13p65OEadZSZVLRk"
+        }
+      }
+    ],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1770307064528,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "ORTWxP4kkcmn2Etv",
+    "sort": 4700000
+  },
+  {
+    "name": "Strategist",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Your attacks against Targets Close your Allies are Favored if the Ally isn’t Incapacitated.</span><br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "awareness",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "leadership"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769602854652,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "OcNVWEpuZEDDdlUu",
+    "sort": 4800000
+  },
+  {
+    "name": "Vigilance",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You don't need to sleep to gain the benefits of a Rest, but you can't remove Fatigue without normal Rest.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "might",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "detect"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "OjB5N2XhHRYUqgBr",
+    "sort": 4900000
+  },
+  {
+    "name": "Poisoner",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can coat your Equipped Weapon with a poison when you attack with it.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "dexterity",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "finesse"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "OvYijC6ubI4a1nAf",
+    "sort": 5000000
+  },
+  {
+    "name": "Extrovert",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Once per Day, you gain a Studied die if you meet a new friendly person.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "presence",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "influence"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "PmtHyDieLWnMmciY",
+    "sort": 5100000
+  },
+  {
+    "name": "Resourceful",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can spend 1 Luck to recall having packed an Item in your inventory with a value as high as 50s. It doesn't \"appear,\" it was always there.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "luck",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "craft"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "Pwvw4buZkkB6eqKN",
+    "sort": 5200000
+  },
+  {
+    "name": "Botanical Mediciner",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can restore d6 HP to a willing Being during a Breather if you have herbs. If you do, you can also remove a Status from the Ally from either Blinded, Paralyzed, or Sickened. That Being can't be affected by this Ability for the rest of the Shift.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [
+          "medicine",
+          "survival"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769596414432,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "QgobMFtpqxqzdEpt",
+    "sort": 5300000
+  },
+  {
+    "name": "Full Swing",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">When you make a Melee Attack Check and roll 10 above your Melee Difficulty, you can choose to push the Target as if you had shoved them if they are no more than one size larger than you.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "might",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "melee"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "QmFXCXawpxHMFHty",
+    "sort": 5400000
+  },
+  {
+    "name": "Infravision",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You gain Darksight (p. 9).</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "awareness",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "detect"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "QtU9SmnfbHFmCs6d",
+    "sort": 5500000
+  },
+  {
+    "name": "Ice Knife",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Ice Objects you create with Freeze last for up to 1 minute without requiring Focus.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          "Compendium.vagabond.spells.Item.toYD8Nm61vMhBbZ7"
+        ],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1769600542111,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "R4LxmvjGwdHiObgF",
+    "sort": 5600000
+  },
+  {
+    "name": "Check Hook",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Once per Round, you can make one attack with a Brawl Weapon you have Equipped if a Close Enemy Moves or Attacks (no Action).</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "dexterity",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "brawl"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "SoMDviAp6pOFjJMk",
+    "sort": 5700000
+  },
+  {
+    "name": "Wander the Wooded",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Natural Difficult Terrain doesn't impede your Speed, and Saves you make against natural hazards (such as avalanches or extreme heat) are Favored.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "dexterity",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "survival"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "Tj6jKf0G9zutW1Or",
+    "sort": 5800000
+  },
+  {
+    "name": "Vehement Magic",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Damage rolls from Spells you Cast explode on a roll of 1.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          ""
+        ],
+        "hasAnySpell": true,
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769602116974,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "UhI94xpNrdCln9jR",
+    "sort": 5900000
+  },
+  {
+    "name": "Heavy Arms",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">The knight has made you vigilant. While you have a weapon held as 2H Grip, its damage rolls explode on a 1. For the purpose of this Perk, Fist Grip counts as 2H Grip.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "might",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "melee"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "ValeBbspVEfTTmvQ",
+    "sort": 6000000
+  },
+  {
+    "name": "Unfailing Guidance",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">If the Target of your Guide Spell forces one of your Allies to make a Hindered Save, the Hinder is ignored if the Ally can see you.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          "Compendium.vagabond.spells.Item.K0iy3DCtjDZzLMm6"
+        ],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769602066179,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "W7jSMj1sVJiDI8O7",
+    "sort": 6100000
+  },
+  {
+    "name": "Metamagic",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">The Maximum Mana you can spend on a Spell increases by 1. You can take this Perk multiple times.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [],
+        "resources": [
+          {
+            "resourceType": "maxMana",
+            "minimum": 7
+          }
+        ],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [
+      {
+        "name": "+ Mana Casting",
+        "origin": "Compendium.world.perks.Item.s4u1snuhI24ZtUHQ",
+        "img": "icons/svg/aura.svg",
+        "_id": "i56MfG6Q5llVChZi",
+        "type": "base",
+        "system": {},
+        "changes": [
+          {
+            "key": "system.mana.castingMaxBonus",
+            "mode": 2,
+            "value": "1",
+            "priority": null
+          }
+        ],
+        "disabled": false,
+        "duration": {
+          "startTime": null,
+          "combat": null,
+          "seconds": null,
+          "rounds": null,
+          "turns": null,
+          "startRound": null,
+          "startTurn": null
+        },
+        "description": "",
+        "tint": "#ffffff",
+        "transfer": true,
+        "statuses": [],
+        "sort": 0,
+        "flags": {
+          "vagabond": {
+            "applicationMode": "permanent"
+          }
+        },
+        "_stats": {
+          "compendiumSource": null,
+          "duplicateSource": null,
+          "exportSource": null,
+          "coreVersion": "13.351",
+          "systemId": "vagabond",
+          "systemVersion": "1.8.1",
+          "lastModifiedBy": "13p65OEadZSZVLRk",
+          "modifiedTime": 1766861296167
+        }
+      }
+    ],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769600783306,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "WeJc28ayUfyamGiM",
+    "sort": 6200000
+  },
+  {
+    "name": "Infesting Burst",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">When you create an Undead with Raise, you can choose to raise them up as a Boomer (p. 181).</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          "Compendium.vagabond.spells.Item.GaL1pCOL67Vf586b"
+        ],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1769600579152,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "XHMK2NVz58trGLKR",
+    "sort": 6300000
+  },
+  {
+    "name": "Combat Medic",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">As an Action, you can tend to a willing Being's injuries. Doing so removes the Sickened Status if they have it and they regain (d6 + your Reason) HP. That Being can't be affected by this Ability for the rest of the Shift.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "reason",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "medicine"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "Y2KK6UiVCIEL7xQK",
+    "sort": 6400000
+  },
+  {
+    "name": "Gish",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can use Weapons as Trinkets to Cast and, when you Cast with a Delivery of Imbue on a Weapon you have Equipped, you can make an attack with the weapon with the same Action.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          ""
+        ],
+        "hasAnySpell": true,
+        "spellOrGroups": [],
+        "trainedSkillOrGroups": [
+          [
+            "melee",
+            "ranged"
+          ]
+        ],
+        "statOrGroups": [],
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [
+      {
+        "name": "Active Effect",
+        "origin": "Compendium.vagabond.perks.Item.YVgf2kRWwn8JRq1X",
+        "img": "icons/svg/aura.svg",
+        "_id": "imf2mRfowH7GpgJt",
+        "type": "base",
+        "system": {},
+        "changes": [
+          {
+            "key": "system.attributes.isSpellcaster",
+            "mode": 5,
+            "value": "true",
+            "priority": null
+          }
+        ],
+        "disabled": false,
+        "duration": {
+          "startTime": null,
+          "combat": null,
+          "seconds": null,
+          "rounds": null,
+          "turns": null,
+          "startRound": null,
+          "startTurn": null
+        },
+        "description": "",
+        "tint": "#ffffff",
+        "transfer": true,
+        "statuses": [],
+        "sort": 0,
+        "flags": {},
+        "_stats": {
+          "compendiumSource": null,
+          "duplicateSource": null,
+          "exportSource": null,
+          "coreVersion": "13.351",
+          "systemId": "vagabond",
+          "systemVersion": "1.8.1",
+          "createdTime": 1766747792063,
+          "modifiedTime": 1766747845898,
+          "lastModifiedBy": "13p65OEadZSZVLRk"
+        }
+      }
+    ],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1769602332125,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "YVgf2kRWwn8JRq1X",
+    "sort": 6500000
+  },
+  {
+    "name": "Sage",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">As an Action, you can grant an Ally one of your Studied Dice if they can see or hear you.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "reason",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "leadership"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769601351519,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "YjYof8YJYhR30yu5",
+    "sort": 6600000
+  },
+  {
+    "name": "Abjurer",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">While Focusing on Ward with another Being as the Target, you also gain the benefits of Ward.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          "Compendium.vagabond.spells.Item.L43XdoqLgQ8Wl6vM"
+        ],
+        "hasAnySpell": false,
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769570233662,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "ZTlEF3gIWZQN3ZPe",
+    "sort": 850000
+  },
+  {
+    "name": "Athame",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can conduct a 10 minute Ritual with a dagger, making it your athame until you conduct this ritual again. Your athame is a Relic with the Loyalty Power, and it can be used as a Trinket.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [],
+        "trainedSkillOrGroups": [
+          [
+            "arcana",
+            "mysticism"
+          ]
+        ],
+        "statOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769602291014,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "ZpxPOAaeveIIQUpU",
+    "sort": 6700000
+  },
+  {
+    "name": "Endless Stamina",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Fatigue doesn't prevent you from taking the Rush Action and, once per day, you can remove 1 Fatigue during a Breather.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "might",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "brawl"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "a3nkW4FHWp8N3DUK",
+    "sort": 6800000
+  },
+  {
+    "name": "Water Walker",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can walk on water.</span><br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          "Compendium.vagabond.spells.Item.KjHS9r9cSkBhUc5R"
+        ],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769603077581,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "aAtWkcH2bTPKY1Kg",
+    "sort": 6900000
+  },
+  {
+    "name": "Protector",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can Block on behalf of an Ally that fails their Save against the attack of an Enemy that is Close to you.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "might",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "melee"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "aHBvA8INtAilA7zH",
+    "sort": 7000000
+  },
+  {
+    "name": "Secret of Mana",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You gain 1 Mana per Level you have, and gain 1 Mana each time you gain a Level. You can take this Perk multiple times.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          ""
+        ],
+        "hasAnySpell": true,
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [
+      {
+        "name": "+Mana",
+        "origin": "Compendium.vagabond.perks.Item.aOUEt5kDCIGtp9nn",
+        "img": "icons/svg/aura.svg",
+        "_id": "vrUdTZ6jHYyy7YFb",
+        "type": "base",
+        "system": {},
+        "changes": [
+          {
+            "key": "system.mana.bonus",
+            "mode": 2,
+            "value": "@lvl",
+            "priority": null
+          }
+        ],
+        "disabled": false,
+        "duration": {
+          "startTime": null,
+          "combat": null,
+          "seconds": null,
+          "rounds": null,
+          "turns": null,
+          "startRound": null,
+          "startTurn": null
+        },
+        "description": "",
+        "tint": "#ffffff",
+        "transfer": true,
+        "statuses": [],
+        "sort": 0,
+        "flags": {
+          "vagabond": {
+            "applicationMode": "permanent"
+          }
+        },
+        "_stats": {
+          "compendiumSource": null,
+          "duplicateSource": null,
+          "exportSource": null,
+          "coreVersion": "13.351",
+          "systemId": "vagabond",
+          "systemVersion": "3.1.1",
+          "createdTime": 1770298283642,
+          "modifiedTime": 1770299035064,
+          "lastModifiedBy": "13p65OEadZSZVLRk"
+        }
+      }
+    ],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1770267089645,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "aOUEt5kDCIGtp9nn",
+    "sort": 8950000
+  },
+  {
+    "name": "Mage Slayer",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">When you damage a Focusing Being, the damage rolls can explode and, if the result of your d20 roll on the Check is 10 or higher than your Difficulty, the Focus ends.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [],
+        "trainedSkillOrGroups": [
+          [
+            "arcana",
+            "mysticism"
+          ]
+        ],
+        "statOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1769600655078,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "b5Asi0XnmAWm2lTH",
+    "sort": 7200000
+  },
+  {
+    "name": "Scout",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can’t get lost during Travel and, if you choose to Hunt, you can roll for the discovered game twice and use the roll of your choice.</span><br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [
+          "detect",
+          "survival"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769602704626,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "cZSBLLRDwqWonXsy",
+    "sort": 7300000
+  },
+  {
+    "name": "Master Breaker",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">If you fail a Finesse Check to pick a lock, your lockpick isn't broken and you make Saves against traps it triggers with Favor.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "dexterity",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "finesse"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "eNAvLBvJPluNHD0W",
+    "sort": 7400000
+  },
+  {
+    "name": "Smooth Talker",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Once per Scene, if you fail an Influence Check made to interact with a Being who understands you, you can reroll it.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "presence",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "influence"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "fHuLr1pLm3MVd4tl",
+    "sort": 7500000
+  },
+  {
+    "name": "Skirmisher",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">While you have Light Armor or no armor Equipped, you have a 5 foot bonus to Speed.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "dexterity",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "melee"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "hJjjazBCtdV7YIc5",
+    "sort": 7600000
+  },
+  {
+    "name": "Interceptor",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Once per Round, you can make one attack on an Off-Turn against a Close Enemy that begins to Move out of your reach.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "awareness",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "melee"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "i8ipAygu2JALmYKI",
+    "sort": 7700000
+  },
+  {
+    "name": "Briar Healer",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">The Target of your Life Spell gains a cloak of etheral thorns while you Focus on it, giving it +1 Armor and dealing d6 to any Being who damages them with a Melee Attack.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          "Compendium.vagabond.spells.Item.sBvdMIqhfJcydANC"
+        ],
+        "hasAnySpell": false,
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769599225682,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "jHHNUgfORW2cvR4X",
+    "sort": 7800000
+  },
+  {
+    "name": "Animal Companion",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">If you spend a Shift taming and training a nonhostile Beast with a HD count no higher than half your Level, you can have it follow you as a companion. You control it by commanding it with your Action or by skipping your Move. Otherwise, it instinctually attacks your Enemies. It uses your Survival Difficulty for Checks. You can only have one such companion at a time.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "presence",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "survival"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "jj9U2ZlShLvJqTaj",
+    "sort": 7900000
+  },
+  {
+    "name": "Telepath",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You have Telepathy (Far) while you Focus on this Ability.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /><br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "reason",
+            "value": 7
+          }
+        ],
+        "trainedSkills": [],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769602908768,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "jmhv9Tnc6FnwqSY9",
+    "sort": 8000000
+  },
+  {
+    "name": "Bookworm",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You gain an extra Studied die when you Study (p. 19). You can take this Perk multiple times.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "reason",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "lDzaNi9ay6p8y0Ay",
+    "sort": 8100000
+  },
+  {
+    "name": "Solar Flare",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can cause the light shed by Spells you Cast to be Sunlight.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          "Compendium.vagabond.spells.Item.M0HRBrZaRQ81vcAg"
+        ],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769601828588,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "lXZGW9w7lzR4pbeO",
+    "sort": 8200000
+  },
+  {
+    "name": "Perfect Parry",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">If you Crit to Block an attack, the attacker is Vulnerable until the end of your next Turn.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "might",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [],
+        "spells": [],
+        "trainedSkillOrGroups": [
+          [
+            "brawl",
+            "melee"
+          ]
+        ],
+        "statOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769601047922,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "lo6rixhWIVJkR80Z",
+    "sort": 8300000
+  },
+  {
+    "name": "Silver Tongued",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p>The roll required for you to Crit on Influence Checks made to deceive, intimidate, or persuade others is reduced by 1. You can take this Perk up to 4 times.</p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "presence",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "influence"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.8.1",
+      "createdTime": 1766953333856,
+      "modifiedTime": 1766953333856,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "_id": "mQh322KcxDzKpyEh",
+    "sort": 0
+  },
+  {
+    "name": "Limit Break",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Once per Combat, when you are dropped below half HP and aren't Fatigued, you can take another Action on your next Turn.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "might",
+            "value": 7
+          }
+        ],
+        "trainedSkills": [],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "mbB4v9dJGRQTlanN",
+    "sort": 8400000
+  },
+  {
+    "name": "Conjurer",
+    "type": "perk",
+    "_id": "n3pI3vkw5yjnNE6H",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p>You can take the Cast Action to conjure a Summon, which is a non-Humanlike Being you have previously defeated with HD equal to or lower than your Level, spending Mana to do so equal to the Summon’s HD. You must conduct a 10-minute Ritual to choose which Being is your Summon before taking this Action.</p><p>The following rules apply to your Summon:</p><ul><li><p>It is an Ally that obeys your commands, which you issue as an Action or by skipping your Move.</p></li><li><p>It uses your Cast Skill for Checks and Saves.</p></li><li><p>You must Focus on the Summon, spending 1 Mana per Turn while it is conjured. Otherwise, the Summon is banished. When it is reduced to 0 HP or if you conjure another Summon, it is banished.</p></li><li><p>Whenever it is banished, any Abilities that would end on its death end.</p></li></ul>",
+      "prerequisites": {
+        "stats": [],
+        "statOrGroups": [],
+        "trainedSkills": [],
+        "trainedSkillOrGroups": [
+          [
+            "arcana",
+            "influence",
+            "mysticism"
+          ]
+        ],
+        "spells": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "sort": 0,
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1769599853517,
+      "modifiedTime": 1769600004597,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    }
+  },
+  {
+    "name": "Vituperation",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can use your Action or skip your Move to rebuke an Enemy, and make an Influence Check with a penalty equal to the Target’s Morale. If you pass, that Enemy is Vulnerable until your next Turn or until it deals damage. Beings without Morale can’t be affected by this Ability.</span></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "presence",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "influence"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769603002589,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "npmCxChHHkkNJIvq",
+    "sort": 8500000
+  },
+  {
+    "name": "Knife Juggler",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You treat 1H Thrown Weapons as 0 Slot for occupying your Item Slots, and can draw one as part of an attack with it.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "dexterity",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "finesse"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "pOiPXKHX7O90AsId",
+    "sort": 8600000
+  },
+  {
+    "name": "Mesmer",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">If you pass a Cast Check by 10 or more to cause a Target to be Charmed or Frightened, you can also cause it to act in one of the following ways in a manner of your choice on its next Turn: • Move up to half its Speed. • Attack a Target (it can attack itself ). • Drop or pick up an Item.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          "Compendium.vagabond.spells.Item.lS7PlTGD7VFNLKhD"
+        ],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769600764888,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "rG1e4FJwMwly5Zbr",
+    "sort": 8700000
+  },
+  {
+    "name": "Archaeologist",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Checks and Saves you make against traps have Favor and, if you are subjected to a Curse, you can make a Will Save to instantly break the curse's hold on you.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "reason",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "craft"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "rWchpJ487yg93tZs",
+    "sort": 8800000
+  },
+  {
+    "name": "Sentinel",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Enemies you hit with a Melee Attack can't Move for the rest of the Turn.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "might",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "melee"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "t2kiBSjqMvPZ6Vbd",
+    "sort": 8900000
+  },
+  {
+    "name": "Assured Healer",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Healing rolls of your Spells explode on a 1.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          "Compendium.vagabond.spells.Item.sBvdMIqhfJcydANC"
+        ],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769569687126,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "tQ0QFm3jAAsu8y1i",
+    "sort": 9000000
+  },
+  {
+    "name": "Grim Harvest",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">When one of your Spells kills an Enemy that is not an Artificial or Undead, you regain HP equal to the damage of the Spell.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [],
+        "spells": [
+          "Compendium.vagabond.spells.Item.GaL1pCOL67Vf586b"
+        ],
+        "hasAnySpell": false,
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1769566404437,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "tegoLkMvfTZPShtI",
+    "sort": 9100000
+  },
+  {
+    "name": "Scrapper's Delight",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can conduct a 10-minute Ritual to magically break down an unsecured Item you touch throughout the ritual. The Item must be nonmagical, it must have a value of at least 5s, and it can occupy no more than 2 Slots. The Item becomes raw materials of a value equal to 5s per 1 Slot it previously occupied.</span><br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "trainedSkills": [
+          "arcana",
+          "craft"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769602751816,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "ty11L2tQGWshgq0E",
+    "sort": 9200000
+  },
+  {
+    "name": "Mounted Combatant",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Any Check you make to avoid falling off a mount is Favored, and you can wield Weapons with the Versatile Grip as 1H while riding a mount and get the benefits of them being wielded in both hands.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "might",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "survival"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "uSjuQ6n725f7YzeO",
+    "sort": 9300000
+  },
+  {
+    "name": "Treads Lightly",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Your Speed isn’t impeded by nonmagical Difficult Terrain that isn’t water or a vertical surface, and you don’t trigger traps by walking on them.</span><br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "dexterity",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769603039732,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "uic2nm5LlKKwoFDQ",
+    "sort": 9400000
+  },
+  {
+    "name": "Akimbo Trigger",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Attacking a Close Target with a Ranged attack doesn’t Hinder the Check, and you can Move up to half your Speed when you skip our Move to make an attack.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "dexterity",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "ranged"
+        ],
+        "spells": [],
+        "resources": [],
+        "trainedSkillOrGroups": [],
+        "statOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769568255548,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "vIYaWIYHSvdSpDFT",
+    "sort": 9500000
+  },
+  {
+    "name": "Deft Hands",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can skip your Move to take the Use Action.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "dexterity",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "finesse"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "vtNfeEdWNUWvaeRM",
+    "sort": 9600000
+  },
+  {
+    "name": "Second Wind",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Once per Combat, you can use your Action or skip your Move to regain (d6 + Might) HP.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "might",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "brawl"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [
+      {
+        "name": "Active Effect",
+        "origin": "Compendium.vagabond.perks.Item.x1EA997D11L9zp7J",
+        "img": "icons/svg/aura.svg",
+        "_id": "B2nYRrBd4Uwtkb7M",
+        "type": "base",
+        "system": {},
+        "changes": [],
+        "disabled": false,
+        "duration": {
+          "startTime": null,
+          "combat": null
+        },
+        "description": "",
+        "tint": "#ffffff",
+        "transfer": true,
+        "statuses": [],
+        "sort": 0,
+        "flags": {},
+        "_stats": {
+          "compendiumSource": null,
+          "duplicateSource": null,
+          "exportSource": null,
+          "coreVersion": "13.351",
+          "systemId": "vagabond",
+          "systemVersion": "3.1.1",
+          "createdTime": 1770296582470,
+          "modifiedTime": 1770296582470,
+          "lastModifiedBy": "13p65OEadZSZVLRk"
+        }
+      }
+    ],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "x1EA997D11L9zp7J",
+    "sort": 9700000
+  },
+  {
+    "name": "Fallaway Reverse",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">If you Crit to Dodge a Melee Attack, the attacker falls Prone.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "dexterity",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "finesse"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "x4gPNuUuQbdpKNAB",
+    "sort": 9800000
+  },
+  {
+    "name": "Guardian Angel",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Once per Round, if one of your Allies is Targeted by an Enemy, you can spend 1 Luck to make an attack against that Enemy. If you hit, your Ally has Favor on any Save forced by that Enemy this Turn.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "awareness",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [],
+        "spells": [],
+        "trainedSkillOrGroups": [
+          [
+            "melee",
+            "ranged"
+          ]
+        ],
+        "statOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1769570058244,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "xXQvKOlRtCsc0oLq",
+    "sort": 9900000
+  },
+  {
+    "name": "Marksmanship",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">The damage dice for your Ranged Weapon attacks are one size larger.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "awareness",
+            "value": 7
+          }
+        ],
+        "trainedSkills": [
+          "ranged"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [
+      {
+        "name": "+Die Size",
+        "origin": "Compendium.vagabond.perks.Item.xfYrdHhVTh03lkvz",
+        "img": "icons/svg/aura.svg",
+        "_id": "w5ecV7F9erXuEZto",
+        "type": "base",
+        "system": {},
+        "changes": [
+          {
+            "key": "system.rangedDamageDieSizeBonus",
+            "mode": 2,
+            "value": "2",
+            "priority": null
+          }
+        ],
+        "disabled": false,
+        "duration": {
+          "startTime": null,
+          "combat": null,
+          "seconds": null,
+          "rounds": null,
+          "turns": null,
+          "startRound": null,
+          "startTurn": null
+        },
+        "description": "",
+        "tint": "#ffffff",
+        "transfer": true,
+        "statuses": [],
+        "sort": 0,
+        "flags": {
+          "vagabond": {
+            "applicationMode": "permanent"
+          }
+        },
+        "_stats": {
+          "compendiumSource": null,
+          "duplicateSource": null,
+          "exportSource": null,
+          "coreVersion": "13.351",
+          "systemId": "vagabond",
+          "systemVersion": "4.1.0",
+          "createdTime": 1770294443189,
+          "modifiedTime": 1772539836269,
+          "lastModifiedBy": "13p65OEadZSZVLRk"
+        }
+      }
+    ],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.1.1",
+      "createdTime": 1765021523595,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "xfYrdHhVTh03lkvz",
+    "sort": 10000000
+  },
+  {
+    "name": "Provoker",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can use your Action to intimidate or otherwise goad an Enemy that can see or hear you. When you do, your Allies make all Saves provoked by that Enemy's Attacks with Favor until the start of your Group's next Turn.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "presence",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [
+          "influence"
+        ],
+        "spells": [],
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1766746832196,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "yIsZFPClB2I9WZ3i",
+    "sort": 10200000
+  },
+  {
+    "name": "Cardistry",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You can use a deck of cards as a Trinket and can make attacks with cards drawn from a deck using your Cast Skill. The Deck must be used as a 2H Grip Weapon to do so. It deals d4, and has the Finesse and Thrown properties. Cards used for an attack magically reappear in the deck.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [
+          {
+            "stat": "dexterity",
+            "value": 4
+          }
+        ],
+        "trainedSkills": [],
+        "spells": [
+          ""
+        ],
+        "hasAnySpell": true,
+        "statOrGroups": [],
+        "trainedSkillOrGroups": [],
+        "spellOrGroups": [],
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "none",
+        "selected": "",
+        "targetField": "",
+        "effectMode": 5,
+        "effectValue": "1"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966653728,
+      "modifiedTime": 1769598444662,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "yrYjdipnKbGr8tvq",
+    "sort": 10300000
+  },
+  {
+    "name": "New Training",
+    "type": "perk",
+    "img": "icons/magic/light/explosion-beam-impact-silhouette.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">You gain a Training. You can take this Perk multiple times.</span> <br style=\"font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:normal;orphans:2;text-align:-webkit-auto;text-indent:0px;text-transform:none;white-space:normal;widows:2;word-spacing:0px;-webkit-text-size-adjust:auto;-webkit-text-stroke-width:0px\" /></p>",
+      "prerequisites": {
+        "stats": [],
+        "statOrGroups": [],
+        "trainedSkills": [],
+        "trainedSkillOrGroups": [],
+        "spells": [],
+        "spellOrGroups": [],
+        "hasAnySpell": false,
+        "resources": [],
+        "resourceOrGroups": []
+      },
+      "choiceConfig": {
+        "type": "skill",
+        "selected": "",
+        "targetField": "system.skills.{choice}.trained",
+        "effectMode": 2,
+        "effectValue": "true"
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.1.1",
+      "createdTime": 1770306149012,
+      "modifiedTime": 1770306149012,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "_id": "zx50vxKePJfpKAlW",
+    "sort": 0
+  }
+]

@@ -1,0 +1,741 @@
+[
+  {
+    "name": "Orc",
+    "type": "ancestry",
+    "img": "systems/vagabond/assets/ui/compendiums/orc.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Mutant nightkin that take on a variety of appearances. Some with snouts and tusks, or fur and horns, or those with calloused and verdigris skin. They typically settle in close-knit tribes where “might is right”, and have been known to establish themselves as commanders over goblin warbands.</span></p>",
+      "size": "medium",
+      "ancestryType": "Cryptid",
+      "traits": [
+        {
+          "name": "Darksight",
+          "description": "You are not Blinded by Dark.",
+          "statBonusPoints": 0,
+          "extraTraining": 0,
+          "requiredSpells": [],
+          "allowedPerks": [],
+          "perkAmount": 0,
+          "spellAmount": 0,
+          "skillChoices": []
+        },
+        {
+          "name": "Beefy",
+          "description": "You make Saves against being Grappled or Shoved with Favor, and have Favor on Checks to Grapple or Shove.",
+          "statBonusPoints": 0,
+          "extraTraining": 0,
+          "requiredSpells": [],
+          "allowedPerks": [],
+          "perkAmount": 0,
+          "spellAmount": 0,
+          "skillChoices": []
+        },
+        {
+          "name": "Hulking",
+          "description": "You have a +2 bonus to Item Slots.",
+          "statBonusPoints": 0,
+          "extraTraining": 0,
+          "requiredSpells": [],
+          "allowedPerks": [],
+          "perkAmount": 0,
+          "spellAmount": 0,
+          "skillChoices": []
+        }
+      ]
+    },
+    "effects": [
+      {
+        "name": "Hulking (Orc Trait)",
+        "origin": "Compendium.vagabond.ancestries.Item.4b55ZN5hVR3goYRZ",
+        "img": "icons/svg/aura.svg",
+        "_id": "TnpQ3eDF0qwfSsI3",
+        "type": "base",
+        "system": {},
+        "changes": [
+          {
+            "key": "system.inventory.bonusSlots",
+            "mode": 2,
+            "value": "2",
+            "priority": null
+          }
+        ],
+        "disabled": false,
+        "duration": {
+          "startTime": null,
+          "combat": null,
+          "seconds": null,
+          "rounds": null,
+          "turns": null,
+          "startRound": null,
+          "startTurn": null
+        },
+        "description": "",
+        "tint": "#ffffff",
+        "transfer": true,
+        "statuses": [],
+        "sort": 0,
+        "flags": {
+          "vagabond": {
+            "applicationMode": "permanent"
+          }
+        },
+        "_stats": {
+          "compendiumSource": null,
+          "duplicateSource": null,
+          "exportSource": null,
+          "coreVersion": "13.351",
+          "systemId": "vagabond",
+          "systemVersion": "4.1.0",
+          "createdTime": 1765107522532,
+          "modifiedTime": 1772319601492,
+          "lastModifiedBy": "13p65OEadZSZVLRk"
+        }
+      }
+    ],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966621821,
+      "modifiedTime": 1765016547881,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "4b55ZN5hVR3goYRZ",
+    "sort": 0
+  },
+  {
+    "name": "Dwarf",
+    "type": "ancestry",
+    "img": "systems/vagabond/assets/ui/compendiums/dwarf.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Dwarves are built from sterner stuff, with some myths saying dwarves aren’t born, they’re forged. These myths speak of gods sculpting the dwarves shortly after the formation of mountains, granting them iron wills, silver tongues, and golden hearts. They are an industrious people who hail from some of the most extreme environments. If dwarves discover rare ore, they don’t look for a nearby river and suitable land for farming; they’ll found the town right on the biggest vein they can find and figure the rest out later.</span></p>",
+      "size": "medium",
+      "ancestryType": "Humanlike",
+      "traits": [
+        {
+          "name": "Darksight",
+          "description": "You are not Blinded by Dark.",
+          "statBonusPoints": 0,
+          "extraTraining": 0,
+          "requiredSpells": [],
+          "allowedPerks": [],
+          "perkAmount": 0,
+          "spellAmount": 0,
+          "skillChoices": []
+        },
+        {
+          "name": "Sturdy",
+          "description": "You have a +1 bonus on Saves against being Frightened, Sickened, or Shoved.",
+          "statBonusPoints": 0,
+          "extraTraining": 0,
+          "requiredSpells": [],
+          "allowedPerks": [],
+          "perkAmount": 0,
+          "spellAmount": 0,
+          "skillChoices": []
+        },
+        {
+          "name": "Tough",
+          "description": "You have a bonus to your max HP equal to your Level.",
+          "statBonusPoints": 0,
+          "extraTraining": 0,
+          "requiredSpells": [],
+          "allowedPerks": [],
+          "perkAmount": 0,
+          "spellAmount": 0,
+          "skillChoices": []
+        }
+      ]
+    },
+    "effects": [
+      {
+        "name": "Tough (Dwarf Trait)",
+        "origin": "Compendium.vagabond.ancestries.Item.HfWZFJE9Ifn25UYs",
+        "img": "icons/svg/aura.svg",
+        "_id": "EQkcwQOr5DknrngZ",
+        "type": "base",
+        "system": {},
+        "changes": [
+          {
+            "key": "system.bonuses.hpPerLevel",
+            "mode": 2,
+            "value": "1",
+            "priority": null
+          }
+        ],
+        "disabled": false,
+        "duration": {
+          "startTime": null,
+          "combat": null,
+          "seconds": null,
+          "rounds": null,
+          "turns": null,
+          "startRound": null,
+          "startTurn": null
+        },
+        "description": "",
+        "tint": "#ffffff",
+        "transfer": true,
+        "statuses": [],
+        "sort": 0,
+        "flags": {
+          "vagabond": {
+            "applicationMode": "permanent"
+          }
+        },
+        "_stats": {
+          "compendiumSource": null,
+          "duplicateSource": null,
+          "exportSource": null,
+          "coreVersion": "13.351",
+          "systemId": "vagabond",
+          "systemVersion": "2.0.0",
+          "createdTime": 1766979054545,
+          "modifiedTime": 1766979548038,
+          "lastModifiedBy": "13p65OEadZSZVLRk"
+        }
+      }
+    ],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.0",
+      "createdTime": 1764966621821,
+      "modifiedTime": 1765016457205,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "HfWZFJE9Ifn25UYs",
+    "sort": 0
+  },
+  {
+    "name": "Elf",
+    "type": "ancestry",
+    "img": "systems/vagabond/assets/ui/compendiums/elf.webp",
+    "system": {
+      "description": "<p>Elves are known for their tall height, ethereal beauty, and inquisitive passion to witness awe. This passion embodies itself in their clothing, language, arts, and cuisine, as elves seek to make every moment one worth savoring. Of all the peoples that inhabit the world, it is likely no other lives as peacefully and permissively with the fae, fauna, and flora as elves.</p>",
+      "size": "medium",
+      "ancestryType": "Fae",
+      "traits": [
+        {
+          "name": "Ascendancy",
+          "description": "You are Trained in a Skill from either Arcana, Mysticism, Influence, or in Ranged Attacks.",
+          "statBonusPoints": 0,
+          "extraTraining": 0,
+          "requiredSpells": [],
+          "allowedPerks": [],
+          "perkAmount": 0,
+          "spellAmount": 0,
+          "skillChoices": [
+            {
+              "count": 1,
+              "pool": [
+                "arcana",
+                "ranged",
+                "mysticism",
+                "influence"
+              ],
+              "label": "Ascendancy"
+            }
+          ]
+        },
+        {
+          "name": "Elven Eyes",
+          "description": "You have Favor on sight-based Detect Checks.",
+          "statBonusPoints": 0,
+          "extraTraining": 0,
+          "requiredSpells": [],
+          "allowedPerks": [],
+          "perkAmount": 0,
+          "spellAmount": 0,
+          "skillChoices": []
+        },
+        {
+          "name": "Naturally Attuned",
+          "description": "You know a Spell and can Cast it with a Skill of your choice.",
+          "statBonusPoints": 0,
+          "extraTraining": 0,
+          "requiredSpells": [],
+          "allowedPerks": [],
+          "perkAmount": 0,
+          "spellAmount": 1,
+          "skillChoices": []
+        }
+      ]
+    },
+    "effects": [
+      {
+        "name": "Naturally Attuned (Elf Trait)",
+        "origin": "Compendium.vagabond.ancestries.Item.IF9AtzPvbTWx1jk1",
+        "img": "icons/svg/aura.svg",
+        "_id": "Bx67PMOTQ3Eyrfuj",
+        "type": "base",
+        "system": {},
+        "changes": [
+          {
+            "key": "system.attributes.isSpellcaster",
+            "mode": 5,
+            "value": "true",
+            "priority": null
+          }
+        ],
+        "disabled": false,
+        "duration": {
+          "startTime": null,
+          "combat": null,
+          "seconds": null,
+          "rounds": null,
+          "turns": null,
+          "startRound": null,
+          "startTurn": null
+        },
+        "description": "",
+        "tint": "#ffffff",
+        "transfer": true,
+        "statuses": [],
+        "sort": 0,
+        "flags": {
+          "vagabond": {
+            "applicationMode": "permanent"
+          }
+        },
+        "_stats": {
+          "compendiumSource": null,
+          "duplicateSource": null,
+          "exportSource": null,
+          "coreVersion": "13.351",
+          "systemId": "vagabond",
+          "systemVersion": "2.0.0",
+          "createdTime": 1766979796924,
+          "modifiedTime": 1772212866954,
+          "lastModifiedBy": "13p65OEadZSZVLRk"
+        }
+      }
+    ],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "4.1.0",
+      "createdTime": 1764966621821,
+      "modifiedTime": 1772318452330,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "IF9AtzPvbTWx1jk1",
+    "sort": 0
+  },
+  {
+    "name": "Halfling",
+    "type": "ancestry",
+    "img": "systems/vagabond/assets/ui/compendiums/halfling.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Plucky, hill-dwelling folk of the shire. Halflings are known to live life to the fullest, rise to any challenge, and bask even in their failures. They are fearless, quick to respond, and always capable of turning things in their favor. Halflings settle on rolling hills, with food at the highest elevation, then homes, markets, and finally waste management at the lowest. It helps reduce the damage of floods, and keeps temperatures comfortable all year.</span></p>",
+      "size": "medium",
+      "ancestryType": "Humanlike",
+      "traits": [
+        {
+          "name": "Nimble",
+          "description": "You have a 5 ft bonus to Speed and ignore Hinder on Reflex Saves if you aren’t Incapacitated.",
+          "statBonusPoints": 0,
+          "extraTraining": 0,
+          "requiredSpells": [],
+          "allowedPerks": [],
+          "perkAmount": 0,
+          "spellAmount": 0,
+          "skillChoices": []
+        },
+        {
+          "name": "Squat",
+          "description": "You can move through areas occupied by other Beings.",
+          "statBonusPoints": 0,
+          "extraTraining": 0,
+          "requiredSpells": [],
+          "allowedPerks": [],
+          "perkAmount": 0,
+          "spellAmount": 0,
+          "skillChoices": []
+        },
+        {
+          "name": "Tricksy",
+          "description": "When you regain Luck from a Rest, you gain 1 additional Luck.",
+          "statBonusPoints": 0,
+          "extraTraining": 0,
+          "requiredSpells": [],
+          "allowedPerks": [],
+          "perkAmount": 0,
+          "spellAmount": 0,
+          "skillChoices": []
+        }
+      ]
+    },
+    "effects": [
+      {
+        "name": "Nimble",
+        "origin": "Compendium.vagabond.ancestries.Item.L7eJ4jNysVVXHFOt",
+        "img": "icons/svg/aura.svg",
+        "_id": "VOv5x6pMJ3UAh8pd",
+        "type": "base",
+        "system": {},
+        "changes": [
+          {
+            "key": "system.speed.bonus",
+            "mode": 2,
+            "value": "5",
+            "priority": null
+          }
+        ],
+        "disabled": false,
+        "duration": {
+          "startTime": null,
+          "combat": null,
+          "seconds": null,
+          "rounds": null,
+          "turns": null,
+          "startRound": null,
+          "startTurn": null
+        },
+        "description": "",
+        "tint": "#ffffff",
+        "transfer": true,
+        "statuses": [],
+        "sort": 0,
+        "flags": {},
+        "_stats": {
+          "compendiumSource": null,
+          "duplicateSource": null,
+          "exportSource": null,
+          "coreVersion": "13.351",
+          "systemId": "vagabond",
+          "systemVersion": "1.1.6",
+          "createdTime": 1765107479616,
+          "modifiedTime": 1765107502441,
+          "lastModifiedBy": "13p65OEadZSZVLRk"
+        }
+      }
+    ],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "4.1.0",
+      "createdTime": 1764966621821,
+      "modifiedTime": 1772319510309,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "L7eJ4jNysVVXHFOt",
+    "sort": 0
+  },
+  {
+    "name": "Draken",
+    "type": "ancestry",
+    "img": "systems/vagabond/assets/ui/compendiums/draken.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Resembling humanoid dragons, Draken are relatives of the terrifying dragons of legend. Their scales come in a variety of brilliant colors, their maws house fanged teeth that often serve as a serrated clamp, and their fingers resemble the talonlike claws of dragons.</span></p>",
+      "size": "medium",
+      "ancestryType": "Cryptid",
+      "traits": [
+        {
+          "name": "Breath Attack",
+          "description": "You can attack with an Endure or Will Save to make a 15’ Cone of draconic breath that deals 2d6!",
+          "statBonusPoints": 0,
+          "extraTraining": 0,
+          "requiredSpells": [],
+          "allowedPerks": [],
+          "perkAmount": 0,
+          "spellAmount": 0,
+          "skillChoices": []
+        },
+        {
+          "name": "Scale",
+          "description": "You have a +1 bonus to Armor Rating.",
+          "statBonusPoints": 0,
+          "extraTraining": 0,
+          "requiredSpells": [],
+          "allowedPerks": [],
+          "perkAmount": 0,
+          "spellAmount": 0,
+          "skillChoices": []
+        },
+        {
+          "name": "Draconic Resilience",
+          "description": "You take half damage from a source of your choice from either Acid, Cold, Fire, or Shock.",
+          "statBonusPoints": 0,
+          "extraTraining": 0,
+          "requiredSpells": [],
+          "allowedPerks": [],
+          "perkAmount": 0,
+          "spellAmount": 0,
+          "skillChoices": []
+        }
+      ]
+    },
+    "effects": [
+      {
+        "name": "Scale",
+        "origin": "Compendium.vagabond.ancestries.Item.LtZtoLKTbT5X3HZJ",
+        "img": "icons/svg/aura.svg",
+        "_id": "1Ismbz8nwoNAFkNj",
+        "type": "base",
+        "system": {},
+        "changes": [
+          {
+            "key": "system.armorBonus",
+            "mode": 2,
+            "value": "1",
+            "priority": null
+          }
+        ],
+        "disabled": false,
+        "duration": {
+          "startTime": null,
+          "combat": null,
+          "seconds": null,
+          "rounds": null,
+          "turns": null,
+          "startRound": null,
+          "startTurn": null
+        },
+        "description": "",
+        "tint": "#ffffff",
+        "transfer": true,
+        "statuses": [],
+        "sort": 0,
+        "flags": {},
+        "_stats": {
+          "compendiumSource": null,
+          "duplicateSource": null,
+          "exportSource": null,
+          "coreVersion": "13.351",
+          "systemId": "vagabond",
+          "systemVersion": "1.1.5",
+          "createdTime": 1765106300065,
+          "modifiedTime": 1765107364534,
+          "lastModifiedBy": "13p65OEadZSZVLRk"
+        }
+      }
+    ],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1764966621821,
+      "modifiedTime": 1769604690050,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "LtZtoLKTbT5X3HZJ",
+    "sort": 0
+  },
+  {
+    "name": "Human",
+    "type": "ancestry",
+    "img": "systems/vagabond/assets/ui/compendiums/human.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Humans are social beings that tend to be central in the development of major, diverse melting pot civilizations. Their tendency to develop wide, sprawling empires and a huge pool of cultures makes them extremely adaptable adventurers.</span> </p>",
+      "size": "medium",
+      "ancestryType": "Humanlike",
+      "traits": [
+        {
+          "name": "Knack",
+          "description": "You gain a Perk and a Training.",
+          "statBonusPoints": 0,
+          "extraTraining": 1,
+          "perkAmount": 1,
+          "requiredSpells": [],
+          "allowedPerks": [],
+          "spellAmount": 0,
+          "skillChoices": []
+        },
+        {
+          "name": "Strong Potential",
+          "description": "Increase one of your Stats by 1, but no higher than 7",
+          "statBonusPoints": 1,
+          "extraTraining": 0,
+          "perkAmount": 0,
+          "requiredSpells": [],
+          "allowedPerks": [],
+          "spellAmount": 0,
+          "skillChoices": []
+        }
+      ]
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "3.0.1",
+      "createdTime": 1764966621821,
+      "modifiedTime": 1770160425560,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "kYLA215krVXIgmnd",
+    "sort": 0
+  },
+  {
+    "name": "Goblin",
+    "type": "ancestry",
+    "img": "systems/vagabond/assets/ui/compendiums/goblin.webp",
+    "system": {
+      "description": "<p><span class=\"fontstyle0\">Havoc wagers known to delight in chaos, goblins are smaller humanoids of a typically green, yellow, grey, or bluish skin color. This instinctual delight for chaos often puts them at-odds with the codes and laws of other societies, but goblin ingenuity can be an indispensable asset.</span></p>",
+      "size": "medium",
+      "ancestryType": "Cryptid",
+      "traits": [
+        {
+          "name": "Darksight",
+          "description": "You are not Blinded by Dark.",
+          "statBonusPoints": 0,
+          "extraTraining": 0,
+          "requiredSpells": [
+            "Compendium.vagabond.spells.Item.aUuqluCeFulvPlNR"
+          ],
+          "allowedPerks": [],
+          "perkAmount": 0,
+          "skillChoices": [
+            {
+              "count": 1,
+              "pool": [],
+              "label": ""
+            }
+          ],
+          "spellAmount": 0
+        },
+        {
+          "name": "Nimble",
+          "description": "You have a 5 ft bonus to Speed and ignore Hinder on Reflex Saves if you aren’t Incapacitated.",
+          "statBonusPoints": 0,
+          "extraTraining": 0,
+          "requiredSpells": [],
+          "allowedPerks": [],
+          "perkAmount": 0,
+          "skillChoices": [],
+          "spellAmount": 0
+        },
+        {
+          "name": "Scavenger",
+          "description": "You have Favor on Endure Saves against being Sickened.",
+          "statBonusPoints": 0,
+          "extraTraining": 0,
+          "requiredSpells": [],
+          "allowedPerks": [],
+          "perkAmount": 0,
+          "skillChoices": [],
+          "spellAmount": 0
+        }
+      ]
+    },
+    "effects": [
+      {
+        "name": "Nimble",
+        "origin": "Compendium.vagabond.ancestries.Item.vcPfVxMJXWTPteGx",
+        "img": "icons/svg/aura.svg",
+        "_id": "sx07MuawyaLixpAt",
+        "type": "base",
+        "system": {},
+        "changes": [
+          {
+            "key": "system.speed.bonus",
+            "mode": 2,
+            "value": "5",
+            "priority": null
+          }
+        ],
+        "disabled": false,
+        "duration": {
+          "startTime": null,
+          "combat": null,
+          "seconds": null,
+          "rounds": null,
+          "turns": null,
+          "startRound": null,
+          "startTurn": null
+        },
+        "description": "",
+        "tint": "#ffffff",
+        "transfer": true,
+        "statuses": [],
+        "sort": 0,
+        "flags": {},
+        "_stats": {
+          "compendiumSource": null,
+          "duplicateSource": null,
+          "exportSource": null,
+          "coreVersion": "13.351",
+          "systemId": "vagabond",
+          "systemVersion": "1.1.6",
+          "createdTime": 1765107430353,
+          "modifiedTime": 1765107475581,
+          "lastModifiedBy": "13p65OEadZSZVLRk"
+        }
+      }
+    ],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "4.1.0",
+      "createdTime": 1764966621821,
+      "modifiedTime": 1772220318822,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "vJkLjvlErdx6ZHoC": 3
+    },
+    "_id": "vcPfVxMJXWTPteGx",
+    "sort": 0
+  }
+]

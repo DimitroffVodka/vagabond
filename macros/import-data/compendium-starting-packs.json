@@ -1,0 +1,2593 @@
+[
+  {
+    "name": "Seaman Pack",
+    "type": "starterPack",
+    "img": "icons/tools/nautical/anchor.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.ShVLwDMGm2m0D4eS",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.pVe3gBnfzcmqyMgM",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.OxqGnjXxt9vRGVeZ",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.ojHYKI04S69IDApB",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 1,
+        "silver": 55,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "0kjmDiLgySCmhswv",
+    "sort": 2900000
+  },
+  {
+    "name": "Astronomer Pack",
+    "type": "starterPack",
+    "img": "icons/magic/light/projectile-stars-blue.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.h9xXLqR2nDPKGV3Z",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.Qgd6djHTjRfPDZLO",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.HxzOPvH1DJBVoLyN",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.goIp2SHolbKYBWaP",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 7,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1773097068984,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "2G3GnGMuSzqQwaxo",
+    "sort": 300000
+  },
+  {
+    "name": "Musician Pack",
+    "type": "starterPack",
+    "img": "icons/tools/instruments/lute-gold-brown.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.HN3Gem6z0pA0r5Fu",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.htE439dDIjptFzMK",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.OxqGnjXxt9vRGVeZ",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 75,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "2nNcbg2WCi5XPKUC",
+    "sort": 2300000
+  },
+  {
+    "name": "Brawler Pack",
+    "type": "starterPack",
+    "img": "icons/equipment/hand/gauntlet-armored-leather-grey.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.d0zJpdUlmX8ChBxz",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.T5aaqoo4V8KZIVCZ",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.0223w2UAnwFD9Fq6",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 1,
+        "silver": 46,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "2pgitsw4mqFLgBnZ",
+    "sort": 600000
+  },
+  {
+    "name": "Nomad Pack",
+    "type": "starterPack",
+    "img": "icons/magic/death/skull-weapon-staff-glow-pink.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.ufjKBfCKT1kTA5Kq",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.HwX2SFNKg7DPXSma",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.wFqNBkEUehnQcGOJ",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8sGl5EOVFo2QcGKD",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 1,
+        "silver": 75,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "5er8iE0ROjdfvuM6",
+    "sort": 2500000
+  },
+  {
+    "name": "Sellsword Pack",
+    "type": "starterPack",
+    "img": "icons/equipment/shield/buckler-boss-iron-wood-brown.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.Nxohe9qqbv8Pc2rf",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.0NA6IoKBoDOjQeEy",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.T5aaqoo4V8KZIVCZ",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 95,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "8aE5eHJwq8lMe2Bo",
+    "sort": 3000000
+  },
+  {
+    "name": "Devout Pack",
+    "type": "starterPack",
+    "img": "icons/commodities/treasure/token-cross-gem-yellow.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.h9xXLqR2nDPKGV3Z",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.VSIqYJp40MiZgxV7",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.alchemical-items.Item.6aI7W223nFKNN3Oz",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.alchemical-items.Item.FsftMObnSY5L2m5a",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 91,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "ALxq2xfC8nfF75iQ",
+    "sort": 1000000
+  },
+  {
+    "name": "Courtesan Pack",
+    "type": "starterPack",
+    "img": "icons/consumables/potions/potion-jar-corked-labeled-purple-pink.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.lAKMZcmQ3vHWk24a",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.HwX2SFNKg7DPXSma",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.svYSrAWRGltLtFRO",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.tmUCdiHzUbgXt7Md",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 1,
+        "silver": 63,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "CgsVEQvhZaD9Dx9A",
+    "sort": 900000
+  },
+  {
+    "name": "Highwayman Pack",
+    "type": "starterPack",
+    "img": "icons/equipment/back/cloak-hooded-jewels-green.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.W4AhHQ6wvtD1Mrqe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.pVe3gBnfzcmqyMgM",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.HwX2SFNKg7DPXSma",
+          "quantity": 2
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 45,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "FhklscLMgERK0v2j",
+    "sort": 1700000
+  },
+  {
+    "name": "Conman Pack",
+    "type": "starterPack",
+    "img": "icons/sundries/gaming/dice-runed-brown.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.HwX2SFNKg7DPXSma",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.O5VmxEFUsYvNBGhv",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.VBtwmHPJQ6c4M481",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 1,
+        "silver": 50,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1766953464389,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "GjPcdjZKPh8PBfMj",
+    "sort": 800000
+  },
+  {
+    "name": "Spy Pack",
+    "type": "starterPack",
+    "img": "icons/equipment/head/hood-ringed-leather-red.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.HwX2SFNKg7DPXSma",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.Cp5RCsNIFtDUk5sl",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.svYSrAWRGltLtFRO",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 1,
+        "silver": 55,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "J2nNKw1hsHUJnJun",
+    "sort": 3200000
+  },
+  {
+    "name": "Assassin Pack",
+    "type": "starterPack",
+    "img": "icons/commodities/treasure/brooch-skull-dagger-grey.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.GlJQrtDBhqIHLwCI",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.Dc1DdU5530PBjfrG",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.HwX2SFNKg7DPXSma",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.alchemical-items.Item.rLuwMWhTLNcOHS6X",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 60,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "JXGh2kMRaR4Wyh5w",
+    "sort": 200000
+  },
+  {
+    "name": "Sentinel Pack",
+    "type": "starterPack",
+    "img": "icons/equipment/head/greathelm-banded-steel.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.lO3uG8NoLQWnS0Ne",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.yvHynLJxGSilvLwM",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 35,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "KcqqBXunMOsfq9TP",
+    "sort": 3100000
+  },
+  {
+    "name": "Alchemist Pack",
+    "type": "starterPack",
+    "img": "icons/tools/laboratory/bowl-liquid-pink-yellow-green.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.GlJQrtDBhqIHLwCI",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.Dc1DdU5530PBjfrG",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 87,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "Km7GTFMeCkOvr986",
+    "sort": 100000
+  },
+  {
+    "name": "Knight Pack",
+    "type": "starterPack",
+    "img": "icons/sundries/gaming/chess-knight-white-glass.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.Nxohe9qqbv8Pc2rf",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.kRZpyvFZXQyDgpZn",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.yvHynLJxGSilvLwM",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 20,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "KoynpKyutYoL8KOX",
+    "sort": 1900000
+  },
+  {
+    "name": "Occultist Pack",
+    "type": "starterPack",
+    "img": "icons/commodities/treasure/token-runed-nyd-green.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.h9xXLqR2nDPKGV3Z",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.HwX2SFNKg7DPXSma",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.Kv94iYhXWcB6gkrC",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.Dc1DdU5530PBjfrG",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 65,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "NmrCbvZNNhHz1Nem",
+    "sort": 2600000
+  },
+  {
+    "name": "Physician Pack",
+    "type": "starterPack",
+    "img": "icons/magic/life/cross-flared-green.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.cmpmitJe5QFcKh6p",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.Kv94iYhXWcB6gkrC",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.Ny1rgetLx1KQXuze",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.2gVTXiZIkFhx6yAr",
+          "quantity": 2
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 35,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "OjF47EO3Tbn4qVw5",
+    "sort": 2700000
+  },
+  {
+    "name": "Tinker Pack",
+    "type": "starterPack",
+    "_id": "PnfmuSTuRLW0gjln",
+    "img": "icons/tools/smithing/pincers.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.UfSh0X0489Uby1ev",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.Dc1DdU5530PBjfrG",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.hlrQAclnJuNQI0vO",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.NKGgWqzRacaktjGK",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 60,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "sort": 0,
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "4.2.3",
+      "createdTime": 1773095612320,
+      "modifiedTime": 1773096068882,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    }
+  },
+  {
+    "name": "Cook Pack",
+    "type": "starterPack",
+    "_id": "TLrZRlyo8yuVb5it",
+    "img": "icons/tools/cooking/fork-steel-tan.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.PehvORieuUtMALxd",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.p1f0sgmgTGtJojAW",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.xaASk1oaUAvspnm9",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.RgdnvrUNbfzSEepg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.j7gc80NDWmZtCTbk",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 76,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "sort": 0,
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "4.2.3",
+      "createdTime": 1773096329923,
+      "modifiedTime": 1773096733283,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    }
+  },
+  {
+    "name": "Noble Pack",
+    "type": "starterPack",
+    "img": "icons/equipment/head/crown-gold-blue.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.OxqGnjXxt9vRGVeZ",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.ShVLwDMGm2m0D4eS",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.pVe3gBnfzcmqyMgM",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.OpIuNLXIqeER6OCi",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 5,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "UR9TSJV0sQl9Z4S9",
+    "sort": 2400000
+  },
+  {
+    "name": "Watchman Pack",
+    "type": "starterPack",
+    "img": "icons/sundries/lights/lantern-bullseye-signal-copper.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.vOF4iFi5ieztUI7N",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.ZPaSkHYlIBVwUQdO",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.pVe3gBnfzcmqyMgM",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.T5aaqoo4V8KZIVCZ",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.WkEFG0QhS4QJ6NwL",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.2wYFUy46hK86VuAJ",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 33,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "X4shfsU5ixmg1J4O",
+    "sort": 3500000
+  },
+  {
+    "name": "Envoy Pack",
+    "type": "starterPack",
+    "img": "icons/tools/navigation/map-marked-brown.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.OxqGnjXxt9vRGVeZ",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.goIp2SHolbKYBWaP",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.NmCnEUsiu9zfGfWB",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.h9xXLqR2nDPKGV3Z",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.1BTTuoltxVPXNQsR",
+          "quantity": 10
+        }
+      ],
+      "currency": {
+        "gold": 1,
+        "silver": 45,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "a48vRomBcHTHwXeD",
+    "sort": 1200000
+  },
+  {
+    "name": "Miner Pack",
+    "type": "starterPack",
+    "img": "icons/skills/trades/mining-pickaxe-iron-blue.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.06MiqNq5OgMBPrDO",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.9PrfXCbYzCY2Y00Q",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.bOiNNqkYcJ5UkdzB",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 1,
+        "silver": 55,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "aMSjPQ3UWYfQGPBW",
+    "sort": 2100000
+  },
+  {
+    "name": "Entertainer Pack",
+    "type": "starterPack",
+    "img": "icons/equipment/head/mask-carved-face-orange.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.OxqGnjXxt9vRGVeZ",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.LgdO04RLlceh5VmB",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.HN3Gem6z0pA0r5Fu",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 61,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "agMNVGsN6wLcldBe",
+    "sort": 1100000
+  },
+  {
+    "name": "Warrior Pack",
+    "type": "starterPack",
+    "img": "icons/weapons/polearms/javelin-flared.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.7kJxTiu6idu4vrAL",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.FFStq9FhUwmJBeLr",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 74,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "hW4AUwhRz98OJoDh",
+    "sort": 3400000
+  },
+  {
+    "name": "Mage Pack",
+    "type": "starterPack",
+    "img": "icons/magic/symbols/rune-sigil-red-orange.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.h9xXLqR2nDPKGV3Z",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.wf5c6JN6FHyDTzye",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.Y4YS4zKbAXglcKcd",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.9963HsVoPfGeLIA4",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 31,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "hje865DkzVVguhdT",
+    "sort": 2000000
+  },
+  {
+    "name": "Bounty Hunter Pack",
+    "type": "starterPack",
+    "img": "icons/skills/targeting/crosshair-pointed-orange.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.ShVLwDMGm2m0D4eS",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.pVe3gBnfzcmqyMgM",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.420Ttee0UiWzStAC",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.st9B6ntyrE3oQYdk",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.ngP24RQI6IyKVciu",
+          "quantity": 3
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.OduxMhFxzjd6tqa1",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 15,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.5.2",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1768654033884,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "j0veMJ1duvnOwNOa",
+    "sort": 500000
+  },
+  {
+    "name": "Base Pack",
+    "type": "starterPack",
+    "img": "icons/containers/bags/pack-simple-leather-fur-tan.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.Y8H21qyxnJjwpulj",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.4DcbA7RsHfBOPJIa",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 285,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.8.1",
+      "createdTime": 1765640522934,
+      "modifiedTime": 1766953796866,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "jA8rBPY7BGjXJvcD",
+    "sort": 1600000
+  },
+  {
+    "name": "Monk Pack",
+    "type": "starterPack",
+    "img": "icons/commodities/treasure/token-worn-yang-brown.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.HrpXxa1GxiZmI4Fw",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.ufjKBfCKT1kTA5Kq",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 1,
+        "silver": 85,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1766953561088,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "jYBKVaOdxIVd8QuY",
+    "sort": 2200000
+  },
+  {
+    "name": "Hermit Pack",
+    "type": "starterPack",
+    "img": "icons/environment/wilderness/cave-entrance.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.ufjKBfCKT1kTA5Kq",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.Kv94iYhXWcB6gkrC",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.Ny1rgetLx1KQXuze",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.WkEFG0QhS4QJ6NwL",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.NDZf21pgM1iD8OW6",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 1,
+        "silver": 5,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1766953649403,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "miFQi5g9aXWERv3R",
+    "sort": 1500000
+  },
+  {
+    "name": "Gladiator Pack",
+    "type": "starterPack",
+    "img": "icons/weapons/polearms/glaive-hooked-steel.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.0NA6IoKBoDOjQeEy",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.mU85pKLCB76Tn12q",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 1,
+        "silver": 65,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "2.8.0",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1769603232480,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "pXpaYfCavubGOicv",
+    "sort": 1400000
+  },
+  {
+    "name": "Investigator Pack",
+    "type": "starterPack",
+    "img": "icons/tools/scribal/magnifying-glass.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.ShVLwDMGm2m0D4eS",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.pVe3gBnfzcmqyMgM",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.HwX2SFNKg7DPXSma",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.ptEnqWH91mEgZDWg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 1,
+        "silver": 15,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "pxZec7iLwT00gl0P",
+    "sort": 1800000
+  },
+  {
+    "name": "Charlatan Pack",
+    "type": "starterPack",
+    "img": "icons/equipment/head/hood-cloth-teal-gold.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.vOF4iFi5ieztUI7N",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.HwX2SFNKg7DPXSma",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.O5VmxEFUsYvNBGhv",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.MdeWlhDLEBOzJhrJ",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 2,
+        "silver": 34,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "tfkrAMO8HJAZ4yOP",
+    "sort": 700000
+  },
+  {
+    "name": "Blacksmith Pack",
+    "type": "starterPack",
+    "img": "icons/tools/smithing/anvil.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.QoM4vz7fklFjWpTo",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.yvHynLJxGSilvLwM",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.zQyUon1GhTU7hFyq",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.Ny1rgetLx1KQXuze",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 47,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1773096226066,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "tyaq3NHo9Iqzxwxn",
+    "sort": 400000
+  },
+  {
+    "name": "Scout Pack",
+    "type": "starterPack",
+    "img": "icons/weapons/bows/longbow-gold-pink.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.ReQB9WHhhob5MZ96",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8sGl5EOVFo2QcGKD",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.K5EHpROMIABuKZDR",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 1,
+        "silver": 25,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "u632eTgHBKam3ZBc",
+    "sort": 2800000
+  },
+  {
+    "name": "Trapper Pack",
+    "type": "starterPack",
+    "img": "icons/weapons/bows/longbow-gold-pink.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.ReQB9WHhhob5MZ96",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8sGl5EOVFo2QcGKD",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.Qz4Mb4y6wUe5lBMI",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.w5VeDhSrZpqFNxm0",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 0,
+        "silver": 24,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1765640522942,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "uWgOkKHbcW0o8eSL",
+    "sort": 3300000
+  },
+  {
+    "name": "Fortune Teller Pack",
+    "type": "starterPack",
+    "img": "icons/magic/control/buff-luck-fortune-clover-green.webp",
+    "system": {
+      "description": "",
+      "items": [
+        {
+          "uuid": "Compendium.vagabond.gear.Item.8o8KVSgpYsNFtGz2",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.YHXzL4H8Dhajk2hg",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.BhUNyj2nflyVUPIo",
+          "quantity": 5
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.sbHg7jCRQY8lIzY7",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.jd6n1Zfo1tAWCCNe",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.gear.Item.NDZf21pgM1iD8OW6",
+          "quantity": 1
+        },
+        {
+          "uuid": "Compendium.vagabond.weapons.Item.HwX2SFNKg7DPXSma",
+          "quantity": 2
+        },
+        {
+          "uuid": "Compendium.vagabond.armor.Item.K6gCgMFAMIPLJO0L",
+          "quantity": 1
+        }
+      ],
+      "currency": {
+        "gold": 1,
+        "silver": 15,
+        "copper": 0
+      }
+    },
+    "effects": [],
+    "folder": null,
+    "flags": {},
+    "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null,
+      "coreVersion": "13.351",
+      "systemId": "vagabond",
+      "systemVersion": "1.3.4",
+      "createdTime": 1765640510531,
+      "modifiedTime": 1773096940780,
+      "lastModifiedBy": "13p65OEadZSZVLRk"
+    },
+    "ownership": {
+      "default": 0,
+      "13p65OEadZSZVLRk": 3
+    },
+    "_id": "y1dMToABIEv83o2C",
+    "sort": 1300000
+  }
+]
