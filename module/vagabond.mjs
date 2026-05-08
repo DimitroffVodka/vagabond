@@ -52,6 +52,7 @@ import { registerSocket, emitSocket, registerSocketAction } from './helpers/sock
 import { VagabondDamageHelper } from './helpers/damage-helper.mjs';
 import { StatusHelper } from './helpers/status-helper.mjs';
 import { VagabondRollBuilder } from './helpers/roll-builder.mjs';
+import { EffectsCompendium } from './helpers/effects-compendium.mjs';
 
 const collections = foundry.documents.collections;
 const sheets = foundry.appv1.sheets;
@@ -517,6 +518,7 @@ globalThis.vagabond = {
     ContextMenuHelper,
     AccordionHelper,
     EnrichmentHelper,
+    EffectsCompendium,
   },
   models,
 };

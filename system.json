@@ -240,6 +240,19 @@
         },
         "private": false,
         "flags": {}
+    },
+    {
+        "name": "effects",
+        "label": "Effects",
+        "system": "vagabond",
+        "path": "packs/effects",
+        "type": "ActiveEffect",
+        "ownership": {
+          "PLAYER": "OBSERVER",
+          "ASSISTANT": "OWNER"
+        },
+        "private": false,
+        "flags": {}
     }
   ],
   "packFolders": [
@@ -282,6 +295,14 @@
                   "packs": [
                       "bestiary",
                       "humanlike"
+                  ]
+              },
+              {
+                  "name": "Effects",
+                  "sorting": "m",
+                  "color": "#000000",
+                  "packs": [
+                      "effects"
                   ]
               }
           ]
