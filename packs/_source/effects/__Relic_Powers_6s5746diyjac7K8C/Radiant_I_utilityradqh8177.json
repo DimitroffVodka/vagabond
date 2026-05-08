@@ -1,0 +1,47 @@
+{
+  "_id": "utilityradqh8177",
+  "name": "Radiant I",
+  "img": "icons/svg/sun.svg",
+  "description": "<p>Sheds Sunlight out to Close while Equipped.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "utility-radiant-i-sunlight-close",
+      "category": "relic",
+      "applicationMode": "when-equipped",
+      "relicPower": "radiant-1",
+      "lightType": "sunlight",
+      "lightRange": "close"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134763,
+    "modifiedTime": 1778271134763,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!utilityradqh8177"
+}

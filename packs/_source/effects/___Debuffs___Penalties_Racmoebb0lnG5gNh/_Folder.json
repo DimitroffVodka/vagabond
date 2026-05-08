@@ -1,0 +1,27 @@
+{
+  "name": "🔴 Debuffs & Penalties",
+  "type": "ActiveEffect",
+  "sorting": "a",
+  "sort": 300,
+  "flags": {
+    "vagabond": {
+      "category": "debuff"
+    }
+  },
+  "_id": "Racmoebb0lnG5gNh",
+  "description": "",
+  "folder": null,
+  "color": null,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134650,
+    "modifiedTime": 1778271134650,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!folders!Racmoebb0lnG5gNh"
+}

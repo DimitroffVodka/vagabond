@@ -1,0 +1,50 @@
+{
+  "_id": "speedpenalhhol4c",
+  "name": "Speed Penalty (-10ft)",
+  "img": "icons/svg/anchor.svg",
+  "description": "<p>-10ft penalty to Speed.</p>",
+  "statuses": [],
+  "showIcon": 0,
+  "transfer": false,
+  "folder": "Racmoebb0lnG5gNh",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.speed.bonus",
+        "type": "add",
+        "value": "-10",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "speed-penalty-minus-10ft",
+      "category": "debuff"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134686,
+    "modifiedTime": 1778271134686,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!speedpenalhhol4c"
+}

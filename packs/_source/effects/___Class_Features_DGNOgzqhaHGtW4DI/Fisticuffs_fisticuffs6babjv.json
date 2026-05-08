@@ -1,0 +1,50 @@
+{
+  "_id": "fisticuffs6babjv",
+  "name": "Fisticuffs",
+  "img": "icons/svg/combat.svg",
+  "description": "<p>Unarmed strikes deal lethal damage and scale with class.</p>",
+  "statuses": [],
+  "showIcon": 0,
+  "transfer": false,
+  "folder": "DGNOgzqhaHGtW4DI",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.fisticuffs",
+        "type": "override",
+        "value": "true",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "fisticuffs",
+      "category": "classFeature"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134815,
+    "modifiedTime": 1778271134815,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!fisticuffs6babjv"
+}

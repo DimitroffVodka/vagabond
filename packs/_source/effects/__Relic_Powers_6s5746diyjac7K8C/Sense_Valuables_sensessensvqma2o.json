@@ -1,0 +1,46 @@
+{
+  "_id": "sensessensvqma2o",
+  "name": "Sense Valuables",
+  "img": "icons/svg/eye.svg",
+  "description": "<p>Senses gold and gems within Near.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "senses-sense-valuables",
+      "category": "relic",
+      "applicationMode": "when-equipped",
+      "relicPower": "sense-valuables",
+      "grantedSense": "sensevaluables"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134762,
+    "modifiedTime": 1778271134762,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!sensessensvqma2o"
+}

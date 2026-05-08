@@ -1,0 +1,46 @@
+{
+  "_id": "acebrutal0kkflc5",
+  "name": "Ace - Brutal",
+  "img": "icons/svg/combat.svg",
+  "description": "<p>Ace property: deals an extra damage die from the Brutal property.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "ace-brutal",
+      "category": "relic",
+      "applicationMode": "when-equipped",
+      "relicPower": "ace-brutal",
+      "extraWeaponDie": true
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134725,
+    "modifiedTime": 1778271134725,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!acebrutal0kkflc5"
+}

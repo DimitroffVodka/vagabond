@@ -1,0 +1,51 @@
+{
+  "_id": "perkmetamagkqjm4",
+  "name": "+ Mana Casting",
+  "img": "icons/svg/aura.svg",
+  "description": "<p>Metamagic perk: +1 to max mana per casting.</p>",
+  "statuses": [],
+  "showIcon": 0,
+  "transfer": false,
+  "folder": "0yId9owDO95LQi2N",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.mana.castingMaxBonus",
+        "type": "add",
+        "value": "1",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "perk-metamagic-plus-1-mana-casting",
+      "category": "buff",
+      "applicationMode": "permanent"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134795,
+    "modifiedTime": 1778271134795,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!perkmetamagkqjm4"
+}

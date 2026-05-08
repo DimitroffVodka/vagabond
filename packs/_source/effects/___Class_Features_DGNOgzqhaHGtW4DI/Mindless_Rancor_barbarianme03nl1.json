@@ -1,0 +1,50 @@
+{
+  "_id": "barbarianme03nl1",
+  "name": "Mindless Rancor",
+  "img": "icons/svg/terror.svg",
+  "description": "<p>While Raging: immune to mental effects.</p>",
+  "statuses": [],
+  "showIcon": 0,
+  "transfer": false,
+  "folder": "DGNOgzqhaHGtW4DI",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.hasMindlessRancor",
+        "type": "override",
+        "value": "true",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "barbarian-mindless-rancor",
+      "category": "classFeature"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134798,
+    "modifiedTime": 1778271134798,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!barbarianme03nl1"
+}

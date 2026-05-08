@@ -1,0 +1,51 @@
+{
+  "_id": "bonusweapo6cqbi7",
+  "name": "+1 Attack Dmg",
+  "img": "icons/magic/control/buff-flight-wings-runes-blue-white.webp",
+  "description": "<p>Enchanted weapon: +1 damage to weapon attacks.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.universalWeaponDamageBonus",
+        "type": "add",
+        "value": "1",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "bonus-weapon-plus-1",
+      "category": "relic",
+      "applicationMode": "when-equipped"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134703,
+    "modifiedTime": 1778271134703,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!bonusweapo6cqbi7"
+}

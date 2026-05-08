@@ -1,0 +1,45 @@
+{
+  "_id": "baneniche04fu7zj",
+  "name": "Bane (Niche)",
+  "img": "icons/svg/sword.svg",
+  "description": "<p>Extra damage vs. extremely specific Beings (e.g. Trolls). Set the Being type in the effect name.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "bane-niche",
+      "category": "relic",
+      "applicationMode": "when-equipped",
+      "relicPower": "bane-niche"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134779,
+    "modifiedTime": 1778271134779,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!baneniche04fu7zj"
+}

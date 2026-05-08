@@ -1,0 +1,64 @@
+{
+  "_id": "blinded000q40div",
+  "name": "Blinded",
+  "img": "icons/svg/blind.svg",
+  "description": "<p>Can't see. Vulnerable.</p>",
+  "statuses": [
+    "blinded"
+  ],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "ajKrwqZasBt8lXkf",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.favorHinder",
+        "type": "override",
+        "value": "hinder",
+        "phase": "initial"
+      },
+      {
+        "key": "system.incomingAttacksModifier",
+        "type": "override",
+        "value": "favor",
+        "phase": "initial"
+      },
+      {
+        "key": "system.outgoingSavesModifier",
+        "type": "override",
+        "value": "favor",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "blinded",
+      "category": "condition"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134666,
+    "modifiedTime": 1778271134666,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!blinded000q40div"
+}

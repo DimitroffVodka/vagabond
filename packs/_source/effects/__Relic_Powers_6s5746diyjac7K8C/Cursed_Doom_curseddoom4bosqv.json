@@ -1,0 +1,46 @@
+{
+  "_id": "curseddoom4bosqv",
+  "name": "Cursed Doom",
+  "img": "icons/magic/control/buff-flight-wings-runes-red-yellow.webp",
+  "description": "<p>Cursed: wearer only regains 1 Hit Point per die used for healing rolls targeting it.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "cursed-doom",
+      "category": "relic",
+      "applicationMode": "when-equipped",
+      "relicPower": "cursed-doom",
+      "healingCappedPerDie": 1
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134741,
+    "modifiedTime": 1778271134741,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!curseddoom4bosqv"
+}

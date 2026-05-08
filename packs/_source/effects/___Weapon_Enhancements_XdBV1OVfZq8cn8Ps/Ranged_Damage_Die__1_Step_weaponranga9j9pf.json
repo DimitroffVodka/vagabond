@@ -1,0 +1,50 @@
+{
+  "_id": "weaponranga9j9pf",
+  "name": "Ranged Damage Die +1 Step",
+  "img": "icons/svg/combat.svg",
+  "description": "<p>Ranged weapon damage die increases by one step.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "XdBV1OVfZq8cn8Ps",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.rangedDamageDieSizeBonus",
+        "type": "add",
+        "value": "1",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "weapon-ranged-damage-die-plus-1-step",
+      "category": "weapon"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134687,
+    "modifiedTime": 1778271134687,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!weaponranga9j9pf"
+}

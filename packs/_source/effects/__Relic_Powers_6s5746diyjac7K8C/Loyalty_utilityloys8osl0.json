@@ -1,0 +1,45 @@
+{
+  "_id": "utilityloys8osl0",
+  "name": "Loyalty",
+  "img": "icons/svg/combat.svg",
+  "description": "<p>Magically returns to the Bound wielder's hand if thrown to attack.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "utility-loyalty",
+      "category": "relic",
+      "applicationMode": "when-equipped",
+      "relicPower": "loyalty"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134762,
+    "modifiedTime": 1778271134762,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!utilityloys8osl0"
+}

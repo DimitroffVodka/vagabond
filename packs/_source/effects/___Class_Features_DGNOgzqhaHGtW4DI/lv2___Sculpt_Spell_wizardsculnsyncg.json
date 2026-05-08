@@ -1,0 +1,51 @@
+{
+  "_id": "wizardsculnsyncg",
+  "name": "lv2 - Sculpt Spell",
+  "img": "icons/svg/aura.svg",
+  "description": "<p>Wizard Lv2: -1 delivery mana cost.</p>",
+  "statuses": [],
+  "showIcon": 0,
+  "transfer": false,
+  "folder": "DGNOgzqhaHGtW4DI",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.bonuses.deliveryManaCostReduction",
+        "type": "add",
+        "value": "(@attributes.level.value >= 2) ? 1 : 0",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "wizard-sculpt-spell-lv2",
+      "category": "classFeature",
+      "applicationMode": "permanent"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134796,
+    "modifiedTime": 1778271134796,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!wizardsculnsyncg"
+}

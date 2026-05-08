@@ -1,0 +1,50 @@
+{
+  "_id": "rogueletha39as91",
+  "name": "Lethal Weapon",
+  "img": "icons/svg/mystery-man.svg",
+  "description": "<p>Sneak Attack always applies (ignores once-per-round limit).</p>",
+  "statuses": [],
+  "showIcon": 0,
+  "transfer": false,
+  "folder": "DGNOgzqhaHGtW4DI",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.hasLethalWeapon",
+        "type": "override",
+        "value": "true",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "rogue-lethal-weapon",
+      "category": "classFeature"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134814,
+    "modifiedTime": 1778271134814,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!rogueletha39as91"
+}

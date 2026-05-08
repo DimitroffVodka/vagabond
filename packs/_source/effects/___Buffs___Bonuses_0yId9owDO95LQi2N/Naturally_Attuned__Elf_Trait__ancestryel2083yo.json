@@ -1,0 +1,63 @@
+{
+  "_id": "ancestryel2083yo",
+  "name": "Naturally Attuned (Elf Trait)",
+  "img": "icons/svg/aura.svg",
+  "description": "<p>Elf trait: Naturally Attuned grants innate spellcasting (Reason-based, 1x mana multiplier).</p>",
+  "statuses": [],
+  "showIcon": 0,
+  "transfer": false,
+  "folder": "0yId9owDO95LQi2N",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.attributes.isSpellcaster",
+        "type": "override",
+        "value": "true",
+        "phase": "initial"
+      },
+      {
+        "key": "system.attributes.manaMultiplier",
+        "type": "override",
+        "value": "1",
+        "phase": "initial"
+      },
+      {
+        "key": "system.attributes.castingStat",
+        "type": "override",
+        "value": "reason",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "ancestry-elf-naturally-attuned",
+      "category": "buff",
+      "applicationMode": "permanent"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134781,
+    "modifiedTime": 1778271134781,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!ancestryel2083yo"
+}

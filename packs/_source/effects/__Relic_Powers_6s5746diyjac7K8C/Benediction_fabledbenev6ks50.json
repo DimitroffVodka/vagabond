@@ -1,0 +1,45 @@
+{
+  "_id": "fabledbenev6ks50",
+  "name": "Benediction",
+  "img": "icons/svg/heal.svg",
+  "description": "<p>Immediately revived upon death by dropping to 0 HP, once per week.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "fabled-benediction",
+      "category": "relic",
+      "applicationMode": "when-equipped",
+      "relicPower": "benediction"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134778,
+    "modifiedTime": 1778271134778,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!fabledbenev6ks50"
+}

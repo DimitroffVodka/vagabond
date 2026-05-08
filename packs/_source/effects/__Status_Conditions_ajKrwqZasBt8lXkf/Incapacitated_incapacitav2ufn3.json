@@ -1,0 +1,82 @@
+{
+  "_id": "incapacitav2ufn3",
+  "name": "Incapacitated",
+  "img": "icons/svg/unconscious.svg",
+  "description": "<p>Can't Focus, use Actions, or Move. Auto-fails Might and Dexterity checks. Vulnerable. Speed = 0.</p>",
+  "statuses": [
+    "incapacitated"
+  ],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "ajKrwqZasBt8lXkf",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.autoFailStats",
+        "type": "add",
+        "value": "might",
+        "phase": "initial"
+      },
+      {
+        "key": "system.autoFailStats",
+        "type": "add",
+        "value": "dexterity",
+        "phase": "initial"
+      },
+      {
+        "key": "system.speed.bonus",
+        "type": "add",
+        "value": "-999",
+        "phase": "initial"
+      },
+      {
+        "key": "system.favorHinder",
+        "type": "override",
+        "value": "hinder",
+        "phase": "initial"
+      },
+      {
+        "key": "system.incomingAttacksModifier",
+        "type": "override",
+        "value": "favor",
+        "phase": "initial"
+      },
+      {
+        "key": "system.outgoingSavesModifier",
+        "type": "override",
+        "value": "favor",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "incapacitated",
+      "category": "condition"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134667,
+    "modifiedTime": 1778271134667,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!incapacitav2ufn3"
+}

@@ -1,0 +1,51 @@
+{
+  "_id": "wizardscul47is1r",
+  "name": "lv10 - Sculpt Spell",
+  "img": "icons/svg/aura.svg",
+  "description": "<p>Wizard Lv10: additional -1 delivery mana cost.</p>",
+  "statuses": [],
+  "showIcon": 0,
+  "transfer": false,
+  "folder": "DGNOgzqhaHGtW4DI",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.bonuses.deliveryManaCostReduction",
+        "type": "add",
+        "value": "(@lvl >= 10) ? 1 : 0",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "wizard-sculpt-spell-lv10",
+      "category": "classFeature",
+      "applicationMode": "permanent"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134797,
+    "modifiedTime": 1778271134797,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!wizardscul47is1r"
+}

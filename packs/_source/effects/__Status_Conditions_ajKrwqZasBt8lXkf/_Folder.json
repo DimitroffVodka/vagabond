@@ -1,0 +1,27 @@
+{
+  "name": "⚡ Status Conditions",
+  "type": "ActiveEffect",
+  "sorting": "a",
+  "sort": 100,
+  "flags": {
+    "vagabond": {
+      "category": "condition"
+    }
+  },
+  "_id": "ajKrwqZasBt8lXkf",
+  "description": "",
+  "folder": null,
+  "color": null,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134649,
+    "modifiedTime": 1778271134649,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!folders!ajKrwqZasBt8lXkf"
+}

@@ -1,0 +1,51 @@
+{
+  "_id": "movementdirs3i1i",
+  "name": "Displacement",
+  "img": "icons/magic/control/debuff-chains-ropes-purple.webp",
+  "description": "<p>Sight-based attacks against the wearer are made as if the attacker is Blinded (attacks Hindered).</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.defenderStatusModifiers.attackersAreBlinded",
+        "type": "override",
+        "value": "true",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "movement-displacement",
+      "category": "relic",
+      "applicationMode": "when-equipped"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134724,
+    "modifiedTime": 1778271134724,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!movementdirs3i1i"
+}
