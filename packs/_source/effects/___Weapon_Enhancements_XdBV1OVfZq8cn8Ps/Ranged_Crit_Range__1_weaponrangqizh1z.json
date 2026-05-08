@@ -1,0 +1,50 @@
+{
+  "_id": "weaponrangqizh1z",
+  "name": "Ranged Crit Range -1",
+  "img": "icons/svg/target.svg",
+  "description": "<p>Ranged weapon critical hit threshold reduced by 1.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "XdBV1OVfZq8cn8Ps",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.rangedCritBonus",
+        "type": "add",
+        "value": "1",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "weapon-ranged-crit-range-minus-1",
+      "category": "weapon"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134687,
+    "modifiedTime": 1778271134687,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!weaponrangqizh1z"
+}

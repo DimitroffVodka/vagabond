@@ -1,0 +1,50 @@
+{
+  "_id": "spellcritrd0yh30",
+  "name": "Spell Crit Range -1",
+  "img": "icons/svg/target.svg",
+  "description": "<p>Spell critical hit threshold reduced by 1.</p>",
+  "statuses": [],
+  "showIcon": 0,
+  "transfer": false,
+  "folder": "0yId9owDO95LQi2N",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.spellCritBonus",
+        "type": "add",
+        "value": "1",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "spell-crit-range-minus-1",
+      "category": "buff"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134689,
+    "modifiedTime": 1778271134689,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!spellcritrd0yh30"
+}

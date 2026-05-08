@@ -1,0 +1,45 @@
+{
+  "_id": "fatigued00o2ktke",
+  "name": "Fatigued",
+  "img": "icons/svg/degen.svg",
+  "description": "<p>Each Fatigue occupies an Item Slot. At 3+ Fatigue, can't Rush. At 5 Fatigue, dies.</p>",
+  "statuses": [
+    "fatigued"
+  ],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "ajKrwqZasBt8lXkf",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "fatigued",
+      "category": "condition"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134669,
+    "modifiedTime": 1778271134669,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!fatigued00o2ktke"
+}

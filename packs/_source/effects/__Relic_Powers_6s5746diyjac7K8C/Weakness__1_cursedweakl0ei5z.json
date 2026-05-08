@@ -1,0 +1,51 @@
+{
+  "_id": "cursedweakl0ei5z",
+  "name": "Weakness -1",
+  "img": "icons/magic/control/buff-flight-wings-runes-red-yellow.webp",
+  "description": "<p>Cursed weapon: -1 weapon damage.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.universalWeaponDamageBonus",
+        "type": "add",
+        "value": "-1",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "cursed-weakness-minus-1",
+      "category": "relic",
+      "applicationMode": "when-equipped"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134709,
+    "modifiedTime": 1778271134709,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!cursedweakl0ei5z"
+}

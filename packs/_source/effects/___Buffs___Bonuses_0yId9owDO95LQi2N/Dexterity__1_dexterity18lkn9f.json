@@ -1,0 +1,50 @@
+{
+  "_id": "dexterity18lkn9f",
+  "name": "Dexterity +1",
+  "img": "icons/svg/upgrade.svg",
+  "description": "<p>+1 bonus to Dexterity.</p>",
+  "statuses": [],
+  "showIcon": 0,
+  "transfer": false,
+  "folder": "0yId9owDO95LQi2N",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.stats.dexterity.bonus",
+        "type": "add",
+        "value": "1",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "dexterity-plus-1",
+      "category": "buff"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134816,
+    "modifiedTime": 1778271134816,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!dexterity18lkn9f"
+}

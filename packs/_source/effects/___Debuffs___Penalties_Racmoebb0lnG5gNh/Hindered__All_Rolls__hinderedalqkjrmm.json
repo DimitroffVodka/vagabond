@@ -1,0 +1,51 @@
+{
+  "_id": "hinderedalqkjrmm",
+  "name": "Hindered (All Rolls)",
+  "img": "icons/svg/downgrade.svg",
+  "description": "<p>All d20 rolls have Hinder (roll 2d20, take lower).</p>",
+  "statuses": [],
+  "showIcon": 0,
+  "transfer": false,
+  "folder": "Racmoebb0lnG5gNh",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.favorHinder",
+        "type": "override",
+        "value": "hinder",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "hindered-all-rolls",
+      "category": "debuff",
+      "durationHint": "Until removed"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134684,
+    "modifiedTime": 1778271134684,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!hinderedalqkjrmm"
+}

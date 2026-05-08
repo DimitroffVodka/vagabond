@@ -1,0 +1,46 @@
+{
+  "_id": "resistance9l2rdo",
+  "name": "Repulsing",
+  "img": "icons/svg/holy-shield.svg",
+  "description": "<p>Grants Favor on Saves against the Charmed status.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "resistance-repulsing",
+      "category": "relic",
+      "applicationMode": "when-equipped",
+      "relicPower": "resistance-repulsing",
+      "favorOnSaveVs": "charmed"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134727,
+    "modifiedTime": 1778271134727,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!resistance9l2rdo"
+}

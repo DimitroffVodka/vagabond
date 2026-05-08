@@ -1,0 +1,56 @@
+{
+  "_id": "perkmagicaxabmm0",
+  "name": "Spellcaster",
+  "img": "icons/svg/aura.svg",
+  "description": "<p>Magical Secret perk: grants spellcasting ability with 2x mana multiplier. Requires choosing a casting stat.</p>",
+  "statuses": [],
+  "showIcon": 0,
+  "transfer": false,
+  "folder": "DGNOgzqhaHGtW4DI",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.attributes.isSpellcaster",
+        "type": "override",
+        "value": "true",
+        "phase": "initial"
+      },
+      {
+        "key": "system.attributes.manaMultiplier",
+        "type": "override",
+        "value": "2",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "perk-magical-secret-spellcaster",
+      "category": "classFeature"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134795,
+    "modifiedTime": 1778271134795,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!perkmagicaxabmm0"
+}

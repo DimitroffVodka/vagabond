@@ -1,0 +1,45 @@
+{
+  "_id": "suffocatinoy3py6",
+  "name": "Suffocating",
+  "img": "icons/svg/stoned.svg",
+  "description": "<p>After not breathing for 1 minute, each round: Heroes roll d8 (if &gt;= Might, gain 1 Fatigue), Enemies gain 1 Fatigue.</p>",
+  "statuses": [
+    "suffocating"
+  ],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "ajKrwqZasBt8lXkf",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "suffocating",
+      "category": "condition"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134670,
+    "modifiedTime": 1778271134670,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!suffocatinoy3py6"
+}

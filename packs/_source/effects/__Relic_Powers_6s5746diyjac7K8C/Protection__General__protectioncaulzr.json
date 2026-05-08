@@ -1,0 +1,45 @@
+{
+  "_id": "protectioncaulzr",
+  "name": "Protection (General)",
+  "img": "icons/svg/shield.svg",
+  "description": "<p>Damage reduction vs. an entire Being Type (e.g. Cryptids). Set the Being type in the effect name.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "protection-general",
+      "category": "relic",
+      "applicationMode": "when-equipped",
+      "relicPower": "protection-general"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134781,
+    "modifiedTime": 1778271134781,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!protectioncaulzr"
+}

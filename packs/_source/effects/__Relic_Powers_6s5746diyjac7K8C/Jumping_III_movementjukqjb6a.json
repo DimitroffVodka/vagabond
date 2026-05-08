@@ -1,0 +1,46 @@
+{
+  "_id": "movementjukqjb6a",
+  "name": "Jumping III",
+  "img": "icons/svg/upgrade.svg",
+  "description": "<p>Wearer's horizontal jump distance is multiplied by 4.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "movement-jumping-iii",
+      "category": "relic",
+      "applicationMode": "when-equipped",
+      "relicPower": "jumping-iii",
+      "jumpMultiplier": 4
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134760,
+    "modifiedTime": 1778271134760,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!movementjukqjb6a"
+}

@@ -1,0 +1,50 @@
+{
+  "_id": "hpbonus100cg1lgh",
+  "name": "HP Bonus (+10)",
+  "img": "icons/svg/heal.svg",
+  "description": "<p>+10 bonus to maximum HP.</p>",
+  "statuses": [],
+  "showIcon": 0,
+  "transfer": false,
+  "folder": "0yId9owDO95LQi2N",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.health.bonus",
+        "type": "add",
+        "value": "10",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "hp-bonus-plus-10",
+      "category": "buff"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134828,
+    "modifiedTime": 1778271134828,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!hpbonus100cg1lgh"
+}

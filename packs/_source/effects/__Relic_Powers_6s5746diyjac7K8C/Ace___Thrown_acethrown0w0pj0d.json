@@ -1,0 +1,46 @@
+{
+  "_id": "acethrown0w0pj0d",
+  "name": "Ace - Thrown",
+  "img": "icons/svg/combat.svg",
+  "description": "<p>Ace property: deals an extra damage die when attacking by throwing it.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "ace-thrown",
+      "category": "relic",
+      "applicationMode": "on-use",
+      "relicPower": "ace-thrown",
+      "extraWeaponDie": true
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134726,
+    "modifiedTime": 1778271134726,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!acethrown0w0pj0d"
+}

@@ -1,0 +1,46 @@
+{
+  "_id": "movementlexrwdy4",
+  "name": "Levitation",
+  "img": "icons/svg/wingfoot.svg",
+  "description": "<p>Wearer can Fly up or down, but not laterally (Levitate spell effect).</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "movement-levitation",
+      "category": "relic",
+      "applicationMode": "when-equipped",
+      "relicPower": "levitation",
+      "grantedMovement": "levitate"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134745,
+    "modifiedTime": 1778271134745,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!movementlexrwdy4"
+}

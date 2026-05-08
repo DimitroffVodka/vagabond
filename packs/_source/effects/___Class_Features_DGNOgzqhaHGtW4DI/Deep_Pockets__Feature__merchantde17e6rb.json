@@ -1,0 +1,51 @@
+{
+  "_id": "merchantde17e6rb",
+  "name": "Deep Pockets (Feature)",
+  "img": "icons/svg/combat.svg",
+  "description": "<p>Merchant feature: +1 inventory slot.</p>",
+  "statuses": [],
+  "showIcon": 0,
+  "transfer": false,
+  "folder": "DGNOgzqhaHGtW4DI",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.inventory.bonusSlots",
+        "type": "add",
+        "value": "1",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "merchant-deep-pockets-plus-1-slot",
+      "category": "classFeature",
+      "applicationMode": "permanent"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134796,
+    "modifiedTime": 1778271134796,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!merchantde17e6rb"
+}

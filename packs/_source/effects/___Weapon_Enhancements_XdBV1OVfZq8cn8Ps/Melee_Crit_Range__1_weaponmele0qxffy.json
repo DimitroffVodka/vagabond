@@ -1,0 +1,50 @@
+{
+  "_id": "weaponmele0qxffy",
+  "name": "Melee Crit Range -1",
+  "img": "icons/svg/target.svg",
+  "description": "<p>Melee weapon critical hit threshold reduced by 1 (e.g. 20 -&gt; 19).</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "XdBV1OVfZq8cn8Ps",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.meleeCritBonus",
+        "type": "add",
+        "value": "1",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "weapon-melee-crit-range-minus-1",
+      "category": "weapon"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134687,
+    "modifiedTime": 1778271134687,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!weaponmele0qxffy"
+}

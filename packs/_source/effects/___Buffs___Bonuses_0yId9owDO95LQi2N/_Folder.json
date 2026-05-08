@@ -1,0 +1,27 @@
+{
+  "name": "🟢 Buffs & Bonuses",
+  "type": "ActiveEffect",
+  "sorting": "a",
+  "sort": 200,
+  "flags": {
+    "vagabond": {
+      "category": "buff"
+    }
+  },
+  "_id": "0yId9owDO95LQi2N",
+  "description": "",
+  "folder": null,
+  "color": null,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134650,
+    "modifiedTime": 1778271134650,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!folders!0yId9owDO95LQi2N"
+}

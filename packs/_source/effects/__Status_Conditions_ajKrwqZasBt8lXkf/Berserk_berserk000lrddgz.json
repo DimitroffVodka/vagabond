@@ -1,0 +1,45 @@
+{
+  "_id": "berserk000lrddgz",
+  "name": "Berserk",
+  "img": "icons/svg/terror.svg",
+  "description": "<p>Can't take Cast Action or Focus. Doesn't make Morale Checks. Can't be Frightened. Barbarian Rage: dice upsize, explode, and damage reduction while active.</p>",
+  "statuses": [
+    "berserk"
+  ],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "ajKrwqZasBt8lXkf",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "berserk",
+      "category": "condition"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134668,
+    "modifiedTime": 1778271134668,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!berserk000lrddgz"
+}

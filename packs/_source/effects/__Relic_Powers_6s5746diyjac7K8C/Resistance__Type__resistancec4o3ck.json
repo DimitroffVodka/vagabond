@@ -1,0 +1,45 @@
+{
+  "_id": "resistancec4o3ck",
+  "name": "Resistance (Type)",
+  "img": "icons/svg/shield.svg",
+  "description": "<p>Favor on Saves and damage reduction against a specific damage source (e.g. fire, cold). Set the source in the effect name.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "resistance-resistance",
+      "category": "relic",
+      "applicationMode": "when-equipped",
+      "relicPower": "resistance-typed"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134740,
+    "modifiedTime": 1778271134740,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!resistancec4o3ck"
+}

@@ -1,0 +1,51 @@
+{
+  "_id": "utilityliftnirn5",
+  "name": "Lifesteal II",
+  "img": "icons/svg/blood.svg",
+  "description": "<p>On kill: wielder heals for 2d8 HP. Automated — heals attacker when target reaches 0 HP.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.onKillHealDice",
+        "type": "add",
+        "value": "2d8",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "utility-lifesteal-ii",
+      "category": "relic",
+      "applicationMode": "when-equipped"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134743,
+    "modifiedTime": 1778271134743,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!utilityliftnirn5"
+}

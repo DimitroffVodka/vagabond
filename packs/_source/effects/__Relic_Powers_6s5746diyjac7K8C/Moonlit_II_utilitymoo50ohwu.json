@@ -1,0 +1,47 @@
+{
+  "_id": "utilitymoo50ohwu",
+  "name": "Moonlit II",
+  "img": "icons/svg/sun.svg",
+  "description": "<p>Sheds Moonlight out to Near while Equipped.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "utility-moonlit-ii-moonlight-near",
+      "category": "relic",
+      "applicationMode": "when-equipped",
+      "relicPower": "moonlit-2",
+      "lightType": "moonlight",
+      "lightRange": "near"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134776,
+    "modifiedTime": 1778271134776,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!utilitymoo50ohwu"
+}

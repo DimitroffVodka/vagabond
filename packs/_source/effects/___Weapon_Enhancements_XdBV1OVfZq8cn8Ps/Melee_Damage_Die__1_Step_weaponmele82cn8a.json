@@ -1,0 +1,50 @@
+{
+  "_id": "weaponmele82cn8a",
+  "name": "Melee Damage Die +1 Step",
+  "img": "icons/svg/combat.svg",
+  "description": "<p>Melee weapon damage die increases by one step (d4 -&gt; d6 -&gt; d8 -&gt; d10 -&gt; d12).</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "XdBV1OVfZq8cn8Ps",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.meleeDamageDieSizeBonus",
+        "type": "add",
+        "value": "1",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "weapon-melee-damage-die-plus-1-step",
+      "category": "weapon"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134687,
+    "modifiedTime": 1778271134687,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!weaponmele82cn8a"
+}

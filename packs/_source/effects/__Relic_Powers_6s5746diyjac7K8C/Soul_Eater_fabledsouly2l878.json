@@ -1,0 +1,45 @@
+{
+  "_id": "fabledsouly2l878",
+  "name": "Soul Eater",
+  "img": "icons/svg/skull.svg",
+  "description": "<p>Those killed by it can't be resurrected unless a wish is granted to do so.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "fabled-soul-eater",
+      "category": "relic",
+      "applicationMode": "when-equipped",
+      "relicPower": "soul-eater"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134779,
+    "modifiedTime": 1778271134779,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!fabledsouly2l878"
+}

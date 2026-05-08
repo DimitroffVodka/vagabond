@@ -1,0 +1,51 @@
+{
+  "_id": "sorcererspjms77d",
+  "name": "lv10 - Spell-Slinger",
+  "img": "icons/svg/fire.svg",
+  "description": "<p>Sorcerer Lv10: additional -1 spell crit threshold.</p>",
+  "statuses": [],
+  "showIcon": 0,
+  "transfer": false,
+  "folder": "DGNOgzqhaHGtW4DI",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.spellCritBonus",
+        "type": "add",
+        "value": "(@lvl >= 10) ? -1 : 0",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "sorcerer-spell-slinger-lv10",
+      "category": "classFeature",
+      "applicationMode": "permanent"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134796,
+    "modifiedTime": 1778271134796,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!sorcererspjms77d"
+}

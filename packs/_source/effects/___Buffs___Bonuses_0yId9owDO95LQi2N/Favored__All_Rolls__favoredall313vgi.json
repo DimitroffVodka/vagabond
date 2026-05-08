@@ -1,0 +1,51 @@
+{
+  "_id": "favoredall313vgi",
+  "name": "Favored (All Rolls)",
+  "img": "icons/svg/upgrade.svg",
+  "description": "<p>All d20 rolls have Favor (roll 2d20, take higher).</p>",
+  "statuses": [],
+  "showIcon": 0,
+  "transfer": false,
+  "folder": "0yId9owDO95LQi2N",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.favorHinder",
+        "type": "override",
+        "value": "favor",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "favored-all-rolls",
+      "category": "buff",
+      "durationHint": "Until removed"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134670,
+    "modifiedTime": 1778271134670,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!favoredall313vgi"
+}

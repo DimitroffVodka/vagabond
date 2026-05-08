@@ -1,0 +1,47 @@
+{
+  "_id": "utilitydarbmi2fl",
+  "name": "Darkness I",
+  "img": "icons/svg/skull.svg",
+  "description": "<p>Darkens non-magical light within Close while Equipped.</p>",
+  "statuses": [],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "6s5746diyjac7K8C",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "utility-darkness-i-close",
+      "category": "relic",
+      "applicationMode": "when-equipped",
+      "relicPower": "darkness-1",
+      "lightType": "darkness",
+      "lightRange": "close"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134777,
+    "modifiedTime": 1778271134777,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!utilitydarbmi2fl"
+}

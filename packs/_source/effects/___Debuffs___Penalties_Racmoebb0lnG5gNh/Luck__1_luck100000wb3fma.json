@@ -1,0 +1,50 @@
+{
+  "_id": "luck100000wb3fma",
+  "name": "Luck -1",
+  "img": "icons/svg/downgrade.svg",
+  "description": "<p>-1 penalty to Luck.</p>",
+  "statuses": [],
+  "showIcon": 0,
+  "transfer": false,
+  "folder": "Racmoebb0lnG5gNh",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": [
+      {
+        "key": "system.stats.luck.bonus",
+        "type": "add",
+        "value": "-1",
+        "phase": "initial"
+      }
+    ]
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "luck-minus-1",
+      "category": "debuff"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134827,
+    "modifiedTime": 1778271134827,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!luck100000wb3fma"
+}

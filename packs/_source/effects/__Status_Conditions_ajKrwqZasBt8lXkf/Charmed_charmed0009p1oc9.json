@@ -1,0 +1,45 @@
+{
+  "_id": "charmed0009p1oc9",
+  "name": "Charmed",
+  "img": "icons/svg/heal.svg",
+  "description": "<p>Can't willingly make an Attack Action targeting the one who Charmed it.</p>",
+  "statuses": [
+    "charmed"
+  ],
+  "showIcon": 2,
+  "transfer": false,
+  "folder": "ajKrwqZasBt8lXkf",
+  "duration": {
+    "value": null,
+    "units": "seconds",
+    "expiry": null,
+    "expired": false
+  },
+  "system": {
+    "changes": []
+  },
+  "flags": {
+    "vagabond": {
+      "canonicalId": "charmed",
+      "category": "condition"
+    }
+  },
+  "type": "base",
+  "disabled": false,
+  "start": null,
+  "origin": null,
+  "tint": "#ffffff",
+  "sort": 0,
+  "_stats": {
+    "coreVersion": "14.361",
+    "systemId": "vagabond",
+    "systemVersion": "5.3.0",
+    "createdTime": 1778271134669,
+    "modifiedTime": 1778271134669,
+    "lastModifiedBy": "UzYVn8wRmBVdopIW",
+    "compendiumSource": null,
+    "duplicateSource": null,
+    "exportSource": null
+  },
+  "_key": "!effects!charmed0009p1oc9"
+}
